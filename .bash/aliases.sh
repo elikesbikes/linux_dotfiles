@@ -9,3 +9,4 @@ alias pp="ping -c 3 google.com"
 alias l="ll"
 alias space="sudo du -h --max-depth=1"
 alias ls='exa --icons -F -H --group-directories-first'
+alias dot="yadm pull"

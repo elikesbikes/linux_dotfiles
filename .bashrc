@@ -4,3 +4,5 @@
 # Load Starship
 eval "$(starship init bash)"
 
+neofetch --config /home/ecloaiza/.config/neofetch/config.conf
+

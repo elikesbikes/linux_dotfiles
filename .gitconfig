@@ -1,5 +1,8 @@
 [core]
 	excludesfile = /Users/xcad/.gitignore_global
+    editor = vi
+[init]
+	defaultBranch = main
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
@@ -12,7 +15,7 @@
 [commit]
 	template = /Users/xcad/.stCommitMsg
 [filter "lfs"]
-	clean = git-lfs clean -- %f
+	clean = git-lfgis clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true

@@ -8,3 +8,4 @@ alias ll="ls -A | less -r -E -X"
 alias pp="ping -c 3 google.com"
 alias l="ll"
 alias space="sudo du -h --max-depth=1"
+alias ls='exa --icons -F -H --group-directories-first --git -1'

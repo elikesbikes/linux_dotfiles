@@ -1,4 +1,4 @@
-##Running Shell scripts
+##Running Shell scriptss
 
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh

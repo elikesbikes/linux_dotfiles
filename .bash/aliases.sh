@@ -6,7 +6,7 @@ alias cp="cp -ip"
 alias mv="mv -i"
 alias ll="ls -l | less -r -E -X"
 alias pp="ping -c 3 google.com"
-alias l="ll"
+alias l="ls -l | less -r -E -X"
 alias space="sudo du -h --max-depth=1"
 alias ls='exa --icons -F -H --group-directories-first'
 alias dot="yadm pull"

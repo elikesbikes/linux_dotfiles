@@ -47,6 +47,7 @@ color_yellow = '#d79921'
 [hostname]
 ssh_only = false
 style = "bg:color_orange fg:color_fg0"
+format = "[$ssh_symbol]($style) on [$hostname]($style)"
 trim_at = '.home.elikesbikes.com'
 disabled = false
 

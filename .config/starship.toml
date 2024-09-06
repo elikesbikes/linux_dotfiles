@@ -46,7 +46,7 @@ color_yellow = '#d79921'
 
 [hostname]
 ssh_only = false
-format = '[$ssh_symbol](bold blue) on [$hostname](bold red) '
+style = "bg:color_orange fg:color_fg0"
 trim_at = '.companyname.com'
 disabled = false
 

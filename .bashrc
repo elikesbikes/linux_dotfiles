@@ -12,7 +12,7 @@ bind -f ~/.inputrc
 eval "$(starship init bash)"
 
 
-neofetch --config /home/ecloaiza/.config/neofetch/config.conf
+neofetch --config ~/.config/neofetch/config.conf
 
 eval "$(direnv hook bash)"
 

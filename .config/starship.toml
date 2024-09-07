@@ -3,6 +3,9 @@
 format = """
 [](color_orange)\
 $os\
+[](bg:color_yellow fg:color_orange)\
+$hostname\
+[](bg:color_yellow fg:color_orange)\
 $username\
 [](bg:color_yellow fg:color_orange)\
 $directory\
@@ -41,31 +44,39 @@ color_purple = '#b16286'
 color_red = '#cc241d'
 color_yellow = '#d79921'
 
+[hostname]
+ssh_only = false
+style = "bg:color_orange fg:color_fg0"
+format = "[$ssh_symbol]($style)[$hostname]($style)"
+trim_at = '.home.elikesbikes.com'
+disabled = false
+
 [os]
 disabled = false
 style = "bg:color_orange fg:color_fg0"
 
+
 [os.symbols]
-Windows = "󰍲"
-Ubuntu = "󰕈"
-SUSE = ""
-Raspbian = "󰐿"
-Mint = "󰣭"
-Macos = "󰀵"
-Manjaro = ""
-Linux = "󰌽"
-Gentoo = "󰣨"
-Fedora = "󰣛"
-Alpine = ""
-Amazon = ""
-Android = ""
-Arch = "󰣇"
-Artix = "󰣇"
-EndeavourOS = ""
-CentOS = ""
-Debian = "󰣚"
-Redhat = "󱄛"
-RedHatEnterprise = "󱄛"
+Windows = "󰍲 "
+Ubuntu = "󰕈 "
+SUSE = " "
+Raspbian = "󰐿 "
+Mint = "󰣭 "
+Macos = "󰀵 "
+Manjaro = " "
+Linux = "󰌽 "
+Gentoo = "󰣨 "
+Fedora = "󰣛 "
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = "󰣇 "
+Artix = "󰣇 "
+EndeavourOS = " "
+CentOS = " "
+Debian = "󰣚 "
+Redhat = "󱄛 "
+RedHatEnterprise = "󱄛 "
 
 [username]
 show_always = true
@@ -76,8 +87,8 @@ format = '[ $user ]($style)'
 [directory]
 style = "fg:color_fg0 bg:color_yellow"
 format = "[ $path ]($style)"
-truncation_length = 3
-truncation_symbol = "…/"
+read_only = " "
+
 
 [directory.substitutions]
 "Documents" = "󰈙 "

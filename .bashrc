@@ -3,6 +3,13 @@
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh
+[[ -f ~/.bash/misc.sh ]] && source ~/.bash/misc.sh
+
+
+#Input
+bind -f ~/.inputrc
+
+
 # Load Starship
 eval "$(starship init bash)"
 

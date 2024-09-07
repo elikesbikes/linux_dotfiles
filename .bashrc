@@ -5,10 +5,8 @@
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh
 [[ -f ~/.bash/misc.sh ]] && source ~/.bash/misc.sh
 
-
 #Input
 bind -f ~/.inputrc
-
 
 # Load Starship
 eval "$(starship init bash)"

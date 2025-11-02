@@ -1,0 +1,62 @@
+{
+  // Sets the overall color scheme for the separator and default key colors
+  "color": "4", 
+  "keyColor": "6", 
+  "separator": "->",
+  "separatorColor": "4", 
+
+  // 🐅 LOGO CONFIGURATION - ADDING THE TIGER
+  "logo": {
+    // We are setting the type to 'kitty'. Change this to 'sixel' or 'iterm' if needed.
+    "type": "kitty", 
+    
+    // *** YOU MUST CHANGE THIS PATH! ***
+    // Replace "/path/to/your/tiger.jpg" with the actual path to your tiger image file.
+    "source": "/home/ecloaiza/.config/fastfetch/tiger.jpg",
+    //"source": "tiger.jpg",
+    // Set width and height to fit nicely next to the modules. Adjust as needed.
+    "width": 60, 
+    "height": 18 
+  },
+  
+  // Custom formatting for the results. (The escaped backslashes are preserved)
+  "format": "{1}${2} \\x1b[35m{3}\\x1b[0m", // Value is magenta 
+
+  // Modules to display. 
+  "modules": [
+    "os",       
+    "host",     
+    "kernel",   
+    "uptime",   
+    "packages", 
+    "shell",    
+    "display",  
+    "wm",       
+    "theme",    
+    "cpu",      
+    "gpu",      
+    "memory",   
+    "disk",     
+    "publicip", 
+    "localip",  
+    "break",    
+    "colors"    
+  ],
+
+  // Module-specific options
+  "options": {
+    "memory": {
+      "format": "\\x1b[33m{used} / {total}\\x1b[0m", // Memory usage in yellow
+      "key": "RAM" 
+    },
+    "cpu": {
+      "key": "Processor"
+    },
+    "gpu": {
+      "key": "Graphics"
+    },
+    "packages": {
+      "key": "Apps"
+    }
+  }
+}

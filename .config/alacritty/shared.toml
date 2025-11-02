@@ -1,0 +1,17 @@
+[env]
+TERM = "xterm-256color"
+
+[shell]
+program = "zellij"
+
+[window]
+padding.x = 16
+padding.y = 14
+decorations = "None"
+opacity = 0.98
+dimensions = { columns = 100, lines = 30 }
+
+[keyboard]
+bindings = [
+{ key = "F11", action = "ToggleFullscreen" }
+]

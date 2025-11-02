@@ -1,0 +1,122 @@
+// ------------------------------------------------
+// Simple, Colorful, and Clean fastfetch Configuration
+// ------------------------------------------------
+
+{
+  // Sets the overall color scheme for the separator and default key colors
+  // A simple way to inject color throughout the output
+  "color": "4", // Represents blue (often bright blue)
+
+  // Defines the left-side color of the key-value pairs (e.g., "OS:")
+  "keyColor": "6", // Represents cyan
+
+  // Defines the separator character and its color
+  "separator": "->",
+  "separatorColor": "4", // Matches the main 'color' (blue)
+
+  // Disables the ASCII art so the focus is purely on the information
+  "logo": {
+    "type": "none"
+  },
+
+  // Custom formatting for the results. 
+  // ${1} is the Key, ${2} is the Separator, ${3} is the Value
+  // We apply color codes (e.g., \x1b[36m for cyan) directly to the Value part.
+  "format": "{1}${2} \x1b[35m{3}\x1b[0m", // Value will be magenta (\x1b[35m)
+
+  // Modules to display. Keep it simple and relevant.
+  "modules": [
+    "os",       // Operating System info
+    "host",     // Device/Host Model
+    "kernel",   // Kernel Version
+    "uptime",   // System Uptime
+    "packages", // Installed Package Count
+    "shell",    // Current Shell
+    "display",  // Screen resolution
+    "wm",       // Window Manager
+    "theme",    // Desktop Theme/Style
+    "cpu",      // CPU Model and Cores
+    "gpu",      // GPU Model
+    "memory",   // RAM Usage
+    "disk",     // Disk Space
+    "publicip", // External IP Address
+    "localip",  // Internal IP Address
+    "break",    // Adds a blank line for visual separation
+    "colors"    // A row of color blocks for display
+  ],
+
+  // Module-specific options (optional, but good practice)
+  "options": {
+    "memory": {
+      "format": "\x1b[33m{used} / {total}\x1b[0m", // Memory usage in yellow
+      "key": "RAM" // Shorter key name
+    },
+    "cpu": {
+      "key": "Processor"
+    },
+    "gpu": {
+      "key": "Graphics"
+    },
+    "packages": {
+      "key": "Apps"
+    }
+  }
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+B
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+A
+}

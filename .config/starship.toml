@@ -4,7 +4,9 @@ format = """
 [](color_orange)\
 $os\
 $username\
-[](bg:color_yellow fg:color_orange)\
+[](fg:color_orange bg:color_blue)\
+$hostname\
+[](fg:color_blue bg:color_yellow)\
 $directory\
 [](fg:color_yellow bg:color_aqua)\
 $git_branch\
@@ -72,15 +74,23 @@ Pop = ""
 show_always = true
 style_user = "bg:color_orange fg:color_fg0"
 style_root = "bg:color_orange fg:color_fg0"
+# Orange block: Starts the group and ends with a space.
 format = '[ $user ]($style)'
+
+[hostname]
+ssh_only = false
+# Hostname style: Blue background, fg0 (white) text
+style = "bg:color_blue fg:color_fg0"
+# Blue block: Starts with @ and ends the group.
+format = '[@$hostname ]($style)'
 
 [directory]
 style = "fg:color_fg0 bg:color_yellow"
 format = "[ $path ]($style)"
 truncation_length = 0
 truncation_symbol = "…/"
-truncate_to_repo = false  # ensures it doesn’t stop at git repo root
-home_symbol = "/home/ecloaiza"  # disable ~ substitution, show full path
+truncate_to_repo = false # ensures it doesn’t stop at git repo root
+home_symbol = "/home/ecloaiza" # disable ~ substitution, show full path
 
 
 [directory.substitutions]

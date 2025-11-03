@@ -63,3 +63,22 @@ gacp() {
 # Provide a helpful message when the script is sourced
 echo "Function 'gacp' loaded. Use it like: gacp \"Initial commit\""
 
+
+# Function to perform Git Pull on the current branch.
+# This fetches and merges changes from the remote tracking branch, refreshing the local copy.
+#
+# Usage: gpull
+gpull() {
+    echo "--> Running: git pull"
+    git pull
+
+    # Check if 'git pull' was successful
+    if [ $? -eq 0 ]; then
+        echo "SUCCESS: Local copy refreshed with changes from remote."
+    else
+        echo "Error: Pull failed. Check your connection, or you may need to resolve conflicts. Consider running 'gstash' first."
+        return 1
+    fi
+}
+
+

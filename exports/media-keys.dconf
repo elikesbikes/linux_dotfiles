@@ -1,0 +1,47 @@
+[/]
+calculator=['<Control><Alt>c']
+control-center=['<Control><Alt>s']
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom7/']
+home=@as []
+next=['<Shift>AudioPlay']
+www=['<Control><Alt>b']
+
+[custom-keybindings/custom0]
+binding='<Super>space'
+command='sh -c "pgrep -x ulauncher && { ulauncher-toggle || true; } || setsid -f ulauncher"'
+name='Ulauncher'
+
+[custom-keybindings/custom1]
+binding='<Control>Print'
+command='sh -c -- "flameshot gui"'
+name='Flameshot'
+
+[custom-keybindings/custom2]
+binding='<Shift><Alt>2'
+command='alacritty'
+name='New Alacritty Window'
+
+[custom-keybindings/custom3]
+binding='<Control><Alt>k'
+command='kitty'
+name='KItty'
+
+[custom-keybindings/custom4]
+binding='<Control>F1'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- -5000'"
+name='Apple Brightness Down (ASDControl)'
+
+[custom-keybindings/custom5]
+binding='<Control>F2'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- +5000'"
+name='Apple Brightness Up (ASDControl)'
+
+[custom-keybindings/custom6]
+binding='<Control><Shift>F2'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- +60000'"
+name='Apple Brightness Max (ASDControl)'
+
+[custom-keybindings/custom7]
+binding='<Control><Alt>m'
+command='spotify'
+name='Spotify'

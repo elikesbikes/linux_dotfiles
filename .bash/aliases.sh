@@ -8,7 +8,7 @@ alias ll="ls -l | less -r -E -X"
 alias pp="ping -c 3 google.com"
 alias l="ls -l | less -r -E -X"
 alias space="sudo du -h --max-depth=1 -t 1G"
-alias ls='exa --icons -F -H --group-directories-first'
+alias ls='eza --icons -F -H --group-directories-first'
 alias dot="yadm pull"
 alias docker-restart="docker restart $(docker ps -a -q)"
 alias dockerrun="sudo docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}'"

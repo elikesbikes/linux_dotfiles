@@ -1,4 +1,4 @@
-alias vim="vi"
+alias vim="/usr/local/bin/nvim/bin/nvim"
 alias rm="rm -i"
 alias U="cd .."
 alias ls="ls -l --color=yes | less -r -E -X"

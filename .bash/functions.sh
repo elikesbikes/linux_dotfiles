@@ -128,6 +128,30 @@ gcap() {
         return 1
     fi
 }
-
+gacp_tutorial() {
+  # 1. Save current directory and go to the target directory
+  # 'pushd' saves your current location to a stack and then cds
+  # We send the normal output to /dev/null to keep it quiet
+  pushd /home/ecloaiza/DevOps/GitHub/tutorials > /dev/null
+  
+  # 2. Run the command with all provided arguments
+  # "$@" is a special variable that passes all arguments
+  # (e.g., your commit message) to the 'gacp' command
+  gacp "$@"
+  
+  # 3. Return to the original directory
+  # 'popd' takes you back to the directory 'pushd' saved
+  popd > /dev/null
+}
+gacp_dotfiles() {
+  # 1. Save current directory and go to the target directory
+  pushd /home/ecloaiza/DevOps/GitHub/linux_dotfiles > /dev/null
+  
+  # 2. Run the command with all provided arguments
+  gacp "$@"
+  
+  # 3. Return to the original directory
+  popd > /dev/null
+}
 # Provide a helpful message when the script is sourced
 echo "Git functions loaded: 'gacp' (Add, Commit, Push), 'gpull' (Pull/Refresh), and 'gcap' (Commit/Pull sequence)."

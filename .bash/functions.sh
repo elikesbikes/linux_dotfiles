@@ -153,6 +153,16 @@ gacp_dotfiles() {
   # 3. Return to the original directory
   popd > /dev/null
 }
+gccp_dotfiles() {
+  # 1. Save current directory and go to the target directory
+  pushd /home/ecloaiza/DevOps/GitHub/linux_dotfiles > /dev/null
+
+  # 2. Run the command with all provided arguments
+  gccp "$@"
+
+  # 3. Return to the original directory
+  popd > /dev/null
+}
 
 # Function to perform Git Add, Commit, Pull, and then Push.
 # This is the "safe push" function.

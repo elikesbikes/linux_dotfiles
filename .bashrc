@@ -9,7 +9,6 @@ source ~/.local/share/omakub/defaults/bash/rc
 # This prevents all output-generating code (like fastfetch) from running.
 [[ $- != *i* ]] && return
 
-
 # ==============================================================================
 # 2. Interactive-Only Sourcing and Setup
 # ==============================================================================
@@ -29,7 +28,6 @@ eval "$(direnv hook bash)"
 # Run output commands last
 fastfetch
 
-
 # ==============================================================================
 # 3. Environment Variables (Order-independent)
 # ==============================================================================
@@ -40,7 +38,7 @@ export VISUAL="$EDITOR"
 export SUDO_EDITOR="$EDITOR"
 
 # PATH Management (Recommended to use a function for cleaner PATH)
-path_prepend () {
+path_prepend() {
   if [[ ":$PATH:" != *":$1:"* ]]; then
     export PATH="$1${PATH:+:$PATH}"
   fi
@@ -62,8 +60,9 @@ path_prepend /tmp
 
 # Bracketed Paste Mode (Safe as it uses the $PS1 check)
 if [ -n "$PS1" ]; then
-    bind 'set enable-bracketed-paste on'
+  bind 'set enable-bracketed-paste on'
 fi
 
 # Input
-# bind -f ~/.inputrc
+bind -f ~/.inputrc
+

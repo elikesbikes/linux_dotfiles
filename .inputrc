@@ -1,1 +1,2 @@
-"\e[28~":""
+$include ~/.local/share/omakub/defaults/bash/inputrc
+set enable-bracketed-paste on

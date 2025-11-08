@@ -65,4 +65,3 @@ fi
 
 # Input
 bind -f ~/.inputrc
-

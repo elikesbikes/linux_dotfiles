@@ -4,8 +4,7 @@ echo "Installing Fastfetch..."
 # --- EDIT BELOW ---
 
 # Example for Ubuntu (PPA might be needed):
-sudo add-apt-repository ppa:cason/fastfetch -y
-sudo apt update
+sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
 sudo apt install -y fastfetch
 
 # Example for macOS (Homebrew):

@@ -1,0 +1,119 @@
+#!/bin/sh
+set -e
+
+# --- CONFIGURATION ---
+SNAP_ID=$1
+INPUT_ARG="$2"
+SNAP_DEST="/mnt/urbackup_snaps/$SNAP_ID"
+SNAP_ARG_SAN=$(echo "$INPUT_ARG" | sed 's@/@_@g')
+SNAP_NUM_PATH="/mnt/urbackup_snaps/cbt_info/$SNAP_ARG_SAN-snapdev"
+SNAP_COWFILE_PATH="/mnt/urbackup_snaps/cbt_info/$SNAP_ARG_SAN-cowfile"
+COW_FILE_NAME=".datto_cow_$SNAP_ID"
+
+# --- HELPER FUNCTIONS ---
+get_path() {
+    echo "$1/$2" | sed 's@//@/@g'
+}
+
+has_num() {
+    [ -e "/mnt/urbackup_snaps/cbt_info" ] && grep -q "$1" /mnt/urbackup_snaps/cbt_info/*-snapdev 2>/dev/null
+}
+
+mkdir -p /mnt/urbackup_snaps
+
+# --- STEP 1: DETECTION ---
+# Resolve symlinks (fixes LVM /dev/mapper paths)
+if [ -b "$INPUT_ARG" ]; then
+    # It's a block device. Use it directly, don't resolve to /dev/dm-X yet unless necessary.
+    DEVICE="$INPUT_ARG"
+    SNAP_MOUNTPOINT=$(lsblk -n -o MOUNTPOINT "$DEVICE" | head -n 1)
+else
+    # It's a mountpoint.
+    SNAP_MOUNTPOINT="$INPUT_ARG"
+    DEVICE=$(findmnt -n -o SOURCE "$SNAP_MOUNTPOINT" | head -n 1)
+fi
+
+# Fallbacks
+if [ -z "$SNAP_MOUNTPOINT" ]; then SNAP_MOUNTPOINT="$INPUT_ARG"; fi
+if [ -z "$DEVICE" ]; then DEVICE="$INPUT_ARG"; fi
+
+# --- DEBUGGING OUTPUT (Check your logs for this!) ---
+echo "DEBUG: Input: $INPUT_ARG"
+echo "DEBUG: Detected Device: $DEVICE"
+echo "DEBUG: Detected Mountpoint: $SNAP_MOUNTPOINT"
+
+# --- STEP 2: PREPARE ---
+CDIR=`dirname $0`
+. $CDIR/filesystem_snapshot_common
+exit_exclude_snapshot_mountpoints "$SNAP_MOUNTPOINT"
+
+# VFAT Check
+if findmnt -n -o FSTYPE "$DEVICE" 2>/dev/null | grep -q "vfat"; then
+    TYPE="vfat"
+else
+    set_filesystem_type "${SNAP_MOUNTPOINT}"
+fi
+
+echo "DEBUG: Filesystem Type: $TYPE"
+
+# BTRFS Check
+if [ "x$TYPE" = "x" ] && btrfs subvolume list -o "$SNAP_MOUNTPOINT" > /dev/null 2>&1; then
+    $CDIR/btrfs_create_filesystem_snapshot "$@"
+    exit $?
+fi
+
+# --- STEP 3: DATTOBD SETUP ---
+echo "Snapshotting device $DEVICE via dattobd..."
+
+NUM=0
+while [ -e "/dev/datto$NUM" ] || has_num $NUM; do
+    NUM=$((NUM + 1))
+done
+
+if ! modprobe dattobd; then
+    echo "Dattobd kernel module not available"
+    exit 1
+fi
+
+sync
+
+# Create COW file
+COW_FILE_PATH=$(get_path "$SNAP_MOUNTPOINT" "$COW_FILE_NAME")
+touch "$COW_FILE_PATH"
+
+echo "DEBUG: COW File Path: $COW_FILE_PATH"
+echo "DEBUG: Running command: dbdctl setup-snapshot $DEVICE $COW_FILE_PATH $NUM"
+
+# --- CRITICAL COMMAND ---
+if ! dbdctl setup-snapshot "$DEVICE" "$COW_FILE_PATH" $NUM; then
+    echo "Error: dbdctl setup-snapshot failed."
+    rm -f "$COW_FILE_PATH"
+    exit 1
+fi
+
+# --- STEP 4: MOUNT ---
+mkdir -p "$SNAP_DEST"
+mkdir -p /mnt/urbackup_snaps/cbt_info
+
+MOUNTOPTS="ro"
+if [ "$TYPE" = "xfs" ]; then
+    MOUNTOPTS="ro,nouuid,norecovery"
+elif [ "$TYPE" = "vfat" ]; then
+    MOUNTOPTS="ro"
+fi
+
+if ! mount -o $MOUNTOPTS "/dev/datto$NUM" "$SNAP_DEST"; then
+    echo "Mounting filesystem failed"
+    rmdir "$SNAP_DEST"
+    dbdctl destroy $NUM
+    rm -f "$COW_FILE_PATH"
+    exit 1
+fi
+
+echo "$NUM" > "${SNAP_DEST}-num"
+echo "/dev/datto$NUM" > "${SNAP_DEST}-dev"
+echo "$NUM" > "$SNAP_NUM_PATH"
+echo "$COW_FILE_PATH" > "$SNAP_COWFILE_PATH"
+echo "SNAPSHOT=$SNAP_DEST"
+
+exit 0

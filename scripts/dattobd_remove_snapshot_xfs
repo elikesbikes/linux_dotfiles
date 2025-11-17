@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+SNAP_DEST=$1
+
+# --- FIX: Find the snapshot number and destroy it forcibly ---
+echo "Running dattobd_remove_snapshot for $SNAP_DEST"
+
+# Determine the device number from the block device list
+DEVICE=$(lsblk -n -o NAME,MOUNTPOINT | grep "$SNAP_DEST" | awk '{print $1}')
+NUM=$(echo "$DEVICE" | sed 's/[^0-9]*//g')
+
+if [ -z "$NUM" ]; then
+    echo "Warning: Could not find datto device associated with $SNAP_DEST. Assuming clean."
+    exit 0
+fi
+
+echo "Destroying datto snapshot $NUM..."
+
+# Force lazy unmount the destination and the underlying device
+umount -l "$SNAP_DEST" || true
+
+# Destroy the device, ignoring errors if it's already gone (-16 busy/gone)
+dbdctl destroy $NUM || true
+
+# Clean up directories
+rm -rf "$SNAP_DEST" || true
+
+exit 0

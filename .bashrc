@@ -65,3 +65,5 @@ fi
 
 # Input
 bind -f ~/.inputrc
+. "/home/ecloaiza/.deno/env"
+source /home/ecloaiza/.local/share/bash-completion/completions/deno.bash

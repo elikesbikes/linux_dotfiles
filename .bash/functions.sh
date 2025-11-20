@@ -128,7 +128,7 @@ gcap() {
         return 1
     fi
 }
-gacp_tutorial() {
+gacp_tutorials() {
   # 1. Save current directory and go to the target directory
   # 'pushd' saves your current location to a stack and then cds
   # We send the normal output to /dev/null to keep it quiet
@@ -225,6 +225,41 @@ gcpp() {
     fi
 }
 
+
+# Function: sshk
+# Description: Runs a pre-connection command (optional) and then initiates
+#              an SSH session using kitty +kitten ssh for terminfo compatibility.
+# Usage: sshk username host [pre_command]
+
+sshk() {
+    # Check if correct number of arguments are provided
+    if [ "$#" -lt 2 ]; then
+        echo "Usage: sshk <username> <host> [pre_command]"
+        echo "Example: sshk user1 myhost.com 'echo Running pre-command...'"
+        return 1
+    fi
+
+    local USERNAME="$1"
+    local HOST="$2"
+    local PRE_COMMAND="$3"
+
+    echo "--- Preparing SSH Connection ---"
+
+    # 1. Execute optional pre-command
+    if [ -n "$PRE_COMMAND" ]; then
+        echo "Executing pre-command: $PRE_COMMAND"
+        eval "$PRE_COMMAND"
+        if [ $? -ne 0 ]; then
+            echo "Error executing pre-command. Aborting."
+            return 1
+        fi
+        echo "Pre-command finished."
+    fi
+
+    # 2. Initiate the Kitty SSH connection
+    echo "Starting SSH session to $USERNAME@$HOST using kitty +kitten..."
+    kitty +kitten ssh "${USERNAME}@${HOST}"
+}
 
 # Provide a helpful message when the script is sourced
 echo "Git functions loaded: 'gacp' (Add, Commit, Push), 'gpull' (Pull/Refresh), and 'gcpp' (Commit, Pull, Push)."

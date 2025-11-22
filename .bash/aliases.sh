@@ -8,7 +8,6 @@ alias ls="eza -lho --sort=modified  --icons --git --git-repos"
 alias ll="eza -lho --sort=modified --icons --git --git-repos"
 alias pp="ping -c 3 google.com"
 alias space="sudo du -h --max-depth=1 -t 1G"
-alias ls='eza --icons -F -H --group-directories-first'
 alias dot="yadm pull"
 alias docker-restart="docker restart $(docker ps -a -q)"
 alias dockerrun="sudo docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}'"

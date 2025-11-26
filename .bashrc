@@ -65,5 +65,6 @@ fi
 
 # Input
 bind -f ~/.inputrc
-. "/home/ecloaiza/.deno/env"
-source /home/ecloaiza/.local/share/bash-completion/completions/deno.bash
+#. "/home/ecloaiza/.deno/env"
+#source /home/ecloaiza/.local/share/bash-completion/completions/deno.bash
+export PATH=$PATH:/home/ecloaiza/.spicetify

@@ -2,6 +2,28 @@
 set -euo pipefail
 
 #####################################
+# NTFY CONFIG
+#####################################
+NTFY_SERVER="https://ntfy.home.elikesbikes.com"
+NTFY_TOPIC="backups"
+HOSTNAME="$(hostname -s)"
+
+notify() {
+  local msg="$1"
+  curl -fsS -X POST "$NTFY_SERVER/$NTFY_TOPIC" \
+    -H "Title: Restic Backup ($HOSTNAME)" \
+    -H "Priority: 3" \
+    -d "$msg" >/dev/null || true
+}
+
+fail() {
+  local msg="$1"
+  echo "ERROR: $msg"
+  notify "❌ [$HOSTNAME] $msg"
+  exit 1
+}
+
+#####################################
 # AUTO-DETECT COMPOSE DIRECTORY
 #####################################
 COMPOSE_DIRS=(
@@ -18,29 +40,23 @@ for dir in "${COMPOSE_DIRS[@]}"; do
   fi
 done
 
-if [[ -z "$COMPOSE_DIR" ]]; then
-  echo "ERROR: docker-compose.yml not found in known locations" >&2
-  exit 1
-fi
+[[ -z "$COMPOSE_DIR" ]] && fail "docker-compose.yml not found in expected locations"
 
 #####################################
 # LOAD HOST CONFIG FROM COMPOSE DIR
 #####################################
 CONFIG_FILE="$COMPOSE_DIR/restic-backup.env"
-if [[ -f "$CONFIG_FILE" ]]; then
-  # shellcheck disable=SC1090
-  source "$CONFIG_FILE"
-else
-  echo "ERROR: restic-backup.env not found in $COMPOSE_DIR" >&2
-  exit 1
-fi
+[[ -f "$CONFIG_FILE" ]] || fail "restic-backup.env not found in $COMPOSE_DIR"
+
+# shellcheck disable=SC1090
+source "$CONFIG_FILE"
 
 #####################################
 # REQUIRED VARIABLES
 #####################################
-: "${NFS_SERVER:?NFS_SERVER not set}"
-: "${NFS_EXPORT:?NFS_EXPORT not set}"
-: "${MOUNT_POINT:?MOUNT_POINT not set}"
+: "${NFS_SERVER:?Missing NFS_SERVER}"
+: "${NFS_EXPORT:?Missing NFS_EXPORT}"
+: "${MOUNT_POINT:?Missing MOUNT_POINT}"
 
 #####################################
 # LOGGING
@@ -51,6 +67,7 @@ mkdir -p "$LOG_DIR"
 
 echo "==================================================" | tee -a "$LOG_FILE"
 echo "Restic backup started at $(date)" | tee -a "$LOG_FILE"
+echo "Host: $HOSTNAME" | tee -a "$LOG_FILE"
 echo "Compose dir: $COMPOSE_DIR" | tee -a "$LOG_FILE"
 echo "Mount point: $MOUNT_POINT" | tee -a "$LOG_FILE"
 echo "==================================================" | tee -a "$LOG_FILE"
@@ -59,19 +76,12 @@ echo "==================================================" | tee -a "$LOG_FILE"
 # STEP 0: ENSURE MOUNT POINT EXISTS
 #####################################
 mkdir -p "$MOUNT_POINT"
-
-if [[ ! -d "$MOUNT_POINT" ]]; then
-  echo "ERROR: Mount point exists but is not a directory" | tee -a "$LOG_FILE"
-  exit 1
-fi
+[[ -d "$MOUNT_POINT" ]] || fail "Mount point exists but is not a directory"
 
 #####################################
 # STEP 1: PING NFS SERVER
 #####################################
-if ! ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1; then
-  echo "ERROR: NFS server unreachable" | tee -a "$LOG_FILE"
-  exit 1
-fi
+ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1 || fail "NFS server $NFS_SERVER unreachable"
 
 #####################################
 # STEP 2: ENSURE NFS IS MOUNTED
@@ -81,35 +91,34 @@ if ! mountpoint -q "$MOUNT_POINT"; then
   mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >>"$LOG_FILE" 2>&1
 fi
 
-if ! mountpoint -q "$MOUNT_POINT"; then
-  echo "ERROR: NFS mount failed" | tee -a "$LOG_FILE"
-  exit 1
-fi
+mountpoint -q "$MOUNT_POINT" || fail "NFS mount failed"
 
 #####################################
-# STEP 3: ENSURE RESTIC REPO EXISTS
+# STEP 3: ENSURE RESTIC REPOSITORY EXISTS
 #####################################
 echo "Checking restic repository..." | tee -a "$LOG_FILE"
 
-(
-  cd "$COMPOSE_DIR"
+cd "$COMPOSE_DIR"
 
-  if docker compose run --rm restic snapshots >/dev/null 2>&1; then
-    echo "Restic repository exists" | tee -a "$LOG_FILE"
-  else
-    echo "Restic repository missing, initializing..." | tee -a "$LOG_FILE"
-    docker compose run --rm restic init >>"$LOG_FILE" 2>&1
-    echo "Restic repository initialized" | tee -a "$LOG_FILE"
-  fi
-)
+if docker compose run --rm restic snapshots >/dev/null 2>&1; then
+  echo "Restic repository exists" | tee -a "$LOG_FILE"
+else
+  echo "Restic repository missing, initializing..." | tee -a "$LOG_FILE"
+  docker compose run --rm restic init >>"$LOG_FILE" 2>&1 \
+    || fail "Failed to initialize restic repository"
+  echo "Restic repository initialized" | tee -a "$LOG_FILE"
+fi
 
 #####################################
 # STEP 4: RUN BACKUP
 #####################################
-(
-  cd "$COMPOSE_DIR"
-  docker compose run --rm restic backup /data/docker-volumes
-) >>"$LOG_FILE" 2>&1
+docker compose run --rm restic backup /data/docker-volumes >>"$LOG_FILE" 2>&1 \
+  || fail "Restic backup command failed"
 
-echo "Restic backup completed at $(date)" | tee -a "$LOG_FILE"
+#####################################
+# SUCCESS
+#####################################
+echo "Restic backup completed successfully at $(date)" | tee -a "$LOG_FILE"
+notify "✅ [$HOSTNAME] Restic backup completed successfully"
+
 echo "==================================================" | tee -a "$LOG_FILE"

@@ -260,6 +260,22 @@ sshk() {
     echo "Starting SSH session to $USERNAME@$HOST using kitty +kitten..."
     kitty +kitten ssh "${USERNAME}@${HOST}"
 }
+# Function to perform Git Pull on the linux_dotfiles repository
+# while preserving the caller's current directory.
+#
+# Usage: gpull_dotfiles
+gpull_dotfiles() {
+  # 1. Save current directory and go to the dotfiles repo
+  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null
+
+  # 2. Pull latest changes
+  gpull
+
+  # 3. Return to the original directory
+  popd > /dev/null
+}
+
+
 
 # Provide a helpful message when the script is sourced
 echo "Git functions loaded: 'gacp' (Add, Commit, Push), 'gpull' (Pull/Refresh), and 'gcpp' (Commit, Pull, Push)."

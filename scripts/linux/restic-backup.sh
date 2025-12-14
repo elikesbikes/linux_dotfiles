@@ -2,22 +2,28 @@
 set -euo pipefail
 
 #####################################
-# LOAD HOST-SPECIFIC CONFIG (LOCAL)
+# SCRIPT LOCATION
 #####################################
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/restic-backup.env"
 
+#####################################
+# LOAD HOST-SPECIFIC CONFIG (LOCAL)
+#####################################
+CONFIG_FILE="$SCRIPT_DIR/restic-backup.env"
 if [[ -f "$CONFIG_FILE" ]]; then
   # shellcheck disable=SC1090
   source "$CONFIG_FILE"
 fi
 
 #####################################
-# DEFAULTS (OVERRIDABLE)
+# DEFAULTS (OVERRIDABLE PER HOST)
 #####################################
 NFS_SERVER="${NFS_SERVER:-192.168.5.51}"
 NFS_EXPORT="${NFS_EXPORT:-/mnt/PROD1/nfs_restic/nfs_tars}"
 MOUNT_POINT="${MOUNT_POINT:-/mnt/homenas/nfs_tars}"
+
+SYMLINK_NAME="${SYMLINK_NAME:-backup}"
+SYMLINK_TARGET="$MOUNT_POINT"
 
 LOG_DIR="/var/log/restic"
 LOG_FILE="$LOG_DIR/backup-$(date +%F).log"
@@ -48,10 +54,20 @@ fi
 # SETUP
 #####################################
 mkdir -p "$LOG_DIR"
+
+# Ensure mount point exists
 mkdir -p "$MOUNT_POINT"
 
-echo "=== Restic backup started at $(date) ===" | tee -a "$LOG_FILE"
+# HARDENING: ensure mount point is a directory
+if [[ ! -d "$MOUNT_POINT" ]]; then
+  echo "ERROR: Mount point $MOUNT_POINT exists but is not a directory" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
+echo "==================================================" | tee -a "$LOG_FILE"
+echo "Restic backup started at $(date)" | tee -a "$LOG_FILE"
 echo "Using compose directory: $COMPOSE_DIR" | tee -a "$LOG_FILE"
+echo "Mount point: $MOUNT_POINT" | tee -a "$LOG_FILE"
 
 #####################################
 # STEP 0: PING NFS SERVER
@@ -65,30 +81,4 @@ fi
 
 echo "NFS server reachable" | tee -a "$LOG_FILE"
 
-#####################################
-# STEP 1: ENSURE NFS MOUNT
-#####################################
-if mountpoint -q "$MOUNT_POINT"; then
-  echo "NFS already mounted at $MOUNT_POINT" | tee -a "$LOG_FILE"
-else
-  echo "NFS not mounted, attempting mount..." | tee -a "$LOG_FILE"
-
-  mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
-
-  if ! mountpoint -q "$MOUNT_POINT"; then
-    echo "ERROR: Failed to mount NFS at $MOUNT_POINT" | tee -a "$LOG_FILE"
-    exit 1
-  fi
-
-  echo "NFS mounted successfully at $MOUNT_POINT" | tee -a "$LOG_FILE"
-fi
-
-#####################################
-# STEP 2: RUN RESTIC BACKUP
-#####################################
-(
-  cd "$COMPOSE_DIR"
-  docker compose run --rm restic backup /data/docker-volumes
-) >> "$LOG_FILE" 2>&1
-
-echo "=== Restic backup completed at $(date) ===" | tee -a "$LOG_FILE"
+###########

@@ -2,6 +2,8 @@
 set -euo pipefail
 
 LOGFILE="/var/log/ddns-update.log"
+NTFY_URL="https://ntfy.home.elikesbikes.com/networking"
+HOSTNAME="$(hostname)"
 
 # --- Log rotation (simple, safe) ---
 if [ -f "$LOGFILE" ] && [ "$(stat -c%s "$LOGFILE")" -gt 1000000 ]; then
@@ -9,18 +11,41 @@ if [ -f "$LOGFILE" ] && [ "$(stat -c%s "$LOGFILE")" -gt 1000000 ]; then
   touch "$LOGFILE"
 fi
 
+log() {
+  echo "[ddns-update] $1"
+}
+
+notify() {
+  local title="$1"
+  local message="$2"
+
+  curl -fsS \
+    -H "Title: $title" \
+    -H "Tags: network,ddns" \
+    -H "Priority: default" \
+    -d "$message" \
+    "$NTFY_URL" >/dev/null 2>&1 || true
+}
+
 {
   echo "==========================================================="
-  echo "[ddns-update] Run started: $(date '+%Y-%m-%d %H:%M:%S')"
+  log "Run started: $(date '+%Y-%m-%d %H:%M:%S')"
 
-  # Force ddclient to update DNS
   if ddclient -force -verbose; then
-    echo "[ddns-update] SUCCESS: ddclient updated DNS."
+    log "SUCCESS: ddclient updated DNS."
+
+    notify \
+      "DDNS Update Success ($HOSTNAME)" \
+      "ddclient ran successfully on $HOSTNAME at $(date '+%Y-%m-%d %H:%M:%S')."
   else
-    echo "[ddns-update] ERROR: ddclient failed!"
+    log "ERROR: ddclient failed!"
+
+    notify \
+      "DDNS Update FAILED ($HOSTNAME)" \
+      "ddclient FAILED on $HOSTNAME at $(date '+%Y-%m-%d %H:%M:%S'). Check $LOGFILE."
   fi
 
-  echo "[ddns-update] Run finished: $(date '+%Y-%m-%d %H:%M:%S')"
+  log "Run finished: $(date '+%Y-%m-%d %H:%M:%S')"
   echo "==========================================================="
   echo
 } >>"$LOGFILE" 2>&1

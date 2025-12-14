@@ -2,16 +2,18 @@
 set -euo pipefail
 
 #####################################
-# LOAD HOST-SPECIFIC CONFIG (OPTIONAL)
+# LOAD HOST-SPECIFIC CONFIG (LOCAL)
 #####################################
-CONFIG_FILE="/etc/restic-backup.env"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/restic-backup.env"
+
 if [[ -f "$CONFIG_FILE" ]]; then
   # shellcheck disable=SC1090
   source "$CONFIG_FILE"
 fi
 
 #####################################
-# DEFAULTS (CAN BE OVERRIDDEN)
+# DEFAULTS (OVERRIDABLE)
 #####################################
 NFS_SERVER="${NFS_SERVER:-192.168.5.51}"
 NFS_EXPORT="${NFS_EXPORT:-/mnt/PROD1/nfs_restic/nfs_tars}"
@@ -21,23 +23,23 @@ LOG_DIR="/var/log/restic"
 LOG_FILE="$LOG_DIR/backup-$(date +%F).log"
 
 #####################################
-# AUTO-DETECT docker-compose.yml
+# AUTO-DETECT COMPOSE DIRECTORY
 #####################################
-COMPOSE_CANDIDATES=(
-  "/home/ecloaiza/DevOps/docker/restic/docker-compose.yml"
-  "/home/ecloaiza/devops/docker/restic/docker-compose.yml"
-  "/home/ecloaiza/docker/restic/docker-compose.yml"
+COMPOSE_DIRS=(
+  "/home/ecloaiza/DevOps/docker/restic"
+  "/home/ecloaiza/devops/docker/restic"
+  "/home/ecloaiza/docker/restic"
 )
 
-COMPOSE_FILE=""
-for candidate in "${COMPOSE_CANDIDATES[@]}"; do
-  if [[ -f "$candidate" ]]; then
-    COMPOSE_FILE="$candidate"
+COMPOSE_DIR=""
+for dir in "${COMPOSE_DIRS[@]}"; do
+  if [[ -f "$dir/docker-compose.yml" ]]; then
+    COMPOSE_DIR="$dir"
     break
   fi
 done
 
-if [[ -z "$COMPOSE_FILE" ]]; then
+if [[ -z "$COMPOSE_DIR" ]]; then
   echo "ERROR: docker-compose.yml not found in known locations" >&2
   exit 1
 fi
@@ -49,7 +51,7 @@ mkdir -p "$LOG_DIR"
 mkdir -p "$MOUNT_POINT"
 
 echo "=== Restic backup started at $(date) ===" | tee -a "$LOG_FILE"
-echo "Using compose file: $COMPOSE_FILE" | tee -a "$LOG_FILE"
+echo "Using compose directory: $COMPOSE_DIR" | tee -a "$LOG_FILE"
 
 #####################################
 # STEP 0: PING NFS SERVER
@@ -84,10 +86,9 @@ fi
 #####################################
 # STEP 2: RUN RESTIC BACKUP
 #####################################
-docker compose \
-  -f "$COMPOSE_FILE" \
-  run --rm restic backup \
-  /data/docker-volumes \
-  >> "$LOG_FILE" 2>&1
+(
+  cd "$COMPOSE_DIR"
+  docker compose run --rm restic backup /data/docker-volumes
+) >> "$LOG_FILE" 2>&1
 
 echo "=== Restic backup completed at $(date) ===" | tee -a "$LOG_FILE"

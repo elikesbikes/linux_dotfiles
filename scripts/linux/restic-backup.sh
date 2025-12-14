@@ -28,6 +28,7 @@ fail() {
 #####################################
 COMPOSE_DIRS=(
   "/home/ecloaiza/DevOps/docker/restic"
+  "/home/ecloaiza/Devops/docker/restic"
   "/home/ecloaiza/devops/docker/restic"
   "/home/ecloaiza/docker/restic"
 )
@@ -43,11 +44,10 @@ done
 [[ -z "$COMPOSE_DIR" ]] && fail "docker-compose.yml not found in expected locations"
 
 #####################################
-# LOAD HOST CONFIG FROM COMPOSE DIR
+# LOAD HOST CONFIG (NFS)
 #####################################
 CONFIG_FILE="$COMPOSE_DIR/restic-backup.env"
 [[ -f "$CONFIG_FILE" ]] || fail "restic-backup.env not found in $COMPOSE_DIR"
-
 # shellcheck disable=SC1090
 source "$CONFIG_FILE"
 
@@ -69,87 +69,73 @@ echo "==================================================" | tee -a "$LOG_FILE"
 echo "Restic backup started at $(date)" | tee -a "$LOG_FILE"
 echo "Host: $HOSTNAME" | tee -a "$LOG_FILE"
 echo "Compose dir: $COMPOSE_DIR" | tee -a "$LOG_FILE"
-echo "Mount point: $MOUNT_POINT" | tee -a "$LOG_FILE"
 echo "==================================================" | tee -a "$LOG_FILE"
 
 #####################################
-# STEP 0: ENSURE MOUNT POINT EXISTS
+# ENSURE NFS MOUNT (HOST SIDE)
 #####################################
 mkdir -p "$MOUNT_POINT"
-[[ -d "$MOUNT_POINT" ]] || fail "Mount point exists but is not a directory"
 
-#####################################
-# STEP 1: PING NFS SERVER
-#####################################
-ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1 || fail "NFS server $NFS_SERVER unreachable"
+ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1 || fail "NFS server unreachable"
 
-#####################################
-# STEP 2: ENSURE NFS IS MOUNTED
-#####################################
 if ! mountpoint -q "$MOUNT_POINT"; then
-  echo "Mounting NFS..." | tee -a "$LOG_FILE"
   mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >>"$LOG_FILE" 2>&1
 fi
 
 mountpoint -q "$MOUNT_POINT" || fail "NFS mount failed"
 
 #####################################
-# STEP 3: BUILD BACKUP PATH LIST (SMART & RESTRICTED)
+# BUILD BACKUP PATHS (CONTAINER VIEW)
 #####################################
 BACKUP_PATHS=()
 
-# Always back up docker volumes
-BACKUP_PATHS+=("/var/lib/docker/volumes")
+# Always include docker named volumes
+BACKUP_PATHS+=("/data/docker-volumes")
 
-# Only standardized bind-mount roots
-CANDIDATE_PATHS=(
-  "/home/ecloaiza/docker"
-  "/home/ecloaiza/Devops/docker"
-  "/home/ecloaiza/devops/docker"
+# Candidate bind-mount docker roots (container paths)
+CANDIDATE_BIND_PATHS=(
+  "/data/bind-volumes/docker"
+  "/data/bind-volumes/devops/docker"
+  "/data/bind-volumes/Devops/docker"
+  "/data/bind-volumes/DevOps/docker"
 )
 
-echo "Detecting bind-mount paths..." | tee -a "$LOG_FILE"
+echo "Detecting bind-mount paths (container view)..." | tee -a "$LOG_FILE"
 
-for path in "${CANDIDATE_PATHS[@]}"; do
-  if [[ -d "$path" ]]; then
+for path in "${CANDIDATE_BIND_PATHS[@]}"; do
+  if docker compose run --rm --entrypoint sh restic -c "[ -d '$path' ]" >/dev/null 2>&1; then
     BACKUP_PATHS+=("$path")
     echo "✔ Including $path" | tee -a "$LOG_FILE"
   else
-    echo "✘ Skipping $path (not present)" | tee -a "$LOG_FILE"
+    echo "✘ Skipping $path (not present in container)" | tee -a "$LOG_FILE"
   fi
 done
 
-[[ "${#BACKUP_PATHS[@]}" -gt 1 ]] || fail "No bind-mount paths found to back up"
-
 #####################################
-# STEP 4: ENSURE RESTIC REPOSITORY EXISTS
+# ENSURE RESTIC REPOSITORY EXISTS
 #####################################
 cd "$COMPOSE_DIR"
 
 if docker compose run --rm restic snapshots >/dev/null 2>&1; then
   echo "Restic repository exists" | tee -a "$LOG_FILE"
 else
-  echo "Restic repository missing, initializing..." | tee -a "$LOG_FILE"
   docker compose run --rm restic init >>"$LOG_FILE" 2>&1 \
     || fail "Failed to initialize restic repository"
-  echo "Restic repository initialized" | tee -a "$LOG_FILE"
 fi
 
 #####################################
-# STEP 5: RUN BACKUP
+# RUN BACKUP
 #####################################
-echo "Running restic backup for paths:" | tee -a "$LOG_FILE"
+echo "Running restic backup for:" | tee -a "$LOG_FILE"
 for p in "${BACKUP_PATHS[@]}"; do
   echo "  - $p" | tee -a "$LOG_FILE"
 done
 
 docker compose run --rm restic backup "${BACKUP_PATHS[@]}" >>"$LOG_FILE" 2>&1 \
-  || fail "Restic backup command failed"
+  || fail "Restic backup failed"
 
 #####################################
 # SUCCESS
 #####################################
-echo "Restic backup completed successfully at $(date)" | tee -a "$LOG_FILE"
 notify "✅ [$HOSTNAME] Restic backup completed successfully"
-
 echo "==================================================" | tee -a "$LOG_FILE"

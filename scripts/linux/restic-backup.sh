@@ -31,19 +31,16 @@ if [[ -f "$CONFIG_FILE" ]]; then
   # shellcheck disable=SC1090
   source "$CONFIG_FILE"
 else
-  echo "ERROR: restic-backup.env not found next to docker-compose.yml in $COMPOSE_DIR" >&2
+  echo "ERROR: restic-backup.env not found in $COMPOSE_DIR" >&2
   exit 1
 fi
 
 #####################################
-# REQUIRED VARIABLES (FAIL FAST)
+# REQUIRED VARIABLES
 #####################################
-: "${NFS_SERVER:?NFS_SERVER not set in restic-backup.env}"
-: "${NFS_EXPORT:?NFS_EXPORT not set in restic-backup.env}"
-: "${MOUNT_POINT:?MOUNT_POINT not set in restic-backup.env}"
-
-SYMLINK_NAME="${SYMLINK_NAME:-backup}"
-SYMLINK_TARGET="$MOUNT_POINT"
+: "${NFS_SERVER:?NFS_SERVER not set}"
+: "${NFS_EXPORT:?NFS_EXPORT not set}"
+: "${MOUNT_POINT:?MOUNT_POINT not set}"
 
 #####################################
 # LOGGING
@@ -54,12 +51,8 @@ mkdir -p "$LOG_DIR"
 
 echo "==================================================" | tee -a "$LOG_FILE"
 echo "Restic backup started at $(date)" | tee -a "$LOG_FILE"
-echo "Compose directory: $COMPOSE_DIR" | tee -a "$LOG_FILE"
-echo "Config file: $CONFIG_FILE" | tee -a "$LOG_FILE"
-echo "NFS server: $NFS_SERVER" | tee -a "$LOG_FILE"
-echo "NFS export: $NFS_EXPORT" | tee -a "$LOG_FILE"
+echo "Compose dir: $COMPOSE_DIR" | tee -a "$LOG_FILE"
 echo "Mount point: $MOUNT_POINT" | tee -a "$LOG_FILE"
-echo "Symlink path: $COMPOSE_DIR/$SYMLINK_NAME -> $SYMLINK_TARGET" | tee -a "$LOG_FILE"
 echo "==================================================" | tee -a "$LOG_FILE"
 
 #####################################
@@ -67,69 +60,56 @@ echo "==================================================" | tee -a "$LOG_FILE"
 #####################################
 mkdir -p "$MOUNT_POINT"
 
-# HARDENING: must be a directory
 if [[ ! -d "$MOUNT_POINT" ]]; then
-  echo "ERROR: Mount point $MOUNT_POINT exists but is not a directory" | tee -a "$LOG_FILE"
+  echo "ERROR: Mount point exists but is not a directory" | tee -a "$LOG_FILE"
   exit 1
 fi
 
 #####################################
 # STEP 1: PING NFS SERVER
 #####################################
-echo "Pinging NFS server $NFS_SERVER..." | tee -a "$LOG_FILE"
 if ! ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1; then
-  echo "ERROR: NFS server $NFS_SERVER unreachable. Aborting." | tee -a "$LOG_FILE"
+  echo "ERROR: NFS server unreachable" | tee -a "$LOG_FILE"
   exit 1
 fi
-echo "NFS server reachable" | tee -a "$LOG_FILE"
 
 #####################################
-# STEP 2: ENSURE NFS MOUNT
+# STEP 2: ENSURE NFS IS MOUNTED
 #####################################
-if mountpoint -q "$MOUNT_POINT"; then
-  echo "NFS already mounted at $MOUNT_POINT" | tee -a "$LOG_FILE"
-else
-  echo "NFS not mounted, attempting mount..." | tee -a "$LOG_FILE"
-  mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
-
-  if ! mountpoint -q "$MOUNT_POINT"; then
-    echo "ERROR: Failed to mount NFS at $MOUNT_POINT" | tee -a "$LOG_FILE"
-    exit 1
-  fi
-
-  echo "NFS mounted successfully at $MOUNT_POINT" | tee -a "$LOG_FILE"
+if ! mountpoint -q "$MOUNT_POINT"; then
+  echo "Mounting NFS..." | tee -a "$LOG_FILE"
+  mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >>"$LOG_FILE" 2>&1
 fi
 
-#####################################
-# STEP 3: ENSURE BACKUP SYMLINK (IN COMPOSE DIR)
-#####################################
-SYMLINK_PATH="$COMPOSE_DIR/$SYMLINK_NAME"
-
-if [[ -L "$SYMLINK_PATH" ]]; then
-  CURRENT_TARGET="$(readlink -f "$SYMLINK_PATH")"
-  if [[ "$CURRENT_TARGET" != "$SYMLINK_TARGET" ]]; then
-    echo "ERROR: Symlink $SYMLINK_PATH points to $CURRENT_TARGET, expected $SYMLINK_TARGET" | tee -a "$LOG_FILE"
-    exit 1
-  fi
-  echo "Backup symlink exists and is correct" | tee -a "$LOG_FILE"
-
-elif [[ -e "$SYMLINK_PATH" ]]; then
-  echo "ERROR: $SYMLINK_PATH exists but is not a symlink" | tee -a "$LOG_FILE"
+if ! mountpoint -q "$MOUNT_POINT"; then
+  echo "ERROR: NFS mount failed" | tee -a "$LOG_FILE"
   exit 1
-
-else
-  echo "Backup symlink missing, creating it..." | tee -a "$LOG_FILE"
-  ln -s "$SYMLINK_TARGET" "$SYMLINK_PATH"
-  echo "Backup symlink created: $SYMLINK_PATH -> $SYMLINK_TARGET" | tee -a "$LOG_FILE"
 fi
 
 #####################################
-# STEP 4: RUN RESTIC BACKUP
+# STEP 3: ENSURE RESTIC REPO EXISTS
+#####################################
+echo "Checking restic repository..." | tee -a "$LOG_FILE"
+
+(
+  cd "$COMPOSE_DIR"
+
+  if docker compose run --rm restic snapshots >/dev/null 2>&1; then
+    echo "Restic repository exists" | tee -a "$LOG_FILE"
+  else
+    echo "Restic repository missing, initializing..." | tee -a "$LOG_FILE"
+    docker compose run --rm restic init >>"$LOG_FILE" 2>&1
+    echo "Restic repository initialized" | tee -a "$LOG_FILE"
+  fi
+)
+
+#####################################
+# STEP 4: RUN BACKUP
 #####################################
 (
   cd "$COMPOSE_DIR"
   docker compose run --rm restic backup /data/docker-volumes
-) >> "$LOG_FILE" 2>&1
+) >>"$LOG_FILE" 2>&1
 
 echo "Restic backup completed at $(date)" | tee -a "$LOG_FILE"
 echo "==================================================" | tee -a "$LOG_FILE"

@@ -14,3 +14,4 @@ alias dockerrun="sudo docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}
 alias dockerlogs="sudo docker compose logs -f"
 alias takeover="sudo chown -R ecloaiza:ecloaiza *"
 alias fixperm="sudo chmod -R 775 *"
+alias idrive="/opt/IDriveForLinux/bin/idrive"

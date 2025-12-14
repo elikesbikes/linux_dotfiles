@@ -275,6 +275,40 @@ gpull_dotfiles() {
   popd > /dev/null
 }
 
+# Function: sshe
+# Description: SSH into a host as user 'ecloaiza' using kitty +kitten ssh.
+#              Optionally runs a pre-command before connecting.
+# Usage: sshe <host> [pre_command]
+
+sshe() {
+    # Check if correct number of arguments are provided
+    if [ "$#" -lt 1 ]; then
+        echo "Usage: sshe <host> [pre_command]"
+        echo "Example: sshe myhost.com 'echo Running pre-command...'"
+        return 1
+    fi
+
+    local USERNAME="ecloaiza"
+    local HOST="$1"
+    local PRE_COMMAND="$2"
+
+    echo "--- Preparing SSH Connection ---"
+
+    # 1. Execute optional pre-command
+    if [ -n "$PRE_COMMAND" ]; then
+        echo "Executing pre-command: $PRE_COMMAND"
+        eval "$PRE_COMMAND"
+        if [ $? -ne 0 ]; then
+            echo "Error executing pre-command. Aborting."
+            return 1
+        fi
+        echo "Pre-command finished."
+    fi
+
+    # 2. Initiate the Kitty SSH connection
+    echo "Starting SSH session to ${USERNAME}@${HOST} using kitty +kitten..."
+    kitty +kitten ssh "${USERNAME}@${HOST}"
+}
 
 
 # Provide a helpful message when the script is sourced

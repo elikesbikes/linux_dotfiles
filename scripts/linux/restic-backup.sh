@@ -2,11 +2,6 @@
 set -euo pipefail
 
 #####################################
-# SCRIPT LOCATION
-#####################################
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-#####################################
 # AUTO-DETECT COMPOSE DIRECTORY
 #####################################
 COMPOSE_DIRS=(
@@ -32,7 +27,6 @@ fi
 # LOAD HOST CONFIG FROM COMPOSE DIR
 #####################################
 CONFIG_FILE="$COMPOSE_DIR/restic-backup.env"
-
 if [[ -f "$CONFIG_FILE" ]]; then
   # shellcheck disable=SC1090
   source "$CONFIG_FILE"
@@ -56,7 +50,6 @@ SYMLINK_TARGET="$MOUNT_POINT"
 #####################################
 LOG_DIR="/var/log/restic"
 LOG_FILE="$LOG_DIR/backup-$(date +%F).log"
-
 mkdir -p "$LOG_DIR"
 
 echo "==================================================" | tee -a "$LOG_FILE"
@@ -66,6 +59,7 @@ echo "Config file: $CONFIG_FILE" | tee -a "$LOG_FILE"
 echo "NFS server: $NFS_SERVER" | tee -a "$LOG_FILE"
 echo "NFS export: $NFS_EXPORT" | tee -a "$LOG_FILE"
 echo "Mount point: $MOUNT_POINT" | tee -a "$LOG_FILE"
+echo "Symlink path: $COMPOSE_DIR/$SYMLINK_NAME -> $SYMLINK_TARGET" | tee -a "$LOG_FILE"
 echo "==================================================" | tee -a "$LOG_FILE"
 
 #####################################
@@ -83,12 +77,10 @@ fi
 # STEP 1: PING NFS SERVER
 #####################################
 echo "Pinging NFS server $NFS_SERVER..." | tee -a "$LOG_FILE"
-
 if ! ping -c 2 -W 2 "$NFS_SERVER" >/dev/null 2>&1; then
   echo "ERROR: NFS server $NFS_SERVER unreachable. Aborting." | tee -a "$LOG_FILE"
   exit 1
 fi
-
 echo "NFS server reachable" | tee -a "$LOG_FILE"
 
 #####################################
@@ -98,7 +90,6 @@ if mountpoint -q "$MOUNT_POINT"; then
   echo "NFS already mounted at $MOUNT_POINT" | tee -a "$LOG_FILE"
 else
   echo "NFS not mounted, attempting mount..." | tee -a "$LOG_FILE"
-
   mount "$NFS_SERVER:$NFS_EXPORT" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
 
   if ! mountpoint -q "$MOUNT_POINT"; then
@@ -110,18 +101,16 @@ else
 fi
 
 #####################################
-# STEP 3: ENSURE BACKUP SYMLINK
+# STEP 3: ENSURE BACKUP SYMLINK (IN COMPOSE DIR)
 #####################################
-SYMLINK_PATH="$SCRIPT_DIR/$SYMLINK_NAME"
+SYMLINK_PATH="$COMPOSE_DIR/$SYMLINK_NAME"
 
 if [[ -L "$SYMLINK_PATH" ]]; then
   CURRENT_TARGET="$(readlink -f "$SYMLINK_PATH")"
-
   if [[ "$CURRENT_TARGET" != "$SYMLINK_TARGET" ]]; then
     echo "ERROR: Symlink $SYMLINK_PATH points to $CURRENT_TARGET, expected $SYMLINK_TARGET" | tee -a "$LOG_FILE"
     exit 1
   fi
-
   echo "Backup symlink exists and is correct" | tee -a "$LOG_FILE"
 
 elif [[ -e "$SYMLINK_PATH" ]]; then
@@ -131,7 +120,7 @@ elif [[ -e "$SYMLINK_PATH" ]]; then
 else
   echo "Backup symlink missing, creating it..." | tee -a "$LOG_FILE"
   ln -s "$SYMLINK_TARGET" "$SYMLINK_PATH"
-  echo "Backup symlink created: $SYMLINK_PATH → $SYMLINK_TARGET" | tee -a "$LOG_FILE"
+  echo "Backup symlink created: $SYMLINK_PATH -> $SYMLINK_TARGET" | tee -a "$LOG_FILE"
 fi
 
 #####################################

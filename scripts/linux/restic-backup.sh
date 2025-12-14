@@ -94,10 +94,36 @@ fi
 mountpoint -q "$MOUNT_POINT" || fail "NFS mount failed"
 
 #####################################
-# STEP 3: ENSURE RESTIC REPOSITORY EXISTS
+# STEP 3: BUILD BACKUP PATH LIST (SMART & RESTRICTED)
 #####################################
-echo "Checking restic repository..." | tee -a "$LOG_FILE"
+BACKUP_PATHS=()
 
+# Always back up docker volumes
+BACKUP_PATHS+=("/var/lib/docker/volumes")
+
+# Only standardized bind-mount roots
+CANDIDATE_PATHS=(
+  "/home/ecloaiza/docker"
+  "/home/ecloaiza/Devops/docker"
+  "/home/ecloaiza/devops/docker"
+)
+
+echo "Detecting bind-mount paths..." | tee -a "$LOG_FILE"
+
+for path in "${CANDIDATE_PATHS[@]}"; do
+  if [[ -d "$path" ]]; then
+    BACKUP_PATHS+=("$path")
+    echo "✔ Including $path" | tee -a "$LOG_FILE"
+  else
+    echo "✘ Skipping $path (not present)" | tee -a "$LOG_FILE"
+  fi
+done
+
+[[ "${#BACKUP_PATHS[@]}" -gt 1 ]] || fail "No bind-mount paths found to back up"
+
+#####################################
+# STEP 4: ENSURE RESTIC REPOSITORY EXISTS
+#####################################
 cd "$COMPOSE_DIR"
 
 if docker compose run --rm restic snapshots >/dev/null 2>&1; then
@@ -110,9 +136,14 @@ else
 fi
 
 #####################################
-# STEP 4: RUN BACKUP
+# STEP 5: RUN BACKUP
 #####################################
-docker compose run --rm restic backup /data/docker-volumes >>"$LOG_FILE" 2>&1 \
+echo "Running restic backup for paths:" | tee -a "$LOG_FILE"
+for p in "${BACKUP_PATHS[@]}"; do
+  echo "  - $p" | tee -a "$LOG_FILE"
+done
+
+docker compose run --rm restic backup "${BACKUP_PATHS[@]}" >>"$LOG_FILE" 2>&1 \
   || fail "Restic backup command failed"
 
 #####################################

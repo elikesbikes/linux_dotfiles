@@ -5,10 +5,10 @@ set -euo pipefail
 # Configuration
 # ==================================================
 
-# Proxmox connection
+# Proxmox connection (use the hostname that works with BatchMode!)
 PROXMOX_HOST="proxmox-prod-2s"
 PROXMOX_USER="root"
-SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=10"
+SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
 
 # ntfy
 NTFY_URL="https://ntfy.home.elikesbikes.com"
@@ -63,9 +63,9 @@ if [[ -n "$END_EPOCH" ]]; then
   END_TIME=$(date -d "@$END_EPOCH" "+%Y-%m-%d %H:%M:%S")
   DURATION=$((END_EPOCH - START_EPOCH))
   DURATION_FMT=$(printf '%02dh:%02dm:%02ds' \
-    $((DURATION / 3600)) \
-    $((DURATION % 3600 / 60)) \
-    $((DURATION % 60)))
+    $((DURATION/3600)) \
+    $((DURATION%3600/60)) \
+    $((DURATION%60)))
 else
   END_TIME="unknown"
   DURATION_FMT="unknown"

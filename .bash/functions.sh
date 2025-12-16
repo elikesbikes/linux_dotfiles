@@ -309,6 +309,20 @@ sshe() {
     echo "Starting SSH session to ${USERNAME}@${HOST} using kitty +kitten..."
     kitty +kitten ssh "${USERNAME}@${HOST}"
 }
+# Function to perform Git Pull on the tutorials repository
+# while preserving the caller's current directory.
+#
+# Usage: gpull_tutorials
+gpull_tutorials() {
+  # 1. Save current directory and go to the tutorials repo
+  pushd /home/ecloaiza/DevOps/GitHub/tutorials > /dev/null
+
+  # 2. Pull latest changes
+  gpull
+
+  # 3. Return to the original directory
+  popd > /dev/null
+}
 
 
 # Provide a helpful message when the script is sourced

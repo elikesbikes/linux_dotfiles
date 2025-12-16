@@ -30,11 +30,11 @@ notify() {
   local message="$2"
   local priority="${3:-3}"
 
-  curl -s \
+  printf "%b" "$message" | curl -s \
     -H "Title: ${title}" \
     -H "Priority: ${priority}" \
     -H "Tags: idrive,backup" \
-    -d "${message}" \
+    --data-binary @- \
     "${NTFY_URL}/${NTFY_TOPIC}" >/dev/null
 }
 

@@ -1,105 +1,72 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#####################################
-# CONSTANTS
-#####################################
-ENV_FILE="/home/ecloaiza/nfs-mount.env"
-HOSTNAME="$(hostname -s)"
+ENV_FILE="$HOME/nfs-mount.env"
+LOG_FILE="/var/log/nfs-auto-mount.log"
+HOSTNAME="$(hostname)"
 
-#####################################
-# LOGGING
-#####################################
 log() {
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$HOSTNAME] $*"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$HOSTNAME] $*" | tee -a "$LOG_FILE"
 }
 
-fail() {
-  log "ERROR: $*"
-  exit 1
-}
-
-#####################################
-# LOAD CONFIG
-#####################################
+# Load env
 if [[ ! -f "$ENV_FILE" ]]; then
-  fail "Env file not found: $ENV_FILE"
+  echo "ERROR: Env file not found: $ENV_FILE" >&2
+  exit 1
 fi
 
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-#####################################
-# VALIDATION
-#####################################
-: "${NFS_MOUNTS:?NFS_MOUNTS must be defined}"
-: "${PING_COUNT:=2}"
-: "${PING_TIMEOUT:=2}"
+PING_COUNT="${PING_COUNT:-2}"
+PING_TIMEOUT="${PING_TIMEOUT:-2}"
 
-#####################################
-# START
-#####################################
 log "========================================"
 log "NFS auto-mount run starting"
 log "========================================"
 
-#####################################
-# CHECK NAS REACHABILITY (ONCE)
-#####################################
-NAS_REACHABLE=false
-PRIMARY_NAS="$(echo "$NFS_MOUNTS" | head -n1 | cut -d'|' -f1)"
-
-if ping -c "$PING_COUNT" -W "$PING_TIMEOUT" "$PRIMARY_NAS" >/dev/null 2>&1; then
-  NAS_REACHABLE=true
-  log "NAS reachable: $PRIMARY_NAS"
-else
-  log "NAS NOT reachable: $PRIMARY_NAS"
+# Safety: require NFS_MOUNTS
+if [[ -z "${NFS_MOUNTS:-}" ]]; then
+  log "ERROR: NFS_MOUNTS is not defined"
+  exit 1
 fi
 
-#####################################
-# PROCESS EACH MOUNT
-#####################################
+# Iterate mounts
 while IFS= read -r line; do
-  # Skip empty lines
   [[ -z "$line" ]] && continue
 
-  IFS='|' read -r NAS_HOST NFS_EXPORT MOUNT_POINT MOUNT_OPTS <<< "$line"
+  IFS='|' read -r NAS_IP NFS_EXPORT MOUNT_POINT MOUNT_OPTS <<< "$line"
 
   log "----------------------------------------"
-  log "NAS:    $NAS_HOST"
+  log "NAS:    $NAS_IP"
   log "Export: $NFS_EXPORT"
   log "Mount:  $MOUNT_POINT"
   log "Opts:   $MOUNT_OPTS"
 
-  #####################################
-  # NAS UP → MOUNT
-  #####################################
-  if [[ "$NAS_REACHABLE" == true ]]; then
-    # Safe to touch filesystem paths ONLY here
-    if [[ ! -d "$MOUNT_POINT" ]]; then
-      log "Creating mount point"
-      mkdir -p "$MOUNT_POINT"
-    fi
+  # Ensure mount directory exists
+  mkdir -p "$MOUNT_POINT"
 
-    if grep -qsE "^$NAS_HOST:$NFS_EXPORT[[:space:]]+$MOUNT_POINT[[:space:]]+nfs" /proc/self/mounts; then
-      log "Already mounted"
+  # Check reachability PER NAS
+  if ping -c "$PING_COUNT" -W "$PING_TIMEOUT" "$NAS_IP" &>/dev/null; then
+    log "NAS reachable"
+
+    if mountpoint -q "$MOUNT_POINT"; then
+      log "Already mounted → no action"
     else
-      log "Mounting NFS"
-      mount -o "$MOUNT_OPTS" "$NAS_HOST:$NFS_EXPORT" "$MOUNT_POINT"
-      log "Mount successful"
+      log "Mounting NFS share"
+      mount -t nfs -o "$MOUNT_OPTS" "$NAS_IP:$NFS_EXPORT" "$MOUNT_POINT"
+      log "Mount complete"
     fi
 
-  #####################################
-  # NAS DOWN → UNMOUNT
-  #####################################
   else
-    # DO NOT TOUCH FILESYSTEM PATHS
-    if grep -qsE "^$NAS_HOST:$NFS_EXPORT[[:space:]]+$MOUNT_POINT[[:space:]]+nfs" /proc/self/mounts; then
+    log "NAS NOT reachable"
+
+    if mountpoint -q "$MOUNT_POINT"; then
       log "Stale NFS mount detected → unmounting"
-      umount -fl "$MOUNT_POINT"
+      umount -f "$MOUNT_POINT" || umount -l "$MOUNT_POINT"
       log "Unmount complete"
     else
-      log "No NFS mount present"
+      log "Not mounted → no action"
     fi
   fi
 

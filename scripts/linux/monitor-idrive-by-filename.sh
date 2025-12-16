@@ -18,7 +18,6 @@ LOG_DIR="${LOG_DIR:-/opt/IDriveForLinux/idriveIt/user_profile/ecloaiza/ecloaiza@
 NTFY_URL="${NTFY_URL:-https://ntfy.home.elikesbikes.com}"
 NTFY_TOPIC="${NTFY_TOPIC:-backups}"
 
-# Alert if last SUCCESS is older than N days
 MAX_DAYS_SINCE_SUCCESS="${MAX_DAYS_SINCE_SUCCESS:-2}"
 
 HOST="$(hostname -s)"
@@ -50,26 +49,26 @@ if [[ ! -d "$LOG_DIR" ]]; then
 fi
 
 #####################################
-# Epoch boundaries
+# Epoch calculations
 #####################################
 TODAY_EPOCH="$(date -d 'today 00:00:00' +%s)"
 NOW_EPOCH="$(date +%s)"
 MAX_SUCCESS_AGE_SEC=$(( MAX_DAYS_SINCE_SUCCESS * 86400 ))
 
 #####################################
-# Collect all logs (sorted newest first)
+# Collect all logs (newest first)
 #####################################
 mapfile -t ALL_LOGS < <(ls -1 "$LOG_DIR" 2>/dev/null | sort -r)
 
 if (( ${#ALL_LOGS[@]} == 0 )); then
   notify "IDrive Backup ERROR (${HOST})" \
-         "No IDrive backup logs found at all.\nDirectory:\n${LOG_DIR}" \
+         "No IDrive backup logs found.\nDirectory:\n${LOG_DIR}" \
          5
   exit 1
 fi
 
 #####################################
-# Find most recent SUCCESS log (any day)
+# Find last SUCCESS (any day)
 #####################################
 LAST_SUCCESS_LOG=""
 LAST_SUCCESS_EPOCH=""
@@ -89,7 +88,7 @@ done
 
 if [[ -z "$LAST_SUCCESS_LOG" ]]; then
   notify "IDrive Backup ALERT (${HOST})" \
-         "No SUCCESS backups found in logs.\nDirectory:\n${LOG_DIR}" \
+         "No SUCCESS backups found in logs." \
          5
   exit 0
 fi
@@ -100,13 +99,12 @@ SUCCESS_AGE_SEC=$(( NOW_EPOCH - LAST_SUCCESS_EPOCH ))
 if (( SUCCESS_AGE_SEC > MAX_SUCCESS_AGE_SEC )); then
   AGE_DAYS=$(( SUCCESS_AGE_SEC / 86400 ))
   notify "IDrive Backup ALERT (${HOST})" \
-         "Last SUCCESS backup is too old.\n\nLast success: ${LAST_SUCCESS_DATE}\nAge: ${AGE_DAYS} days\nLog: ${LAST_SUCCESS_LOG}" \
+         "Last SUCCESS backup is too old.\n\nLast success:\n${LAST_SUCCESS_DATE}\nAge: ${AGE_DAYS} days\nLog: ${LAST_SUCCESS_LOG}" \
          5
-  # keep going — we can also report today's status below
 fi
 
 #####################################
-# Find today's logs (based on epoch)
+# Find today's logs (epoch-based)
 #####################################
 TODAYS_LOGS=()
 
@@ -119,16 +117,16 @@ for f in "${ALL_LOGS[@]}"; do
 done
 
 #####################################
-# No backup today → report last run
+# No backup today
 #####################################
 if (( ${#TODAYS_LOGS[@]} == 0 )); then
   LAST_LOG="${ALL_LOGS[0]}"
   LAST_EPOCH="${LAST_LOG%%_*}"
-  LAST_STATUS="$(echo "$LAST_LOG" | cut -d_ -f2)"
+  LAST_STATUS="$(cut -d_ -f2 <<<"$LAST_LOG")"
   LAST_DATE="$(date -d "@$LAST_EPOCH" '+%Y-%m-%d %H:%M:%S')"
 
   notify "IDrive Backup NOT RUN TODAY (${HOST})" \
-         "No IDrive backup ran today.\n\nLast run:\nDate: ${LAST_DATE}\nStatus: ${LAST_STATUS}\nLog: ${LAST_LOG}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}\nLog: ${LAST_SUCCESS_LOG}" \
+         "No IDrive backup ran today.\n\nLast run:\nDate: ${LAST_DATE}\nStatus: ${LAST_STATUS}\nLog: ${LAST_LOG}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}" \
          4
   exit 0
 fi
@@ -137,6 +135,9 @@ fi
 # Evaluate latest backup today
 #####################################
 LATEST_TODAY="${TODAYS_LOGS[0]}"
+FILE_EPOCH="${LATEST_TODAY%%_*}"
+START_TIME="$(date -d "@$FILE_EPOCH" '+%Y-%m-%d %H:%M:%S')"
+FINISH_TIME="$(date -d "@$(stat -c %Y "$LOG_DIR/$LATEST_TODAY")" '+%Y-%m-%d %H:%M:%S')"
 
 case "$LATEST_TODAY" in
   *_Running_*)
@@ -145,25 +146,25 @@ case "$LATEST_TODAY" in
 
   *_Success_*)
     notify "IDrive Backup SUCCESS (${HOST})" \
-           "Latest backup today completed successfully.\n\nLog file:\n${LATEST_TODAY}" \
+           "Backup completed successfully.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nLog file:\n${LATEST_TODAY}" \
            2
     ;;
 
   *_Skipped_*)
     notify "IDrive Backup SKIPPED (${HOST})" \
-           "Backup was skipped today.\n\nLog file:\n${LATEST_TODAY}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}\nLog: ${LAST_SUCCESS_LOG}" \
+           "Backup was skipped today.\n\nLog file:\n${LATEST_TODAY}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}" \
            3
     ;;
 
   *_Canceled_*)
     notify "IDrive Backup CANCELED (${HOST})" \
-           "Backup was canceled today.\n\nLog file:\n${LATEST_TODAY}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}\nLog: ${LAST_SUCCESS_LOG}" \
+           "Backup was canceled.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nLog file:\n${LATEST_TODAY}" \
            5
     ;;
 
   *)
     notify "IDrive Backup UNKNOWN (${HOST})" \
-           "Unrecognized backup state today.\n\nLog file:\n${LATEST_TODAY}\n\nLast SUCCESS:\n${LAST_SUCCESS_DATE}\nLog: ${LAST_SUCCESS_LOG}" \
+           "Unrecognized backup state.\n\nLog file:\n${LATEST_TODAY}" \
            4
     ;;
 esac

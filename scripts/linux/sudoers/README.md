@@ -70,3 +70,8 @@ This script itself does not write logs.
 - This script is intentionally single-purpose.
 - Do not modify sudo behavior here.
 - All policy changes must be done via `/home/ecloaiza/sudoers`.
+
+
+## Author
+
+ELIKESBIKES (Tars)

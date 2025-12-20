@@ -107,3 +107,7 @@ TIMEOUT_SEC="20"
 NTFY_TAGS="truenas,replication"
 
 chmod 600 ~/.truenas-repl-ntfy.env
+
+## Author
+
+ELIKESBIKES (Tars)

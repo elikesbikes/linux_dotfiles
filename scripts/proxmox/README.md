@@ -123,3 +123,6 @@ These scripts are actively used in production and have been validated for:
 - job failure detection
 - job-not-run detection
 - clean notification delivery
+## Author
+
+ELIKESBIKES (Tars)

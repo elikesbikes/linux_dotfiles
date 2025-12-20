@@ -148,3 +148,6 @@ Required on the host:
 
 These scripts are actively used and validated across multiple hosts
 with different directory layouts.
+## Author
+
+ELIKESBIKES (Tars)

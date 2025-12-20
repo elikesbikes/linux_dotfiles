@@ -268,3 +268,6 @@ for NON-LVM systems.
 **UrBackup Image Backups – LVM Systems**
 (To be written separately; different scripts, different rules)
 
+## Author
+
+ELIKESBIKES (Tars)

@@ -138,3 +138,6 @@ exists to:
 - Keep related scripts grouped
 - Make cron paths explicit
 - Prepare for future organization without breaking behavior
+## Author
+
+ELIKESBIKES (Tars)

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resolve the directory where this script lives (even if symlinked)
+# Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Backup directory inside script location
+# Backup root
 BACKUP_ROOT="${SCRIPT_DIR}/backups"
 mkdir -p "$BACKUP_ROOT"
 
@@ -17,7 +17,9 @@ echo "Saving GNOME keybindings backup to:"
 echo "  $BACKUP_DIR"
 echo
 
-# Export GNOME keybindings
+# -------------------------------
+# System / built-in keybindings
+# -------------------------------
 gsettings list-recursively org.gnome.desktop.wm.keybindings \
   > "$BACKUP_DIR/wm-keybindings.txt"
 
@@ -30,10 +32,15 @@ gsettings list-recursively org.gnome.shell.keybindings \
 gsettings list-recursively org.gnome.mutter.keybindings \
   > "$BACKUP_DIR/mutter-keybindings.txt"
 
-gsettings list-recursively org.gnome.settings-daemon.plugins.media-keys.custom-keybindings \
-  > "$BACKUP_DIR/custom-shortcuts.txt"
+# -------------------------------
+# Custom shortcuts (CORRECT WAY)
+# -------------------------------
+dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ \
+  > "$BACKUP_DIR/custom-keybindings.dconf"
 
-# Optional but recommended: full GNOME dconf dump
+# -------------------------------
+# Optional: full GNOME backup
+# -------------------------------
 dconf dump / > "$BACKUP_DIR/full-gnome-backup.conf"
 
 echo

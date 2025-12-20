@@ -1,0 +1,39 @@
+[custom0]
+binding='<Super>space'
+command='sh -c "pgrep -x ulauncher && { ulauncher-toggle || true; } || setsid -f ulauncher"'
+name='Ulauncher'
+
+[custom1]
+binding='<Control>Print'
+command='sh -c -- "flameshot gui"'
+name='Flameshot'
+
+[custom2]
+binding='<Shift><Alt>2'
+command='alacritty'
+name='New Alacritty Window'
+
+[custom3]
+binding='<Control><Alt>k'
+command='kitty'
+name='KItty'
+
+[custom4]
+binding='<Control>F1'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- -5000'"
+name='Apple Brightness Down (ASDControl)'
+
+[custom5]
+binding='<Control>F2'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- +5000'"
+name='Apple Brightness Up (ASDControl)'
+
+[custom6]
+binding='<Control><Shift>F2'
+command="sh -c 'asdcontrol $(asdcontrol --detect /dev/usb/hiddev* 2>/dev/null | grep ^/dev/usb/hiddev | cut -d: -f1) -- +60000'"
+name='Apple Brightness Max (ASDControl)'
+
+[custom7]
+binding='<Control><Alt>m'
+command='spotify'
+name='Spotify'

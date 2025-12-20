@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ------------------------------------------------------------
+# ============================================================
 # TrueNAS SCALE Replication Monitor (REMOTE, LOG-BASED)
-# ------------------------------------------------------------
-# - One ntfy message per replication job (today)
-# - Human-readable notifications
-# - Job ID is authoritative
-# - Replication task name included ONLY if present in log
-# ------------------------------------------------------------
+# ============================================================
+# - Runs remotely (no SSH to NAS)
+# - Uses job logs as the authoritative source of truth
+# - Sends human-readable ntfy notifications
+# - One message per replication job per day
+# - Separate alert if replication did not run
+# - Env file resolved internally (cron stays clean)
+# ============================================================
 
+# ------------------------------------------------------------
+# Environment file (canonical location)
+# ------------------------------------------------------------
 ENV_FILE="${ENV_FILE:-$HOME/.truenas-repl-ntfy.env}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -24,11 +29,17 @@ need sed
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-: "${TRUENAS_URL:?Missing TRUENAS_URL}"
-: "${TRUENAS_API_KEY:?Missing TRUENAS_API_KEY}"
-: "${NTFY_URL:?Missing NTFY_URL}"
-: "${NTFY_TOPIC:?Missing NTFY_TOPIC}"
+# ------------------------------------------------------------
+# Required configuration
+# ------------------------------------------------------------
+: "${TRUENAS_URL:?Missing TRUENAS_URL in $ENV_FILE}"
+: "${TRUENAS_API_KEY:?Missing TRUENAS_API_KEY in $ENV_FILE}"
+: "${NTFY_URL:?Missing NTFY_URL in $ENV_FILE}"
+: "${NTFY_TOPIC:?Missing NTFY_TOPIC in $ENV_FILE}"
 
+# ------------------------------------------------------------
+# Optional configuration
+# ------------------------------------------------------------
 VERIFY_TLS="${VERIFY_TLS:-true}"
 TIMEOUT_SEC="${TIMEOUT_SEC:-20}"
 NTFY_TAGS="${NTFY_TAGS:-truenas,replication}"
@@ -112,12 +123,12 @@ jq -c '.[]' <<<"$jobs_today" | while read -r job; do
   end_time="$(fmt_epoch_ms "$end_ms")"
 
   # --------------------------------------------------------
-  # Fetch job log (authoritative)
+  # Fetch job log (authoritative source)
   # --------------------------------------------------------
   log_text="$(api "$TRUENAS_URL/api/v2.0/core/job_log?id=$job_id")"
 
   # --------------------------------------------------------
-  # Attempt to extract replication task name (BEST EFFORT)
+  # Extract replication task name (best effort)
   # --------------------------------------------------------
   task_name="$(
     echo "$log_text" \
@@ -136,7 +147,7 @@ jq -c '.[]' <<<"$jobs_today" | while read -r job; do
   [[ -z "$task_name" ]] && task_name="(not present in job log)"
 
   # --------------------------------------------------------
-  # Attempt to extract dataset information (BEST EFFORT)
+  # Extract dataset mapping (best effort)
   # --------------------------------------------------------
   dataset_info="$(
     echo "$log_text" \
@@ -155,7 +166,7 @@ jq -c '.[]' <<<"$jobs_today" | while read -r job; do
   [[ -z "$dataset_info" ]] && dataset_info="(not present in job log)"
 
   # --------------------------------------------------------
-  # Build message
+  # Build human-readable message
   # --------------------------------------------------------
   base_msg="Job ID: $job_id
 Replication task: $task_name
@@ -166,13 +177,10 @@ End time: $end_time
 Checked at: $now"
 
   # --------------------------------------------------------
-  # Notifications
+  # Send notifications
   # --------------------------------------------------------
   if [[ "$job_state" == "RUNNING" ]]; then
-    notify \
-      "TrueNAS Replication — RUNNING" \
-      "$base_msg" \
-      2
+    notify "TrueNAS Replication — RUNNING" "$base_msg" 2
     continue
   fi
 
@@ -185,9 +193,6 @@ Last log lines:
 $(echo "$log_text" | tail -n 20)" \
       5
   else
-    notify \
-      "TrueNAS Replication — SUCCESSFUL" \
-      "$base_msg" \
-      3
+    notify "TrueNAS Replication — SUCCESSFUL" "$base_msg" 3
   fi
 done

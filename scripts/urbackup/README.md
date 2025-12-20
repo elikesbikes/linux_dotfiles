@@ -1,234 +1,139 @@
-# UrBackup Image Backups on Linux (NON‑LVM Systems)
-## dattobd Snapshot Integration Guide
+# UrBackup Image Backups on Linux
+## Master Runbook (ENTRY POINT)
 
-> Scope: **NON‑LVM systems only**
-> (Raw disk / partition filesystems such as ext4 or XFS)
->
-> LVM systems are intentionally excluded and will be documented separately.
+> **Audience:** Linux administrators / operators  
+> **Scope:** ALL Linux systems using UrBackup image backups  
+> **Purpose:** This document is the **single entry point** for installing,
+> configuring, and operating UrBackup image backups using `dattobd`.
 
----
-
-## 1. Purpose of This Guide
-
-This document explains **how UrBackup image backups were made to work reliably on NON‑LVM Linux systems** using the `dattobd` snapshot driver.
-
-It documents:
-- What UrBackup actually does under the hood
-- Where snapshot scripts live
-- Why the defaults fail
-- How snapshot creation & removal was overridden
-- How cleanup is handled when things go wrong
-
-This guide is based on **real failure modes**, not theory.
+This runbook **does not implement backups by itself**.  
+It directs you to the **correct downstream guide** based on your system layout.
 
 ---
 
-## 2. High‑Level Architecture
+## 1. What This Runbook Is (and Is Not)
 
-UrBackup on Linux does **not** call `dbdctl` directly.
+### This runbook **IS**:
+- The **starting point** for all UrBackup image backup work
+- A decision guide to choose **NON-LVM vs LVM**
+- A controller for **execution order**
+- The authoritative map of this repository
 
-Instead, it executes **snapshot helper scripts** configured in:
-
-```
-/usr/local/etc/urbackup/snapshot.cfg
-```
-
-Those scripts are responsible for:
-1. Creating a snapshot
-2. Mounting it read‑only
-3. Cleaning it up after the backup
-
-UrBackup assumes those scripts:
-- Always succeed
-- Always clean up
-- Never leave state behind
-
-Those assumptions are **false** with dattobd unless corrected.
+### This runbook **IS NOT**:
+- A filesystem-specific implementation
+- A replacement for NON-LVM or LVM runbooks
+- A script reference
 
 ---
 
-## 3. Where UrBackup Snapshot Scripts Live
-
-On the client system, snapshot scripts are deployed under:
+## 2. Repository Structure (Authoritative)
 
 ```
-/usr/local/share/urbackup/
+/home/ecloaiza/scripts/urbackup/
+├── README.md                  ← THIS FILE (ENTRY POINT)
+├── Pre-Req/
+│   └── Install-Pre-REq.md     ← Install dattobd + UrBackup client (MANDATORY)
+├── NON-LVM/
+│   ├── Install-NON-LVM2.md    ← NON-LVM snapshot runbook
+│   └── *.sh                   ← NON-LVM operational scripts
+└── LVM/
+    └── Install-LVM.md         ← LVM snapshot runbook (to be added)
 ```
 
-Example contents:
-
-```
-btrfs_create_filesystem_snapshot
-btrfs_remove_filesystem_snapshot
-lvm_create_filesystem_snapshot
-lvm_remove_filesystem_snapshot
-dm_create_snapshot
-dm_remove_snapshot
-filesystem_snapshot_common
-dattobd_create_snapshot        -> symlink
-dattobd_remove_snapshot        -> symlink
-```
-
-### Important
-UrBackup **chooses which scripts to run** purely based on `snapshot.cfg`.
+This structure is intentional.  
+Filesystem-specific logic **must never be mixed**.
 
 ---
 
-## 4. Snapshot Configuration (snapshot.cfg)
+## 3. Mandatory Execution Order (DO NOT SKIP)
 
-For NON‑LVM systems, the configuration was set to:
+All systems **must** follow this order:
 
-```
-create_filesystem_snapshot=/usr/local/share/urbackup/dattobd_create_snapshot
-remove_filesystem_snapshot=/usr/local/share/urbackup/dattobd_remove_snapshot
-create_volume_snapshot=/usr/local/share/urbackup/dattobd_create_snapshot
-remove_volume_snapshot=/usr/local/share/urbackup/dattobd_remove_snapshot
-```
+### Step 1 — Install Prerequisites (ALL systems)
 
-This forces UrBackup to use `dattobd` for both filesystem and volume snapshots.
+Before doing anything else, install and validate:
 
----
+- `dattobd` (DKMS kernel snapshot driver)
+- Kernel headers / DKMS tooling
+- UrBackup client backend
 
-## 5. Why the Default dattobd Scripts Failed
-
-Out‑of‑the‑box behavior failed due to:
-
-- Incorrect device vs mountpoint assumptions
-- EFI/GPT confusion (SYSVOL / MBR errors)
-- Cow file exhaustion
-- Snapshots not being destroyed
-- UrBackup calling remove scripts multiple times with different arguments
-- datto devices remaining mounted (`/dev/datto0`, `/dev/datto1`, etc.)
-
-Once a datto device is left behind, **all future backups fail**.
-
----
-
-## 6. Script Override Strategy (NON‑LVM)
-
-Instead of editing UrBackup code, we override behavior by:
-
-1. Leaving UrBackup intact
-2. Replacing only the snapshot scripts it calls
-3. Making the scripts defensive and idempotent
-
-### Deployment Method
-
-The following symlinks are used:
+📄 Follow **this guide first**:
 
 ```
-/usr/local/share/urbackup/dattobd_create_snapshot
-    -> dattobd_create_snapshot_xfs
-
-/usr/local/share/urbackup/dattobd_remove_snapshot
-    -> dattobd_remove_snapshot_xfs
+/home/ecloaiza/scripts/urbackup/Pre-Req/Install-Pre-REq.md
 ```
 
-The actual scripts live outside UrBackup (e.g. in Git‑tracked locations).
+Stop if any validation step fails.
 
 ---
 
-## 7. dattobd_create_snapshot_xfs (Conceptual Behavior)
+### Step 2 — Identify Your System Type
 
-This script is responsible for:
+Determine **how your root filesystem is implemented**.
 
-1. Determining the correct block device for the given mountpoint
-2. Creating a dattobd snapshot using `dbdctl setup-snapshot`
-3. Tracking the assigned datto minor number
-4. Mounting the snapshot read‑only under:
-   ```
-   /mnt/urbackup_snaps/<id>
-   ```
-5. Writing a `-num` file so cleanup knows which snapshot to destroy
+Run:
 
-Key design goals:
-- Never assume fixed datto numbers
-- Never hardcode devices
-- Fail fast if arguments are invalid
+```bash
+lsblk -f /
+```
 
----
+Then classify the system:
 
-## 8. dattobd_remove_snapshot_xfs (Conceptual Behavior)
+| System Type | Description |
+|-----------|------------|
+| **NON-LVM** | Root filesystem directly on disk/partition (e.g. `/dev/sda2`) |
+| **LVM** | Root filesystem on `/dev/mapper/<vg>-<lv>` |
 
-This script must survive **bad input**.
-
-UrBackup may call it with:
-- A full mount path
-- A short snapshot ID
-- A device path
-- Garbage
-
-Correct behavior:
-- Ignore invalid calls
-- Only act when a valid snapshot directory exists
-- Lazily unmount
-- Destroy the snapshot using `dbdctl destroy <num>`
-- Never fail the backup due to cleanup issues
-
-Cleanup must be **best‑effort**, not strict.
+If unsure, assume **LVM** until proven otherwise.
 
 ---
 
-## 9. Why a Separate Cleanup Script Exists
+### Step 3 — Follow the Correct Runbook
 
-Despite best efforts, kernel‑level snapshot systems can still fail.
+#### NON-LVM Systems
 
-A **standalone cleanup script** exists to recover the system when:
+Follow:
 
-- datto devices are left behind
-- Cow files are stuck or immutable
-- Mount points remain after crashes
-- UrBackup cannot recover on its own
+```
+/home/ecloaiza/scripts/urbackup/NON-LVM/Install-NON-LVM2.md
+```
 
-Scripts provided:
-- `cleanup_snapshots.sh`
-- `new_cleanup_snapshots.sh` (hardened version)
+#### LVM Systems
 
-These are **manual recovery tools**, not part of normal operation.
+Follow:
+
+```
+/home/ecloaiza/scripts/urbackup/LVM/Install-LVM.md
+```
+
+⚠️ LVM systems use **different snapshot logic** and must not reuse NON-LVM scripts.
 
 ---
 
-## 10. Operational Rules (NON‑LVM)
+## 4. Hard Rules (ALL Systems)
 
-✔ Do:
-- Let UrBackup control snapshot timing
-- Use script overrides only
-- Monitor `/var/log/urbackupclient.log`
-- Keep cleanup scripts available
-
-✘ Do NOT:
+❌ Do NOT:
+- Skip the Pre-Req install
+- Mix NON-LVM and LVM logic
 - Run `dbdctl` manually during backups
-- Mix LVM logic into non‑LVM scripts
-- Assume datto minor numbers
-- Assume scripts are called only once
+- Modify UrBackup binaries
+
+✅ Always:
+- Start from this runbook
+- Follow exactly one filesystem-specific guide
+- Validate after every change
 
 ---
 
-## 11. Known Failure Modes
+## 5. Status
 
-- Cow file fills before transition
-- Snapshot not destroyed → device busy
-- Wrong filesystem detected
-- Mount succeeds but unmount fails
-- Multiple snapshots created concurrently
-
-All are handled by **defensive scripting**, not configuration.
+- ✅ Entry-point runbook defined
+- ✅ Pre-Req install documented
+- ✅ NON-LVM runbook complete
+- ⏳ LVM runbook pending
 
 ---
 
-## 12. Status
+## 6. Summary
 
-NON‑LVM snapshot handling using `dattobd` is:
-- Complex
-- Fragile
-- Achievable with strict discipline
-
-This guide documents a **working, battle‑tested approach**.
-
----
-
-## Next Document
-
-**LVM systems** require a fundamentally different approach and are intentionally excluded here.
-They will be covered in a separate guide.
-
+**Start here → Install Pre-Req → Choose NON-LVM or LVM → Follow exactly one runbook**

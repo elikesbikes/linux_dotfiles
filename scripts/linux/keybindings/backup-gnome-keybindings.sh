@@ -1,23 +1,42 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# Create timestamp
-timestamp=$(date +"%Y%m%d_%H%M%S")
+# Resolve the directory where this script lives (even if symlinked)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Destination directory
-backup_dir="$HOME/Downloads/gnome-keybindings-$timestamp"
-mkdir -p "$backup_dir"
+# Backup directory inside script location
+BACKUP_ROOT="${SCRIPT_DIR}/backups"
+mkdir -p "$BACKUP_ROOT"
 
-echo "Saving GNOME keybindings backup to: $backup_dir"
+# Timestamp
+TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
+BACKUP_DIR="${BACKUP_ROOT}/gnome-keybindings-${TIMESTAMP}"
+mkdir -p "$BACKUP_DIR"
 
-# Export keybindings from major GNOME schemas
-gsettings list-recursively org.gnome.desktop.wm.keybindings >"$backup_dir/wm-keybindings.txt"
-gsettings list-recursively org.gnome.settings-daemon.plugins.media-keys >"$backup_dir/media-keys.txt"
-gsettings list-recursively org.gnome.shell.keybindings >"$backup_dir/shell-keybindings.txt"
-gsettings list-recursively org.gnome.mutter.keybindings >"$backup_dir/mutter-keybindings.txt"
-gsettings list-recursively org.gnome.settings-daemon.plugins.media-keys.custom-keybindings >"$backup_dir/custom-shortcuts.txt"
+echo "Saving GNOME keybindings backup to:"
+echo "  $BACKUP_DIR"
+echo
 
-# Create a full GNOME config dump (optional but recommended)
-dconf dump / >"$backup_dir/full-gnome-backup.conf"
+# Export GNOME keybindings
+gsettings list-recursively org.gnome.desktop.wm.keybindings \
+  > "$BACKUP_DIR/wm-keybindings.txt"
 
-echo "Backup complete!"
-echo "Files saved under: $backup_dir"
+gsettings list-recursively org.gnome.settings-daemon.plugins.media-keys \
+  > "$BACKUP_DIR/media-keys.txt"
+
+gsettings list-recursively org.gnome.shell.keybindings \
+  > "$BACKUP_DIR/shell-keybindings.txt"
+
+gsettings list-recursively org.gnome.mutter.keybindings \
+  > "$BACKUP_DIR/mutter-keybindings.txt"
+
+gsettings list-recursively org.gnome.settings-daemon.plugins.media-keys.custom-keybindings \
+  > "$BACKUP_DIR/custom-shortcuts.txt"
+
+# Optional but recommended: full GNOME dconf dump
+dconf dump / > "$BACKUP_DIR/full-gnome-backup.conf"
+
+echo
+echo "Backup complete."
+echo "Files created:"
+ls -1 "$BACKUP_DIR"

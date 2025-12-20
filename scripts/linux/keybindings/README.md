@@ -106,4 +106,4 @@ Safe to commit to Git (no secrets stored).
 
 ## Author
 
-Maintained by ecloaiza
+ELIKESBIKES (Tars)

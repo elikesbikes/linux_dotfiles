@@ -13,7 +13,7 @@ if [[ ! -d "$SRC_DIR" ]]; then
   exit 1
 fi
 
-# Only install numbered fragments (ignore README.md and legacy files like ecloaiza-nopasswd)
+# Discover sudoers fragments (NN-*)
 mapfile -t FRAGMENTS < <(
   ls -1 "$SRC_DIR" 2>/dev/null \
     | grep -E '^[0-9]{2}-' \
@@ -29,7 +29,6 @@ TS="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="/var/tmp/sudoers.d-backup-${TS}"
 mkdir -p "$BACKUP_DIR"
 
-# Track which files existed so rollback can restore/delete appropriately
 declare -A EXISTED=()
 declare -a INSTALLED=()
 
@@ -77,7 +76,6 @@ for f in "${FRAGMENTS[@]}"; do
   echo "    -> ${f}"
   sudo install -m 0440 "$src" "$dst"
 
-  # Validate each fragment after install
   sudo visudo -cf "$dst" >/dev/null
 
   INSTALLED+=("$f")

@@ -13,7 +13,7 @@ Dynamic DNS updates are run on a schedule and logged consistently.
 
 ## Files
 
-- `update-ddns.sh`  
+- `update-ddns.sh`
   Main script that runs ddclient and logs the result.
 
 ## Log file
@@ -65,3 +65,8 @@ sudo tail -n 50 /var/log/ddns-update.log
 - This script assumes `ddclient` is already installed and configured.
 - All authentication and provider configuration lives in `/etc/ddclient.conf`.
 - No secrets are stored in this repository or script.
+
+
+## Author
+
+ELIKESBIKES (Tars)

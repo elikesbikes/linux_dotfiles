@@ -1,8 +1,8 @@
 # Runbook: Installing dattobd and UrBackup Client (All Linux Distros)
 
-> **Audience:** Linux administrators  
-> **Scope:** Client-side installation only  
-> **Applies to:** Debian/Ubuntu, RHEL/CentOS/Rocky/Alma, generic Linux  
+> **Audience:** Linux administrators
+> **Scope:** Client-side installation only
+> **Applies to:** Debian/Ubuntu, RHEL/CentOS/Rocky/Alma, generic Linux
 > **Purpose:** Provide a repeatable, distro-agnostic install procedure for
 > `dattobd` (snapshot driver) and the UrBackup client.
 
@@ -224,3 +224,7 @@ runbook completes successfully.
 
 This runbook defines the **minimum supported installation state** for all
 UrBackup image backup workflows on Linux.
+
+## Author
+
+ELIKESBIKES (Tars)

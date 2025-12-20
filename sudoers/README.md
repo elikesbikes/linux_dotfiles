@@ -94,3 +94,6 @@ Refer to sudoers fragment documentation for logging behavior.
 - Any changes to sudoers behavior must be done via fragments in
   `/home/ecloaiza/sudoers`, not by modifying this script.
 
+## Author
+
+ELIKESBIKES (Tars)

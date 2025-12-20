@@ -1,12 +1,12 @@
 # UrBackup Image Backups on Linux
 ## Master Runbook (ENTRY POINT)
 
-> **Audience:** Linux administrators / operators  
-> **Scope:** ALL Linux systems using UrBackup image backups  
+> **Audience:** Linux administrators / operators
+> **Scope:** ALL Linux systems using UrBackup image backups
 > **Purpose:** This document is the **single entry point** for installing,
 > configuring, and operating UrBackup image backups using `dattobd`.
 
-This runbook **does not implement backups by itself**.  
+This runbook **does not implement backups by itself**.
 It directs you to the **correct downstream guide** based on your system layout.
 
 ---
@@ -40,7 +40,7 @@ It directs you to the **correct downstream guide** based on your system layout.
     └── Install-LVM.md         ← LVM snapshot runbook (to be added)
 ```
 
-This structure is intentional.  
+This structure is intentional.
 Filesystem-specific logic **must never be mixed**.
 
 ---
@@ -137,3 +137,9 @@ Follow:
 ## 6. Summary
 
 **Start here → Install Pre-Req → Choose NON-LVM or LVM → Follow exactly one runbook**
+
+
+## Author
+
+ELIKESBIKES (Tars)
+

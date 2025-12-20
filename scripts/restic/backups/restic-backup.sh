@@ -2,6 +2,13 @@
 set -euo pipefail
 
 #####################################
+# CONSTANTS / PATHS
+#####################################
+SCRIPT_DIR="/home/ecloaiza/scripts/restic/backups"
+NFS_MOUNT_SCRIPT="$SCRIPT_DIR/nfs-auto-mount.sh"
+ENV_FILE="/home/ecloaiza/restic.env"
+
+#####################################
 # NTFY CONFIG
 #####################################
 NTFY_SERVER="https://ntfy.home.elikesbikes.com"
@@ -24,23 +31,39 @@ fail() {
 }
 
 #####################################
-# LOAD CONSOLIDATED ENV
+# VALIDATE DEPENDENCIES
 #####################################
-ENV_FILE="/home/ecloaiza/restic.env"
-[[ -f "$ENV_FILE" ]] || fail "Missing env file: $ENV_FILE"
+[[ -x "$NFS_MOUNT_SCRIPT" ]] || fail "Missing nfs-auto-mount.sh at $NFS_MOUNT_SCRIPT"
+[[ -f "$ENV_FILE" ]] || fail "Missing env file $ENV_FILE"
+
+#####################################
+# LOAD ENV (single source of truth)
+#####################################
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-#####################################
-# REQUIRED VARIABLES
-#####################################
 : "${RESTIC_REPOSITORY:?Missing RESTIC_REPOSITORY}"
 : "${RESTIC_PASSWORD:?Missing RESTIC_PASSWORD}"
-: "${NFS_SERVER:?Missing NFS_SERVER}"
-: "${NFS_EXPORT:?Missing NFS_EXPORT}"
-: "${MOUNT_POINT:?Missing MOUNT_POINT}"
-: "${PING_COUNT:?Missing PING_COUNT}"
-: "${PING_TIMEOUT:?Missing PING_TIMEOUT}"
+
+#####################################
+# LOGGING
+#####################################
+LOG_DIR="/var/log/restic"
+LOG_FILE="$LOG_DIR/backup-$(date +%F).log"
+mkdir -p "$LOG_DIR"
+
+echo "==================================================" | tee -a "$LOG_FILE"
+echo "Restic backup started at $(date)" | tee -a "$LOG_FILE"
+echo "Host: $HOSTNAME" | tee -a "$LOG_FILE"
+echo "Script dir: $SCRIPT_DIR" | tee -a "$LOG_FILE"
+echo "Env file: $ENV_FILE" | tee -a "$LOG_FILE"
+echo "==================================================" | tee -a "$LOG_FILE"
+
+#####################################
+# PRE-HOOK: ENSURE NFS MOUNT
+#####################################
+"$NFS_MOUNT_SCRIPT" >>"$LOG_FILE" 2>&1 \
+  || fail "NFS mount pre-hook failed"
 
 #####################################
 # AUTO-DETECT COMPOSE DIRECTORY
@@ -62,40 +85,12 @@ done
 
 [[ -z "$COMPOSE_DIR" ]] && fail "docker-compose.yml not found"
 
-COMPOSE_FILE="$COMPOSE_DIR/docker-compose.yml"
-
-#####################################
-# LOGGING
-#####################################
-LOG_DIR="/var/log/restic"
-LOG_FILE="$LOG_DIR/backup-$(date +%F).log"
-mkdir -p "$LOG_DIR"
-
-{
-  echo "=================================================="
-  echo "Restic backup started at $(date)"
-  echo "Host: $HOSTNAME"
-  echo "Compose file: $COMPOSE_FILE"
-  echo "Env file: $ENV_FILE"
-  echo "=================================================="
-} | tee -a "$LOG_FILE"
-
-#####################################
-# PRE-HOOK: ENSURE NFS MOUNT
-#####################################
-NFS_SCRIPT="/home/ecloaiza/scripts/linux/nfs-auto-mount.sh"
-[[ -x "$NFS_SCRIPT" ]] || fail "nfs-auto-mount.sh not executable"
-
-ping -c "$PING_COUNT" -W "$PING_TIMEOUT" "$NFS_SERVER" >/dev/null 2>&1 \
-  || fail "NFS server unreachable"
-
-"$NFS_SCRIPT" >>"$LOG_FILE" 2>&1 || fail "nfs-auto-mount.sh failed"
-mountpoint -q "$MOUNT_POINT" || fail "NFS not mounted"
-
 #####################################
 # BUILD BACKUP PATHS (CONTAINER VIEW)
 #####################################
-BACKUP_PATHS=("/data/docker-volumes")
+BACKUP_PATHS=(
+  "/data/docker-volumes"
+)
 
 CANDIDATE_BIND_PATHS=(
   "/data/bind-volumes/docker"
@@ -107,7 +102,8 @@ CANDIDATE_BIND_PATHS=(
 echo "Detecting bind-mount paths (container view)..." | tee -a "$LOG_FILE"
 
 for path in "${CANDIDATE_BIND_PATHS[@]}"; do
-  if docker compose -f "$COMPOSE_FILE" run --rm --entrypoint sh restic \
+  if docker compose -f "$COMPOSE_DIR/docker-compose.yml" \
+       run --rm --entrypoint sh restic \
        -c "[ -d '$path' ]" >/dev/null 2>&1; then
     BACKUP_PATHS+=("$path")
     echo "✔ Including $path" | tee -a "$LOG_FILE"
@@ -119,10 +115,12 @@ done
 #####################################
 # ENSURE RESTIC REPO EXISTS
 #####################################
-if docker compose -f "$COMPOSE_FILE" run --rm restic snapshots >/dev/null 2>&1; then
+cd "$COMPOSE_DIR"
+
+if docker compose run --rm restic snapshots >/dev/null 2>&1; then
   echo "Restic repository exists" | tee -a "$LOG_FILE"
 else
-  docker compose -f "$COMPOSE_FILE" run --rm restic init >>"$LOG_FILE" 2>&1 \
+  docker compose run --rm restic init >>"$LOG_FILE" 2>&1 \
     || fail "Failed to initialize restic repository"
 fi
 
@@ -134,14 +132,15 @@ for p in "${BACKUP_PATHS[@]}"; do
   echo "  - $p" | tee -a "$LOG_FILE"
 done
 
-docker compose -f "$COMPOSE_FILE" run --rm restic backup "${BACKUP_PATHS[@]}" \
+docker compose run --rm restic backup "${BACKUP_PATHS[@]}" \
   >>"$LOG_FILE" 2>&1 || fail "Restic backup failed"
 
 #####################################
-# POST-HOOK
+# POST-HOOK: OPTIONAL UNMOUNT
 #####################################
-if [[ "${RESTIC_POST_CHECK:-true}" == "true" ]]; then
-  "$NFS_SCRIPT" >>"$LOG_FILE" 2>&1 || true
+if [[ "${RESTIC_UNMOUNT_AFTER:-false}" == "true" ]]; then
+  echo "Unmounting NFS after backup" | tee -a "$LOG_FILE"
+  umount /mnt/homenas/nfs_tars >>"$LOG_FILE" 2>&1 || true
 fi
 
 #####################################

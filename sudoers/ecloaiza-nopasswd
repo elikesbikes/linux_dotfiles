@@ -1,7 +1,7 @@
 # Preserve terminal capabilities for sudo commands
 Defaults env_keep += "TERMINFO"
 
-# Allow ecloaiza to run selected admin, filesystem, and troubleshooting commands without a password
+# Allow ecloaiza to run selected admin, filesystem, troubleshooting, and approved scripts without a password
 ecloaiza ALL=(ALL) NOPASSWD: \
     /usr/bin/docker, \
     /usr/bin/systemctl, \
@@ -25,5 +25,8 @@ ecloaiza ALL=(ALL) NOPASSWD: \
     /usr/bin/lsof, \
     /usr/bin/strace, \
     /usr/bin/pmap, \
-    /usr/bin/ulimit
-
+    /usr/bin/ulimit, \
+    /home/ecloaiza/scripts/linux/install-sudoers.sh, \
+    /home/ecloaiza/scripts/linux/restic-backup.sh, \
+    /home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh, \
+    /home/ecloaiza/scripts/linux/monitor-idrive-by-filename.sh

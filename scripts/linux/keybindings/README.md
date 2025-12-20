@@ -4,6 +4,7 @@ This directory contains scripts to **backup and restore GNOME keybindings** on U
 
 The design goals are:
 - Safe and reversible
+- Explicit (no silent destructive actions)
 - Non-destructive by default
 - Git-friendly
 - Compatible with Wayland and X11
@@ -25,7 +26,7 @@ keybindings/
         ├── media-keys.txt
         ├── shell-keybindings.txt
         ├── mutter-keybindings.txt
-        ├── custom-shortcuts.txt
+        ├── custom-keybindings.dconf
         └── full-gnome-backup.conf
 ```
 
@@ -35,34 +36,47 @@ keybindings/
 
 ### `backup-gnome-keybindings.sh`
 
-Creates a timestamped backup of all GNOME keybindings.
+Creates a timestamped backup of GNOME keybindings.
 
 **What is backed up:**
 - Window manager keybindings
 - Media keys
 - GNOME Shell keybindings
 - Mutter keybindings
-- Custom shortcuts
-- Full GNOME `dconf` dump (optional but included)
+- **Custom keybindings (correctly backed up via dconf paths)**
+- Optional full GNOME configuration dump
 
 **Backup location:**
 ```
 <script_directory>/backups/
 ```
 
-Each run creates a new timestamped folder.
+Each execution creates a new timestamped backup directory.
 
 ---
 
 ### `restore-gnome-keybindings.sh`
 
-Restores GNOME keybindings from a backup directory.
+Restores GNOME keybindings from a selected backup directory.
 
-**Behavior:**
-- Always restores keybindings
-- Prompts whether to restore the full GNOME configuration
-- If you answer **NO**, only keybindings are restored
-- Full GNOME restore (`dconf load`) is optional and explicit
+The restore process is **interactive** and supports multiple modes.
+
+#### Restore Modes
+
+1. **Restore ONLY custom keybindings**
+   - Restores user-defined shortcuts (applications, scripts, commands)
+   - Does NOT touch system or GNOME defaults
+
+2. **Restore ALL keybindings (system + custom)**
+   - Restores all GNOME-managed keybindings
+   - Does NOT restore full GNOME UI configuration
+
+3. **Restore ALL keybindings + FULL GNOME config**
+   - Restores keybindings
+   - Restores full GNOME configuration via `dconf load`
+   - This overwrites themes, extensions, and UI preferences
+
+All restore actions require explicit confirmation.
 
 ---
 
@@ -78,18 +92,20 @@ Restores GNOME keybindings from a backup directory.
 ./restore-gnome-keybindings.sh ./backups/gnome-keybindings-YYYYMMDD_HHMMSS
 ```
 
-You will be prompted before any destructive operation.
+Follow the interactive prompts to select the desired restore mode.
 
 ---
 
 ## Notes
 
-- Log out and log back in after restoring for all changes to apply.
-- Restoring the full GNOME config will overwrite:
-  - Themes
-  - Extensions
-  - UI preferences
-- Use full restore only when migrating systems or recovering from corruption.
+- Always **log out and log back in** after restoring for all changes to apply.
+- Custom keybindings are stored and restored via:
+  ```
+  /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/
+  ```
+- Full GNOME restore should be used only for:
+  - New system migration
+  - GNOME configuration corruption recovery
 
 ---
 

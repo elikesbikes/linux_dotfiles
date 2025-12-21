@@ -53,7 +53,9 @@ else
   log "FAIL: starship not found after install"
   exit 1
 fi
-
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
+mkdir -p "$STATE_DIR"
+touch "$STATE_DIR/<category>"
 log "=================================================="
 log "[$SCRIPT_NAME] Completed at: $(ts)"
 log "=================================================="

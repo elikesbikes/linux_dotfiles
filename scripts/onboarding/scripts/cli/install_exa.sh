@@ -43,5 +43,8 @@ fi
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
 touch "$STATE_DIR/<category>"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
+mkdir -p "$STATE_DIR"
+touch "$STATE_DIR/<category>"
 
 echo "Done."

@@ -6,7 +6,7 @@ DOTFILES_REPO="https://github.com/elikesbikes/linux_dotfiles"
 MASTER_SCRIPT="$DOTFILES_DIR/scripts/onboarding/master.sh"
 
 echo "=================================================="
-echo " Linux Dotfiles Bootstrap (FORCE MODE)"
+echo " Linux Dotfiles Bootstrap (FORCE OVERWRITE)"
 echo "=================================================="
 echo ""
 echo "Target directory:"
@@ -14,7 +14,7 @@ echo "  $DOTFILES_DIR"
 echo ""
 
 # --------------------------------------------------
-# Ensure git exists
+# Ensure git is installed
 # --------------------------------------------------
 if ! command -v git >/dev/null 2>&1; then
   echo "Installing git..."
@@ -23,7 +23,7 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 # --------------------------------------------------
-# Force remove existing repo
+# Remove existing repo (INTENTIONAL)
 # --------------------------------------------------
 if [[ -d "$DOTFILES_DIR" ]]; then
   echo "Existing dotfiles directory found."
@@ -39,7 +39,7 @@ mkdir -p "$(dirname "$DOTFILES_DIR")"
 git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 
 # --------------------------------------------------
-# Launch onboarding master script
+# Launch master onboarding script
 # --------------------------------------------------
 if [[ ! -f "$MASTER_SCRIPT" ]]; then
   echo "ERROR: master.sh not found at:"

@@ -134,7 +134,7 @@ gacp_tutorials() {
   # 1. Save current directory and go to the target directory
   # 'pushd' saves your current location to a stack and then cds
   # We send the normal output to /dev/null to keep it quiet
-  pushd /home/ecloaiza/DevOps/GitHub/tutorials > /dev/null
+  pushd /home/ecloaiza/devops/github/tutorials > /dev/null
 
   # 2. Run the command with all provided arguments
   # "$@" is a special variable that passes all arguments
@@ -358,7 +358,7 @@ sshe() {
 # Usage: gpull_tutorials
 gpull_tutorials() {
   # 1. Save current directory and go to the tutorials repo
-  pushd /home/ecloaiza/DevOps/GitHub/tutorials > /dev/null
+  pushd /home/ecloaiza/devops/github/tutorials > /dev/null
 
   # 2. Pull latest changes
   gpull

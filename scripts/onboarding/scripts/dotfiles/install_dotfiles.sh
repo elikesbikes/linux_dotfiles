@@ -1,34 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_NAME="$(basename "$0")"
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
-
-mkdir -p "$LOG_DIR" "$STATE_DIR"
-
-exec > >(tee -a "$LOG_FILE") 2>&1
-
-echo "=================================================="
-echo "[$SCRIPT_NAME] Dotfiles bootstrap"
-echo "Date: $(date)"
-echo "Log: $LOG_FILE"
-echo "=================================================="
-
-DOTFILES_DIR="/home/ecloaiza/DevOps/GitHub/linux_dotfiles"
+DOTFILES_DIR="/home/ecloaiza/devops/github/linux_dotfiles"
 DOTFILES_REPO="https://github.com/elikesbikes/linux_dotfiles"
+MASTER_SCRIPT="$DOTFILES_DIR/scripts/onboarding/master.sh"
+
+echo "=================================================="
+echo " Dotfiles bootstrap"
+echo "=================================================="
 
 # --------------------------------------------------
-# Ensure prerequisites
+# Ensure git
 # --------------------------------------------------
-echo "Ensuring git is installed..."
 if ! command -v git >/dev/null 2>&1; then
   echo "Installing git..."
   sudo apt-get update
   sudo apt-get install -y git
-else
-  git --version
 fi
 
 # --------------------------------------------------
@@ -45,26 +32,17 @@ else
 fi
 
 # --------------------------------------------------
-# Deployment notice (non-destructive)
+# Launch master onboarding script
 # --------------------------------------------------
-echo ""
-echo "Dotfiles repository is present at:"
-echo "  $DOTFILES_DIR"
-echo ""
-echo "No dotfiles have been deployed yet."
-echo ""
-echo "Next steps (manual, intentional):"
-echo "  cd $DOTFILES_DIR"
-echo "  stow <package>"
-echo ""
-echo "This avoids accidental overwrites."
-
-# --------------------------------------------------
-# Mark state
-# --------------------------------------------------
-touch "$STATE_DIR/dotfiles"
+if [[ ! -x "$MASTER_SCRIPT" ]]; then
+  echo "Making master.sh executable..."
+  chmod +x "$MASTER_SCRIPT"
+fi
 
 echo ""
 echo "=================================================="
-echo " Dotfiles bootstrap complete"
+echo " Launching onboarding master script"
 echo "=================================================="
+echo ""
+
+exec "$MASTER_SCRIPT"

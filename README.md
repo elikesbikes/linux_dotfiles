@@ -1,158 +1,175 @@
 # linux_dotfiles
 
-Personal Linux dotfiles and shell environment configuration maintained by **elikesbikes**.
+Opinionated Linux dotfiles curated and battle-tested by **elikesbikes**.
 
-This repository contains opinionated, production‑tested configuration for Bash, terminal emulators, Neovim, Starship, and various CLI tools. It is designed for **Linux workstations and servers**, with an emphasis on repeatability, portability, and transparency.
+This repository is not a generic dotfiles starter kit. It reflects a very specific workflow built over time across Linux workstations, servers, and homelab systems. The focus is on **clarity, control, and repeatability** — not magic installers or fragile abstractions.
 
-> ⚠️ These dotfiles are tailored to the author's environment. Review before using and adapt as needed.
-
----
-
-## Overview
-
-The goal of this repository is to provide:
-
-- A modular Bash environment (aliases, functions, exports split by concern)
-- Consistent terminal and prompt experience across hosts
-- A reproducible Neovim setup (Lazy.nvim‑based)
-- Clear separation between **configuration**, **secrets**, and **machine‑specific state**
-- Git‑tracked history with changelog and tagged releases
+If you like to know *exactly* what your shell and editor are doing, you’re in the right place.
 
 ---
 
-## Repository Structure
+## Philosophy
+
+These dotfiles follow a few non-negotiable principles:
+
+- **Explicit over clever** – readable configs beat one-liners
+- **Modular over monolithic** – small, focused files by concern
+- **Manual over automatic** – no surprise installers or hidden side effects
+- **Versioned and frozen** – tags represent known-good states
+- **Portable, not universal** – adapt to your system, don’t blindly copy
+
+This repo is meant to be **read**, not just cloned.
+
+---
+
+## Repository Layout
 
 ```
 .
-├── .bash/                  # Modular bash configuration
-│   ├── aliases.sh          # Command aliases
+├── .bash/                  # Modular bash environment
+│   ├── aliases.sh          # Aliases and shortcuts
 │   ├── functions.sh        # Custom shell functions
-│   ├── misc.sh             # Misc helpers and tweaks
-│   ├── starship.sh         # Starship prompt integration
-│   └── config.json         # Shell‑related config data
-├── .bashrc                 # Main bash entry point
-├── .config/                # User application configs
-│   ├── alacritty/          # Alacritty terminal configuration
-│   ├── kitty/              # Kitty terminal configuration
-│   ├── nvim/               # Neovim (Lazy.nvim) configuration
+│   ├── misc.sh             # Quality-of-life tweaks
+│   ├── starship.sh         # Prompt integration
+│   └── config.json         # Shell-related config data
+├── .bashrc                 # Main bash entry point (minimal, sourced logic)
+├── .config/                # Application configuration
+│   ├── alacritty/          # Alacritty terminal
+│   ├── kitty/              # Kitty terminal
+│   ├── nvim/               # Neovim (Lazy.nvim, Lua)
 │   ├── fastfetch/          # fastfetch system info
-│   ├── neofetch/           # neofetch configuration
+│   ├── neofetch/           # neofetch config
 │   ├── starship.toml       # Starship prompt config
 │   └── VeraCrypt/          # VeraCrypt user config
-├── exports/                # Exported settings & OS‑level configs
-├── .env                    # Environment variables (DO NOT COMMIT SECRETS)
-├── CHANGELOG.md            # Versioned change history
+├── exports/                # Exported desktop / OS-level settings
+├── .env                    # Environment variables (structure only)
+├── CHANGELOG.md            # Human-readable change history
 └── README.md               # This file
 ```
 
 ---
 
-## Bash Design
+## Bash Setup
 
-The Bash configuration is intentionally **modular**:
+The Bash environment is intentionally **split by responsibility**.
 
-- `.bashrc` is minimal and sources files from `.bash/`
-- Logic is split by responsibility (aliases, functions, prompt, misc)
-- Designed to be readable, debuggable, and extensible
+- `.bashrc` does very little on purpose
+- Everything interesting lives in `.bash/`
+- Each file has a single job
 
-This avoids monolithic `.bashrc` files and makes iteration safer.
+This makes it easier to debug, extend, or remove pieces without breaking your shell.
+
+If something goes wrong, you’ll know *where* and *why*.
 
 ---
 
 ## Neovim
 
-- Uses **Lazy.nvim** for plugin management
-- Configuration written in Lua
-- Clear separation between:
-  - options
-  - keymaps
-  - autocmds
-  - plugins
-- Includes lockfile (`lazy-lock.json`) for reproducibility
+Neovim is configured using:
 
-Neovim config lives entirely under:
+- **Lazy.nvim** for plugin management
+- Lua for all configuration
+- Locked dependencies via `lazy-lock.json`
+
+Structure is clean and predictable:
+
+- `options.lua` – editor behavior
+- `keymaps.lua` – mappings only
+- `autocmds.lua` – event-driven logic
+- `plugins/` – plugin specs and overrides
+
+Everything lives under:
 
 ```
 .config/nvim
 ```
 
+No global hacks. No mystery state.
+
 ---
 
 ## Terminal & Prompt
 
-Supported / configured tools:
+This repo configures a consistent terminal experience across hosts:
 
 - **Kitty**
 - **Alacritty**
 - **Starship**
 - **fastfetch / neofetch**
 
-Themes and shared configuration are split into reusable `.toml` fragments where possible.
+Themes and shared settings are broken into reusable fragments instead of copy-pasted blobs.
 
 ---
 
 ## Environment Variables
 
-An `.env` file exists **by design**, but:
+An `.env` file exists to document **structure**, not secrets.
 
-- It should contain **NO secrets** when committed
-- Real secrets should live in a **local, untracked, user‑specific env file**
-- This repo assumes env files are sourced explicitly by the shell
+Rules:
 
-Always review `.env` before use.
+- ❌ Do not commit secrets
+- ✅ Keep real values in a local, ignored env file
+- ✅ Source env files explicitly
+
+If you don’t know what a variable does, don’t set it.
 
 ---
 
-## Installation (Manual)
+## Installation (Intentional)
 
-This repository intentionally avoids automatic installers.
+There is no one-line installer.
 
-Typical usage:
+That’s deliberate.
+
+Typical workflow:
 
 ```bash
 git clone https://github.com/elikesbikes/linux_dotfiles.git ~/linux_dotfiles
 cd ~/linux_dotfiles
-
-# Review files carefully before symlinking or sourcing
 ```
 
-Common approaches:
-- Symlink individual files
-- Source `.bashrc` selectively
-- Copy `.config/*` entries you actually use
+From there:
+
+- Read the files
+- Symlink or copy what you actually want
+- Leave the rest alone
+
+Your system, your responsibility.
 
 ---
 
 ## Versioning & Stability
 
-- Changes are tracked in `CHANGELOG.md`
-- Git **tags** represent frozen, known‑good states
-- `main` may evolve as experimentation continues
+- `CHANGELOG.md` explains *why* things changed
+- Git **tags** represent frozen, known-good states
+- `main` is allowed to evolve
 
-If stability matters, **use a tagged release**.
+If you care about stability, **check out a tag**.
 
 ---
 
-## Audience
+## Who This Is For
 
-This repo is best suited for:
+This repo is for:
 
 - Linux power users
-- Engineers / SREs / DevOps practitioners
-- Users comfortable reading and modifying shell and Lua code
+- Engineers, SREs, DevOps, homelabbers
+- People who enjoy understanding their tools
 
-Not intended for beginners.
+If you want plug-and-play dotfiles, this probably isn’t it.
 
 ---
 
 ## License
 
-Personal configuration repository.  
-Reuse allowed, attribution appreciated.
+Personal configuration repository.
+
+Reuse what’s useful. Attribution appreciated.
 
 ---
 
-## Disclaimer
+## Final Note
 
-These dotfiles reflect personal workflow decisions.  
-No warranty, no guarantees — **read before running**.
+These dotfiles match *my* brain and workflow.
+
+Steal ideas, not assumptions.

@@ -14,7 +14,7 @@ echo "  $DOTFILES_DIR"
 echo ""
 
 # --------------------------------------------------
-# Move to a safe directory FIRST (critical)
+# Move to a safe directory FIRST
 # --------------------------------------------------
 cd "$HOME"
 
@@ -50,16 +50,21 @@ mkdir -p "$(dirname "$DOTFILES_DIR")"
 git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 
 # --------------------------------------------------
-# Preemptively resolve known stow conflicts (Omakub)
+# Remove known conflicting files / directories
 # --------------------------------------------------
-OMAKUB_BASH_DIR="$HOME/.local/share/omakub/defaults/bash"
 
+# Omakub bash defaults
+OMAKUB_BASH_DIR="$HOME/.local/share/omakub/defaults/bash"
 if [[ -d "$OMAKUB_BASH_DIR" ]]; then
-  echo ""
-  echo "Detected Omakub bash defaults:"
+  echo "Removing Omakub bash defaults:"
   echo "  $OMAKUB_BASH_DIR"
-  echo "Removing to avoid stow conflicts..."
   rm -rf "$OMAKUB_BASH_DIR"
+fi
+
+# Existing .bashrc (managed by stow)
+if [[ -f "$HOME/.bashrc" || -L "$HOME/.bashrc" ]]; then
+  echo "Removing existing ~/.bashrc to allow stow-managed version..."
+  rm -f "$HOME/.bashrc"
 fi
 
 # --------------------------------------------------
@@ -79,8 +84,7 @@ if [[ "$STOW_EXIT_CODE" -ne 0 ]]; then
   echo "=================================================="
   echo " Stow reported conflicts."
   echo ""
-  echo "Resolve the reported files (move or delete them),"
-  echo "then re-run:"
+  echo "Resolve remaining conflicts, then re-run:"
   echo ""
   echo "  cd $DOTFILES_DIR"
   echo "  stow . -t ~"

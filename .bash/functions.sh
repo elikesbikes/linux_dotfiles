@@ -128,6 +128,8 @@ gcap() {
         return 1
     fi
 }
+
+#######
 gacp_tutorials() {
   # 1. Save current directory and go to the target directory
   # 'pushd' saves your current location to a stack and then cds

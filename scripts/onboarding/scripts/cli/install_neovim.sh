@@ -1,66 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_NAME="$(basename "$0")"
+SCRIPT_NAME="install_neovim.sh"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
+LOG_FILE="$LOG_DIR/install_neovim.log"
+
 mkdir -p "$LOG_DIR"
-exec > >(tee -a "$LOG_FILE") 2>&1
 
-echo "=================================================="
-echo "[$SCRIPT_NAME] Starting at: $(date)"
-echo "Log: $LOG_FILE"
-echo "=================================================="
+ts() { date +"%a %b %d %I:%M:%S %p %Z %Y"; }
 
-# Standardized source: official Neovim release tarball
-# Default channel/tag: "stable"
-NEOVIM_TAG="${NEOVIM_TAG:-stable}"
-NEOVIM_URL="https://github.com/neovim/neovim/releases/download/${NEOVIM_TAG}/nvim-linux64.tar.gz"
+log() {
+  echo "$1" | tee -a "$LOG_FILE"
+}
 
-INSTALL_ROOT="/opt/neovim"
-INSTALL_DIR="${INSTALL_ROOT}/nvim-linux64"
-SYMLINK="/usr/local/bin/nvim"
+run() {
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then
+    log "[DRY-RUN] $*"
+  else
+    eval "$@" 2>&1 | tee -a "$LOG_FILE"
+  fi
+}
 
-echo "Neovim tag: ${NEOVIM_TAG}"
-echo "Download: ${NEOVIM_URL}"
-echo "Install dir: ${INSTALL_DIR}"
-echo "Symlink: ${SYMLINK}"
+log "=================================================="
+log "[$SCRIPT_NAME] Starting at: $(ts)"
+log "Log: $LOG_FILE"
+log "=================================================="
 
-echo "Ensuring dependencies..."
-sudo apt-get update
-sudo apt-get install -y curl tar
-
-# If already installed via our managed path, show version and optionally refresh
-if [ -x "${INSTALL_DIR}/bin/nvim" ]; then
-  echo "Neovim appears installed at ${INSTALL_DIR}/bin/nvim"
-  "${INSTALL_DIR}/bin/nvim" --version | head -n 2 || true
-  echo "Refreshing installation (reinstall) to ensure standardized source is current..."
+if command -v nvim >/dev/null 2>&1; then
+  log "Neovim already installed:"
+  run "nvim --version | head -n 2"
+  log "Nothing to do."
+  exit 0
 fi
 
-TMP_DIR="$(mktemp -d)"
-cleanup() { rm -rf "$TMP_DIR"; }
-trap cleanup EXIT
+log "Installing Neovim via official PPA (stable)..."
 
-echo "Downloading Neovim..."
-curl -fL "$NEOVIM_URL" -o "${TMP_DIR}/nvim-linux64.tar.gz"
+# Core should already have run apt update
+# We only add repo + install here
 
-echo "Extracting..."
-tar -xzf "${TMP_DIR}/nvim-linux64.tar.gz" -C "$TMP_DIR"
+run "sudo apt-get install -y software-properties-common"
 
-echo "Installing to ${INSTALL_ROOT}..."
-sudo mkdir -p "$INSTALL_ROOT"
-sudo rm -rf "$INSTALL_DIR"
-sudo mv "${TMP_DIR}/nvim-linux64" "$INSTALL_DIR"
+# Add Neovim stable PPA if not already present
+if ! grep -R \"neovim-ppa/stable\" /etc/apt/sources.list.d >/dev/null 2>&1; then
+  run "sudo add-apt-repository -y ppa:neovim-ppa/stable"
+fi
 
-echo "Updating symlink ${SYMLINK}..."
-sudo ln -sf "${INSTALL_DIR}/bin/nvim" "$SYMLINK"
+run "sudo apt-get update"
+run "sudo apt-get install -y neovim"
 
-echo "Neovim installed:"
-command -v nvim
-nvim --version | head -n 2 || true
+if command -v nvim >/dev/null 2>&1; then
+  log "SUCCESS: Neovim installed:"
+  run "nvim --version | head -n 2"
+else
+  log "FAIL: Neovim not found after install"
+  exit 1
+fi
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
 touch "$STATE_DIR/<category>"
 
-echo "Done."
-
+log "=================================================="
+log "[$SCRIPT_NAME] Completed at: $(ts)"
+log "=================================================="

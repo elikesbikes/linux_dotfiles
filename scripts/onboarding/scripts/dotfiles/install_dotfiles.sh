@@ -89,7 +89,7 @@ if [[ "$STOW_EXIT_CODE" -ne 0 ]]; then
 fi
 
 # --------------------------------------------------
-# Launch onboarding master script
+# Launch onboarding master script (from HOME)
 # --------------------------------------------------
 if [[ ! -f "$MASTER_SCRIPT" ]]; then
   echo "ERROR: master.sh not found at:"
@@ -106,4 +106,5 @@ echo " Launching onboarding master script"
 echo "=================================================="
 echo ""
 
+cd "$HOME"
 exec "$MASTER_SCRIPT"

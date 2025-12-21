@@ -36,13 +36,19 @@ confirm() {
 }
 
 # ------------------------------------------------------------
-# Install category
+# Install category (state-aware)
 # ------------------------------------------------------------
 install_category() {
   local category="$1"
   local dir="$SCRIPTS_DIR/$category"
+  local marker="$STATE_DIR/$category"
 
   [[ ! -d "$dir" ]] && return
+
+  if [[ -f "$marker" ]]; then
+    echo "SKIP: $category already installed"
+    return
+  fi
 
   header "Installing: $category"
 
@@ -61,12 +67,12 @@ install_category() {
   done
 
   if [[ "$DRY_RUN" -eq 0 ]]; then
-    touch "$STATE_DIR/$category"
+    touch "$marker"
   fi
 }
 
 # ------------------------------------------------------------
-# Verify (state-aware)
+# Verify
 # ------------------------------------------------------------
 verify_installed() {
   header "Verification"
@@ -101,29 +107,25 @@ verify_installed() {
 uninstall_menu() {
   header "Uninstall components"
 
-  local choices
-  choices=$(gum choose --no-limit cli desktop security back)
+  CHOICE=$(gum choose cli desktop security back)
+  [[ "$CHOICE" == "back" ]] && return
 
-  for choice in $choices; do
-    [[ "$choice" == "back" ]] && return
+  script="$SCRIPTS_DIR/cleanup/cleanup_${CHOICE}.sh"
+  [[ ! -f "$script" ]] && return
 
-    script="$SCRIPTS_DIR/cleanup/cleanup_${choice}.sh"
-    [[ ! -f "$script" ]] && continue
+  chmod +x "$script"
 
-    chmod +x "$script"
+  if confirm "Uninstall $CHOICE components?"; then
+    echo ""
+    echo "→ Uninstalling $CHOICE"
 
-    if confirm "Uninstall $choice components?"; then
-      echo ""
-      echo "→ Uninstalling $choice"
-
-      if [[ "$DRY_RUN" -eq 1 ]]; then
-        echo "[DRY-RUN] $script"
-      else
-        "$script"
-        rm -f "$STATE_DIR/$choice"
-      fi
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      echo "[DRY-RUN] $script"
+    else
+      "$script"
+      rm -f "$STATE_DIR/$CHOICE"
     fi
-  done
+  fi
 }
 
 # ------------------------------------------------------------
@@ -142,7 +144,10 @@ while true; do
     "Install components")
       COMPONENTS=$(gum choose --no-limit core cli desktop security)
 
-      [[ -z "$COMPONENTS" ]] && continue
+      if [[ -z "$COMPONENTS" ]]; then
+        echo "Nothing selected."
+        continue
+      fi
 
       if confirm "Install selected components?"; then
         for component in $COMPONENTS; do

@@ -3,167 +3,162 @@ set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 SCRIPTS_DIR="$BASE_DIR/scripts"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
+LOG_DIR="$STATE_DIR/logs"
+INSTALLED_DIR="$STATE_DIR/installed"
 
-mkdir -p "$STATE_DIR"
+mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 
-# ------------------------------------------------------------
-# Dry-run support
-# ------------------------------------------------------------
-DRY_RUN=0
-if [[ "${1:-}" == "--dry-run" ]]; then
-  DRY_RUN=1
-fi
+# --------------------------------------------------
+# Utilities
+# --------------------------------------------------
+ts() { date +"%a %b %d %I:%M:%S %p %Z %Y"; }
 
-# ------------------------------------------------------------
-# Ensure gum is installed
-# ------------------------------------------------------------
-if ! command -v gum >/dev/null 2>&1; then
-  echo "Installing gum..."
+log() {
+  echo "$1"
+}
+
+run_script() {
+  local script="$1"
+  chmod +x "$script"
+  "$script"
+}
+
+# --------------------------------------------------
+# Ensure gum (Charm repo, Omakub-style)
+# --------------------------------------------------
+ensure_gum() {
+  if command -v gum >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "Installing gum (Charm repo)..."
+
+  sudo apt-get update
+  sudo apt-get install -y curl ca-certificates gnupg
+
+  sudo install -d -m 0755 /etc/apt/keyrings
+
+  if [[ ! -f /etc/apt/keyrings/charm.gpg ]]; then
+    curl -fsSL https://repo.charm.sh/apt/gpg.key \
+      | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+  fi
+
+  if [[ ! -f /etc/apt/sources.list.d/charm.list ]]; then
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" \
+      | sudo tee /etc/apt/sources.list.d/charm.list > /dev/null
+  fi
+
   sudo apt-get update
   sudo apt-get install -y gum
-fi
-
-# ------------------------------------------------------------
-# UI helpers
-# ------------------------------------------------------------
-header() {
-  gum style --bold --foreground 212 --border double --padding "1 2" "$1"
 }
 
-confirm() {
-  gum confirm "$1"
-}
-
-# ------------------------------------------------------------
-# Install category (state-aware)
-# ------------------------------------------------------------
-install_category() {
+# --------------------------------------------------
+# Category execution
+# --------------------------------------------------
+run_category() {
   local category="$1"
   local dir="$SCRIPTS_DIR/$category"
-  local marker="$STATE_DIR/$category"
 
-  [[ ! -d "$dir" ]] && return
+  [[ -d "$dir" ]] || return 0
 
-  if [[ -f "$marker" ]]; then
-    echo "SKIP: $category already installed"
-    return
-  fi
-
-  header "Installing: $category"
+  gum style --border normal --padding "1 2" "Installing: $category"
 
   for script in "$dir"/install_*.sh; do
-    [[ -e "$script" ]] || continue
-    chmod +x "$script"
-
-    echo ""
+    [[ -f "$script" ]] || continue
     echo "→ Running $(basename "$script")"
-
-    if [[ "$DRY_RUN" -eq 1 ]]; then
-      echo "[DRY-RUN] $script"
-    else
-      "$script"
-    fi
+    run_script "$script"
   done
 
-  if [[ "$DRY_RUN" -eq 0 ]]; then
-    touch "$marker"
-  fi
+  touch "$INSTALLED_DIR/$category"
 }
 
-# ------------------------------------------------------------
-# Verify
-# ------------------------------------------------------------
-verify_installed() {
-  header "Verification"
+verify_category() {
+  local category="$1"
+  local dir="$SCRIPTS_DIR/$category"
 
-  for script in "$SCRIPTS_DIR/verify"/verify_*.sh; do
-    [[ -e "$script" ]] || continue
+  gum style --border normal --padding "1 2" "VERIFY: $category"
 
-    category="$(basename "$script" | sed 's/^verify_//; s/\.sh$//')"
-    marker="$STATE_DIR/$category"
-
-    if [[ ! -f "$marker" ]]; then
-      echo "SKIP: $category (not installed)"
-      continue
-    fi
-
-    chmod +x "$script"
-
-    echo ""
-    echo "→ Verifying $category"
-
-    if [[ "$DRY_RUN" -eq 1 ]]; then
-      echo "[DRY-RUN] $script"
-    else
-      "$script"
-    fi
+  for script in "$dir"/verify_*.sh; do
+    [[ -f "$script" ]] || continue
+    run_script "$script"
   done
 }
 
-# ------------------------------------------------------------
-# Uninstall
-# ------------------------------------------------------------
+uninstall_category() {
+  local category="$1"
+  local dir="$SCRIPTS_DIR/$category"
+
+  gum style --border normal --padding "1 2" "UNINSTALL: $category"
+
+  for script in "$dir"/uninstall_*.sh; do
+    [[ -f "$script" ]] || continue
+    run_script "$script"
+  done
+
+  rm -f "$INSTALLED_DIR/$category"
+}
+
+# --------------------------------------------------
+# Menus
+# --------------------------------------------------
+install_menu() {
+  local choices
+  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
+
+  [[ -z "$choices" ]] && return
+
+  for choice in $choices; do
+    [[ "$choice" == "back" ]] && return
+    run_category "$choice"
+  done
+}
+
+verify_menu() {
+  local choices
+  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
+
+  [[ -z "$choices" ]] && return
+
+  for choice in $choices; do
+    [[ "$choice" == "back" ]] && return
+    verify_category "$choice"
+  done
+}
+
 uninstall_menu() {
-  header "Uninstall components"
+  local choices
+  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
 
-  CHOICE=$(gum choose cli desktop security back)
-  [[ "$CHOICE" == "back" ]] && return
+  [[ -z "$choices" ]] && return
 
-  script="$SCRIPTS_DIR/cleanup/cleanup_${CHOICE}.sh"
-  [[ ! -f "$script" ]] && return
-
-  chmod +x "$script"
-
-  if confirm "Uninstall $CHOICE components?"; then
-    echo ""
-    echo "→ Uninstalling $CHOICE"
-
-    if [[ "$DRY_RUN" -eq 1 ]]; then
-      echo "[DRY-RUN] $script"
-    else
-      "$script"
-      rm -f "$STATE_DIR/$CHOICE"
-    fi
-  fi
+  for choice in $choices; do
+    [[ "$choice" == "back" ]] && return
+    uninstall_category "$choice"
+  done
 }
 
-# ------------------------------------------------------------
+# --------------------------------------------------
 # Main menu
-# ------------------------------------------------------------
-while true; do
-  header "Linux Dotfiles Onboarding"
+# --------------------------------------------------
+main_menu() {
+  while true; do
+    gum style --border double --padding "1 4" "Linux Dotfiles Onboarding"
 
-  ACTION=$(gum choose \
-    "Install components" \
-    "Verify installation" \
-    "Uninstall components" \
-    "Exit")
+    choice=$(printf "Install components\nVerify system\nUninstall components\nExit\n" \
+      | gum choose)
 
-  case "$ACTION" in
-    "Install components")
-      COMPONENTS=$(gum choose --no-limit core cli desktop security)
+    case "$choice" in
+      "Install components") install_menu ;;
+      "Verify system") verify_menu ;;
+      "Uninstall components") uninstall_menu ;;
+      "Exit") exit 0 ;;
+    esac
+  done
+}
 
-      if [[ -z "$COMPONENTS" ]]; then
-        echo "Nothing selected."
-        continue
-      fi
-
-      if confirm "Install selected components?"; then
-        for component in $COMPONENTS; do
-          install_category "$component"
-        done
-      fi
-      ;;
-    "Verify installation")
-      verify_installed
-      ;;
-    "Uninstall components")
-      uninstall_menu
-      ;;
-    "Exit")
-      echo "Goodbye 👋"
-      exit 0
-      ;;
-  esac
-done
+# --------------------------------------------------
+# Entry
+# --------------------------------------------------
+ensure_gum
+main_menu

@@ -1,41 +1,18 @@
-# Desktop Category
+# Desktop
 
-## Purpose
-Graphical applications for daily use.
+Desktop installs GUI applications.
 
-## Structure
-This category is split by install mechanism:
+## Sources
+- Flatpak (preferred)
+- Apt (only when Flatpak is unsuitable)
 
-### Flatpak apps
-Installed and updated via Flathub.
-
-### Native apps
-Installed via apt due to system or hardware access needs.
-
-## Flatpak apps
-- Clapgrep
+## Examples
 - Cryptomator
-- Resources
-- Obsidian
-- SyncThingy
-- RustDesk
-- ProtonPlus
-- Yubico Authenticator
-- Warehouse
-- Stimulator
-- RetroArch
-- BlueBubbles
-
-## Native apps
-- Timeshift
-- Yubikey Manager (Qt)
 - Flameshot
-- Caffeine
-- Kitty
-
-## Scripts
-- install_desktop_flatpak_apps.sh
-- install_desktop_native_apps.sh
+- Resources
+- Todoist
+- Yubico Authenticator
+- Timeshift (system-level)
 
 ## Notes
-No configuration is applied; installs only.
+- Desktop installs are isolated from CLI tooling

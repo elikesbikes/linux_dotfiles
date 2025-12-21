@@ -144,25 +144,68 @@ gacp_tutorials() {
   popd > /dev/null
 }
 gacp_dotfiles() {
-  # 1. Save current directory and go to the target directory
-  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null
+  local TAG=""
+  local MESSAGE=""
 
-  # 2. Run the command with all provided arguments
-  gacp "$@"
+  # --- Argument parsing ---
+  if [ "$1" = "--tag" ]; then
+    if [ -z "$2" ] || [ -z "$3" ]; then
+      echo "Error: --tag requires a tag name and a commit message."
+      echo "Usage:"
+      echo "  gacp_dotfiles \"commit message\""
+      echo "  gacp_dotfiles --tag v1.0.0 \"commit message\""
+      return 1
+    fi
+    TAG="$2"
+    shift 2
+  fi
 
-  # 3. Return to the original directory
+  MESSAGE="$1"
+
+  if [ -z "$MESSAGE" ]; then
+    echo "Error: You must provide a commit message."
+    echo "Usage:"
+    echo "  gacp_dotfiles \"commit message\""
+    echo "  gacp_dotfiles --tag v1.0.0 \"commit message\""
+    return 1
+  fi
+
+  # --- Enter dotfiles repo ---
+  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null || return 1
+
+  # --- Commit & push ---
+  gacp "$MESSAGE"
+  if [ $? -ne 0 ]; then
+    echo "Error: gacp failed. Aborting."
+    popd > /dev/null
+    return 1
+  fi
+
+  # --- Optional tagging ---
+  if [ -n "$TAG" ]; then
+    echo "--> Creating annotated tag: $TAG"
+    git tag -a "$TAG" -m "$MESSAGE"
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to create tag '$TAG'."
+      popd > /dev/null
+      return 1
+    fi
+
+    echo "--> Pushing tag: $TAG"
+    git push origin "$TAG"
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to push tag '$TAG'."
+      popd > /dev/null
+      return 1
+    fi
+
+    echo "SUCCESS: Tag '$TAG' created and pushed."
+  fi
+
+  # --- Restore directory ---
   popd > /dev/null
 }
-gcpp_dotfiles() {
-  # 1. Save current directory and go to the target directory
-  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null
 
-  # 2. Run the command with all provided arguments
-  gcpp "$@"
-
-  # 3. Return to the original directory
-  popd > /dev/null
-}
 
 # Function to perform Git Add, Commit, Pull, and then Push.
 # This is the "safe push" function.

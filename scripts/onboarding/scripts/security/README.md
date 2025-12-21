@@ -1,22 +1,12 @@
-# Security Category
+# Security
 
-## Purpose
-Privacy, authentication, and encryption tools.
+Security installs privacy and authentication tooling.
 
-## What gets installed
-- Proton VPN (native)
-- Proton Bridge (native)
-- Proton Mail Desktop (official .deb)
-- Proton Pass (Flatpak, required)
-- Proton Authenticator (native)
-
-## Why hybrid installs
-- VPN and Bridge require native networking
-- Pass is best maintained via Flatpak
-- Mail desktop is only officially distributed as a .deb
-
-## Scripts
-- install_proton_suite.sh
+## Includes
+- Proton VPN (APT with signed-by keyring)
+- Proton Bridge
+- Proton Pass (Flatpak)
 
 ## Notes
-Reboot or logout may be required for tray integrations.
+- Datto repositories are intentionally NOT managed here
+- Repositories are added using modern GPG keyring practices

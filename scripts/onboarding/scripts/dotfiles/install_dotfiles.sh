@@ -6,7 +6,7 @@ DOTFILES_REPO="https://github.com/elikesbikes/linux_dotfiles"
 MASTER_SCRIPT="$DOTFILES_DIR/scripts/onboarding/master.sh"
 
 echo "=================================================="
-echo " Linux Dotfiles Bootstrap (FORCE OVERWRITE)"
+echo " Linux Dotfiles Bootstrap (FORCE OVERWRITE + STOW)"
 echo "=================================================="
 echo ""
 echo "Target directory:"
@@ -14,7 +14,7 @@ echo "  $DOTFILES_DIR"
 echo ""
 
 # --------------------------------------------------
-# Ensure git is installed
+# Ensure required packages
 # --------------------------------------------------
 if ! command -v git >/dev/null 2>&1; then
   echo "Installing git..."
@@ -22,8 +22,14 @@ if ! command -v git >/dev/null 2>&1; then
   sudo apt-get install -y git
 fi
 
+if ! command -v stow >/dev/null 2>&1; then
+  echo "Installing stow..."
+  sudo apt-get update
+  sudo apt-get install -y stow
+fi
+
 # --------------------------------------------------
-# Remove existing repo (INTENTIONAL)
+# Force remove existing repo
 # --------------------------------------------------
 if [[ -d "$DOTFILES_DIR" ]]; then
   echo "Existing dotfiles directory found."
@@ -39,7 +45,46 @@ mkdir -p "$(dirname "$DOTFILES_DIR")"
 git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 
 # --------------------------------------------------
-# Launch master onboarding script
+# Preemptively resolve known stow conflicts (Omakub)
+# --------------------------------------------------
+OMAKUB_BASH_DIR="$HOME/.local/share/omakub/defaults/bash"
+
+if [[ -d "$OMAKUB_BASH_DIR" ]]; then
+  echo ""
+  echo "Detected Omakub bash defaults:"
+  echo "  $OMAKUB_BASH_DIR"
+  echo "Removing to avoid stow conflicts..."
+  rm -rf "$OMAKUB_BASH_DIR"
+fi
+
+# --------------------------------------------------
+# Run stow
+# --------------------------------------------------
+echo ""
+echo "Running stow..."
+cd "$DOTFILES_DIR"
+
+set +e
+stow . -t ~
+STOW_EXIT_CODE=$?
+set -e
+
+if [[ "$STOW_EXIT_CODE" -ne 0 ]]; then
+  echo ""
+  echo "=================================================="
+  echo " Stow reported conflicts."
+  echo ""
+  echo "Resolve the reported files (move or delete them),"
+  echo "then re-run:"
+  echo ""
+  echo "  cd $DOTFILES_DIR"
+  echo "  stow . -t ~"
+  echo "=================================================="
+  exit 1
+fi
+
+# --------------------------------------------------
+# Launch onboarding master script
 # --------------------------------------------------
 if [[ ! -f "$MASTER_SCRIPT" ]]; then
   echo "ERROR: master.sh not found at:"
@@ -51,6 +96,7 @@ chmod +x "$MASTER_SCRIPT"
 
 echo ""
 echo "=================================================="
+echo " Dotfiles deployed successfully"
 echo " Launching onboarding master script"
 echo "=================================================="
 echo ""

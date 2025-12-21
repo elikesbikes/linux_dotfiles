@@ -1,39 +1,51 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_NAME="$(basename "$0")"
+SCRIPT_NAME="install_neovim.sh"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
+LOG_FILE="$LOG_DIR/install_neovim.log"
+
 mkdir -p "$LOG_DIR"
-exec > >(tee -a "$LOG_FILE") 2>&1
 
-echo "=================================================="
-echo "[$SCRIPT_NAME] Starting at: $(date)"
-echo "Log: $LOG_FILE"
-echo "=================================================="
+ts() { date +"%a %b %d %I:%M:%S %p %Z %Y"; }
 
-echo "Standardized source: official Starship installer (installs to /usr/local/bin)."
+log() {
+  echo "$1" | tee -a "$LOG_FILE"
+}
 
-echo "Ensuring curl is present..."
-sudo apt-get update
-sudo apt-get install -y curl
+run() {
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then
+    log "[DRY-RUN] $*"
+  else
+    eval "$@" 2>&1 | tee -a "$LOG_FILE"
+  fi
+}
 
-if command -v starship >/dev/null 2>&1; then
-  echo "starship already installed: $(command -v starship)"
-  starship --version || true
-  echo "Reinstalling via official installer to standardize location (safe overwrite)..."
+log "=================================================="
+log "[$SCRIPT_NAME] Starting at: $(ts)"
+log "Log: $LOG_FILE"
+log "=================================================="
+
+if command -v nvim >/dev/null 2>&1; then
+  log "Neovim already installed:"
+  run "nvim --version | head -n 2"
+  log "Nothing to do."
+  exit 0
 fi
 
-# -y: no prompts
-# --bin-dir: enforce /usr/local/bin
-curl -fsSL https://starship.rs/install.sh | sh -s -- -y --bin-dir /usr/local/bin
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
-mkdir -p "$STATE_DIR"
-touch "$STATE_DIR/<category>"
+log "Installing Neovim (Ubuntu package)..."
 
+# Install via apt
+run "sudo apt-get install -y neovim"
 
-echo "starship installed:"
-command -v starship
+if command -v nvim >/dev/null 2>&1; then
+  log "SUCCESS: Neovim installed:"
+  run "nvim --version | head -n 2"
+else
+  log "FAIL: Neovim not found after install"
+  exit 1
+fi
 
-
-echo "Done."
+log "=================================================="
+log "[$SCRIPT_NAME] Completed at: $(ts)"
+log "=================================================="

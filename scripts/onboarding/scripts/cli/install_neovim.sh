@@ -33,19 +33,9 @@ if command -v nvim >/dev/null 2>&1; then
   exit 0
 fi
 
-log "Installing Neovim via official PPA (stable)..."
+log "Installing Neovim (Ubuntu package)..."
 
-# Core should already have run apt update
-# We only add repo + install here
-
-run "sudo apt-get install -y software-properties-common"
-
-# Add Neovim stable PPA if not already present
-if ! grep -R \"neovim-ppa/stable\" /etc/apt/sources.list.d >/dev/null 2>&1; then
-  run "sudo add-apt-repository -y ppa:neovim-ppa/stable"
-fi
-
-run "sudo apt-get update"
+# Install via apt
 run "sudo apt-get install -y neovim"
 
 if command -v nvim >/dev/null 2>&1; then
@@ -58,7 +48,6 @@ fi
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
 touch "$STATE_DIR/<category>"
-
 log "=================================================="
 log "[$SCRIPT_NAME] Completed at: $(ts)"
 log "=================================================="

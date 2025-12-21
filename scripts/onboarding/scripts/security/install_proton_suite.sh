@@ -36,6 +36,9 @@ flatpak install -y flathub com.proton.Mail
 # 5. Install Proton Pass (via Flatpak)
 echo "--- Installing Proton Pass (Flatpak) ---"
 flatpak install -y flathub me.proton.Pass
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
+mkdir -p "$STATE_DIR"
+touch "$STATE_DIR/<category>"
 
 echo "=== Proton Suite Installation Complete ==="
 echo "Note: You may need to restart your computer for the VPN system tray icons to appear correctly."

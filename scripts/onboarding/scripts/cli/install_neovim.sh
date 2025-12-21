@@ -26,24 +26,38 @@ log "[$SCRIPT_NAME] Starting at: $(ts)"
 log "Log: $LOG_FILE"
 log "=================================================="
 
+# --------------------------------------------------
+# Check existing install
+# --------------------------------------------------
 if command -v nvim >/dev/null 2>&1; then
   log "Neovim already installed:"
   run "nvim --version | head -n 2"
-  log "Nothing to do."
-  exit 0
+else
+  log "Installing Neovim via Ubuntu package (Omakub-style)..."
+
+  # Core should already have run apt update
+  run "sudo apt-get install -y neovim"
+
+  if command -v nvim >/dev/null 2>&1; then
+    log "SUCCESS: Neovim installed:"
+    run "nvim --version | head -n 2"
+  else
+    log "FAIL: Neovim not found after install"
+    exit 1
+  fi
 fi
 
-log "Installing Neovim (Ubuntu package)..."
+# --------------------------------------------------
+# Cleanup: remove tree-sitter-cli
+# --------------------------------------------------
+log "Removing tree-sitter-cli (if present)..."
 
-# Install via apt
-run "sudo apt-get install -y neovim"
-
-if command -v nvim >/dev/null 2>&1; then
-  log "SUCCESS: Neovim installed:"
-  run "nvim --version | head -n 2"
+if dpkg -s tree-sitter-cli >/dev/null 2>&1; then
+  run "sudo apt-get remove -y tree-sitter-cli"
+  run "sudo apt-get autoremove -y"
+  log "tree-sitter-cli removed."
 else
-  log "FAIL: Neovim not found after install"
-  exit 1
+  log "tree-sitter-cli not installed. Nothing to remove."
 fi
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"

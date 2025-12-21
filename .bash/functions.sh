@@ -145,7 +145,7 @@ gacp_tutorials() {
 }
 gacp_dotfiles() {
   # 1. Save current directory and go to the target directory
-  pushd /home/ecloaiza/DevOps/GitHub/linux_dotfiles > /dev/null
+  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null
 
   # 2. Run the command with all provided arguments
   gacp "$@"
@@ -155,7 +155,7 @@ gacp_dotfiles() {
 }
 gcpp_dotfiles() {
   # 1. Save current directory and go to the target directory
-  pushd /home/ecloaiza/DevOps/GitHub/linux_dotfiles > /dev/null
+  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null
 
   # 2. Run the command with all provided arguments
   gcpp "$@"

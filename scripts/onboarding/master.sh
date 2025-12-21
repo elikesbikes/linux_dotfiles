@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 SCRIPTS_DIR="$BASE_DIR/scripts"
@@ -13,52 +13,44 @@ mkdir -p "$STATE_DIR"
 DRY_RUN=0
 if [[ "${1:-}" == "--dry-run" ]]; then
   DRY_RUN=1
-  echo "[DRY-RUN MODE ENABLED]"
 fi
 
 # ------------------------------------------------------------
-# Ensure fzf is installed
+# Ensure gum is installed (Omakub-style)
 # ------------------------------------------------------------
-if ! command -v fzf >/dev/null 2>&1; then
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "[DRY-RUN] Would install fzf via apt"
-  else
-    echo "fzf not found. Installing..."
-    sudo apt update
-    sudo apt install -y fzf
-  fi
+if ! command -v gum >/dev/null 2>&1; then
+  echo "Installing gum..."
+  sudo apt-get update
+  sudo apt-get install -y gum
 fi
 
 # ------------------------------------------------------------
-# Menu definitions
+# UI helpers
 # ------------------------------------------------------------
-declare -A DESCRIPTIONS=(
-  [core]="Install system foundations (Flatpak, SSH)"
-  [cli]="Install CLI & developer tools"
-  [desktop]="Install desktop GUI applications"
-  [security]="Install security & privacy tools (Proton, YubiKey)"
-  [verify]="Verify installed components (installed categories only)"
-  [uninstall]="Uninstall onboarding-installed components (selective)"
-  [exit]="Exit installer without making changes"
-)
+header() {
+  gum style --bold --foreground 212 --border double --padding "1 2" "$1"
+}
 
-MAIN_CATEGORIES=(core cli desktop security verify uninstall exit)
-UNINSTALL_CATEGORIES=(cli desktop security)
+confirm() {
+  gum confirm "$1"
+}
+
+spinner() {
+  local title="$1"
+  shift
+  gum spin --spinner dot --title "$title" -- "$@"
+}
 
 # ------------------------------------------------------------
 # Install category
 # ------------------------------------------------------------
-run_install_category() {
+install_category() {
   local category="$1"
   local dir="$SCRIPTS_DIR/$category"
 
-  echo ""
-  echo "======================================"
-  echo " INSTALL: $category"
-  echo " ${DESCRIPTIONS[$category]}"
-  echo "======================================"
+  [[ ! -d "$dir" ]] && return
 
-  [[ ! -d "$dir" ]] && echo "Missing directory: $dir" && return
+  header "Installing: $category"
 
   for script in "$dir"/install_*.sh; do
     [[ -e "$script" ]] || continue
@@ -67,154 +59,104 @@ run_install_category() {
     if [[ "$DRY_RUN" -eq 1 ]]; then
       echo "[DRY-RUN] Would run: $script"
     else
-      "$script"
+      spinner "Running $(basename "$script")" "$script"
     fi
   done
 
-  # Mark category as installed (state)
   if [[ "$DRY_RUN" -eq 0 ]]; then
     touch "$STATE_DIR/$category"
-  else
-    echo "[DRY-RUN] Would mark category '$category' as installed"
   fi
 }
 
 # ------------------------------------------------------------
-# Verification (STATE-AWARE)
+# Verify (state-aware)
 # ------------------------------------------------------------
-run_verify() {
-  local verify_dir="$SCRIPTS_DIR/verify"
+verify_installed() {
+  header "Verification"
 
-  echo ""
-  echo "======================================"
-  echo " VERIFY (installed categories only)"
-  echo "======================================"
-
-  [[ ! -d "$verify_dir" ]] && echo "Missing verify directory: $verify_dir" && exit 1
-
-  for script in "$verify_dir"/verify_*.sh; do
+  for script in "$SCRIPTS_DIR/verify"/verify_*.sh; do
     [[ -e "$script" ]] || continue
 
     category="$(basename "$script" | sed 's/^verify_//; s/\.sh$//')"
     marker="$STATE_DIR/$category"
 
     if [[ ! -f "$marker" ]]; then
-      echo "SKIP: $category (not installed via onboarding)"
+      echo "SKIP: $category (not installed)"
       continue
     fi
 
     chmod +x "$script"
 
-    echo ""
-    echo "--------------------------------------"
-    echo " VERIFY: $category"
-    echo "--------------------------------------"
-
     if [[ "$DRY_RUN" -eq 1 ]]; then
       echo "[DRY-RUN] Would run: $script"
     else
-      "$script"
+      spinner "Verifying $category" "$script"
     fi
   done
 }
 
 # ------------------------------------------------------------
-# Selective Uninstall (with Back option)
+# Uninstall (selective)
 # ------------------------------------------------------------
-run_uninstall() {
-  local dir="$SCRIPTS_DIR/cleanup"
+uninstall_menu() {
+  header "Uninstall components"
 
-  [[ ! -d "$dir" ]] && echo "Missing directory: $dir" && exit 1
+  local choices
+  choices=$(gum choose --no-limit cli desktop security back)
 
-  while true; do
-    MENU_INPUT=""
-    for cat in "${UNINSTALL_CATEGORIES[@]}"; do
-      MENU_INPUT+="$cat | Uninstall $cat-installed components"$'\n'
-    done
-    MENU_INPUT+="back | Return to main menu"$'\n'
+  for choice in $choices; do
+    [[ "$choice" == "back" ]] && return
 
-    SELECTED=$(echo "$MENU_INPUT" | fzf \
-      --multi \
-      --bind="space:toggle,q:abort" \
-      --prompt="Select uninstall categories > " \
-      --header="SPACE select | ENTER confirm | q / ESC back" \
-      --height=40% \
-      --border \
-      --layout=reverse
-    )
+    script="$SCRIPTS_DIR/cleanup/cleanup_${choice}.sh"
+    [[ ! -f "$script" ]] && continue
 
-    [[ -z "$SELECTED" ]] && return
+    chmod +x "$script"
 
-    while IFS= read -r line; do
-      choice="$(echo "$line" | cut -d'|' -f1 | xargs)"
-
-      if [[ "$choice" == "back" ]]; then
-        return
-      fi
-
-      script="$dir/cleanup_${choice}.sh"
-
-      if [[ ! -f "$script" ]]; then
-        echo "Uninstall script not found: $script"
-        continue
-      fi
-
-      chmod +x "$script"
-
-      echo ""
-      echo "--------------------------------------"
-      echo " UNINSTALL: $choice"
-      echo "--------------------------------------"
-
+    if confirm "Uninstall $choice components?"; then
       if [[ "$DRY_RUN" -eq 1 ]]; then
         echo "[DRY-RUN] Would run: $script"
-        echo "[DRY-RUN] Would remove state marker: $STATE_DIR/$choice"
+        echo "[DRY-RUN] Would remove state: $choice"
       else
-        "$script"
+        spinner "Uninstalling $choice" "$script"
         rm -f "$STATE_DIR/$choice"
       fi
-    done <<< "$SELECTED"
+    fi
   done
 }
 
 # ------------------------------------------------------------
-# Main menu loop
+# Main menu (Omakub-style)
 # ------------------------------------------------------------
 while true; do
-  MENU_INPUT=""
-  for cat in "${MAIN_CATEGORIES[@]}"; do
-    MENU_INPUT+="$cat | ${DESCRIPTIONS[$cat]}"$'\n'
-  done
+  header "Linux Dotfiles Onboarding"
 
-  SELECTED=$(echo "$MENU_INPUT" | fzf \
-    --bind="q:abort" \
-    --prompt="Select action > " \
-    --header="ENTER select | / search | q / ESC exit" \
-    --height=40% \
-    --border \
-    --layout=reverse
-  )
+  ACTION=$(gum choose \
+    "Install components" \
+    "Verify installation" \
+    "Uninstall components" \
+    "Exit")
 
-  [[ -z "$SELECTED" ]] && echo "Exiting installer." && exit 0
+  case "$ACTION" in
+    "Install components")
+      COMPONENTS=$(gum choose --no-limit core cli desktop security)
 
-  choice="$(echo "$SELECTED" | cut -d'|' -f1 | xargs)"
+      [[ -z "$COMPONENTS" ]] && continue
 
-  case "$choice" in
-    core|cli|desktop|security)
-      run_install_category "$choice"
+      if confirm "Install selected components?"; then
+        for component in $COMPONENTS; do
+          install_category "$component"
+        done
+      fi
       ;;
-    verify)
-      run_verify
+    "Verify installation")
+      verify_installed
       ;;
-    uninstall)
-      run_uninstall
+    "Uninstall components")
+      uninstall_menu
       ;;
-    exit)
-      echo "Exiting installer."
+    "Exit")
+      echo "Goodbye 👋"
       exit 0
-      ;;
-    *)
-      echo "Unknown selection: $choice"
       ;;
   esac
 done

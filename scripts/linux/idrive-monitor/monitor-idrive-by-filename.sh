@@ -102,7 +102,7 @@ LAST_SUCCESS_EPOCH=""
 
 for f in "${ALL_LOGS[@]}"; do
   case "$f" in
-    *_Success_*)
+    *_Success_*|*_Success*_* )
       FILE_EPOCH="${f%%_*}"
       if [[ "$FILE_EPOCH" =~ ^[0-9]+$ ]]; then
         LAST_SUCCESS_LOG="$f"
@@ -172,6 +172,14 @@ SUMMARY="$(extract_summary_counts "$LOG_PATH")"
 FILES_BACKED_UP="${SUMMARY%%|*}"
 FILES_FAILED="${SUMMARY##*|}"
 
+#####################################
+# Success label (normal vs warnings)
+#####################################
+SUCCESS_LABEL="SUCCESS"
+if [[ "$LATEST_TODAY" == *"Success*"* ]]; then
+  SUCCESS_LABEL="SUCCESS (with warnings)"
+fi
+
 case "$LATEST_TODAY" in
   *_Running_*)
     if (( QUIET_RUNNING == 0 )); then
@@ -182,9 +190,9 @@ case "$LATEST_TODAY" in
     exit 0
     ;;
 
-  *_Success_*)
-    notify "IDrive Backup SUCCESS (${HOST})" \
-      "Backup completed successfully.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nFiles backed up : ${FILES_BACKED_UP}\nFiles failed    : ${FILES_FAILED}\n\nLog file:\n${LATEST_TODAY}" \
+  *_Success_*|*_Success*_* )
+    notify "IDrive Backup ${SUCCESS_LABEL} (${HOST})" \
+      "Backup completed.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nFiles backed up : ${FILES_BACKED_UP}\nFiles failed    : ${FILES_FAILED}\n\nLog file:\n${LATEST_TODAY}" \
       2
     ;;
 
@@ -194,9 +202,9 @@ case "$LATEST_TODAY" in
       3
     ;;
 
-  *_Canceled_*)
-    notify "IDrive Backup CANCELED (${HOST})" \
-      "Backup was canceled.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nFiles backed up : ${FILES_BACKED_UP}\nFiles failed    : ${FILES_FAILED}\n\nLog file:\n${LATEST_TODAY}" \
+  *_Canceled_*|*_Failure_*)
+    notify "IDrive Backup FAILED (${HOST})" \
+      "Backup failed or was canceled.\n\nStarted : ${START_TIME}\nFinished: ${FINISH_TIME}\n\nFiles backed up : ${FILES_BACKED_UP}\nFiles failed    : ${FILES_FAILED}\n\nLog file:\n${LATEST_TODAY}" \
       5
     ;;
 

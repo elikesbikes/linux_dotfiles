@@ -149,31 +149,31 @@ gacp_dotfiles() {
   local TAG=""
   local MESSAGE=""
 
-  # --- Argument parsing ---
+  # --- Parse arguments ---
   if [ "$1" = "--tag" ]; then
     if [ -z "$2" ] || [ -z "$3" ]; then
       echo "Error: --tag requires a tag name and a commit message."
       echo "Usage:"
       echo "  gacp_dotfiles \"commit message\""
-      echo "  gacp_dotfiles --tag v1.0.0 \"commit message\""
+      echo "  gacp_dotfiles --tag v1.0.1 \"commit message\""
       return 1
     fi
     TAG="$2"
-    shift 2
+    MESSAGE="$3"
+  else
+    MESSAGE="$1"
   fi
 
-  MESSAGE="$1"
-
   if [ -z "$MESSAGE" ]; then
-    echo "Error: You must provide a commit message."
-    echo "Usage:"
-    echo "  gacp_dotfiles \"commit message\""
-    echo "  gacp_dotfiles --tag v1.0.0 \"commit message\""
+    echo "Error: Commit message is required."
     return 1
   fi
 
-  # --- Enter dotfiles repo ---
-  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null || return 1
+  # --- Enter dotfiles repo (FAIL HARD if missing) ---
+  if ! pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null; then
+    echo "Error: dotfiles repo path not found."
+    return 1
+  fi
 
   # --- Commit & push ---
   gacp "$MESSAGE"
@@ -186,20 +186,18 @@ gacp_dotfiles() {
   # --- Optional tagging ---
   if [ -n "$TAG" ]; then
     echo "--> Creating annotated tag: $TAG"
-    git tag -a "$TAG" -m "$MESSAGE"
-    if [ $? -ne 0 ]; then
+    git tag -a "$TAG" -m "$MESSAGE" || {
       echo "Error: Failed to create tag '$TAG'."
       popd > /dev/null
       return 1
-    fi
+    }
 
     echo "--> Pushing tag: $TAG"
-    git push origin "$TAG"
-    if [ $? -ne 0 ]; then
+    git push origin "$TAG" || {
       echo "Error: Failed to push tag '$TAG'."
       popd > /dev/null
       return 1
-    fi
+    }
 
     echo "SUCCESS: Tag '$TAG' created and pushed."
   fi

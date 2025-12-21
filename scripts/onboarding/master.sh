@@ -16,7 +16,7 @@ if [[ "${1:-}" == "--dry-run" ]]; then
 fi
 
 # ------------------------------------------------------------
-# Ensure gum is installed (Omakub-style)
+# Ensure gum is installed
 # ------------------------------------------------------------
 if ! command -v gum >/dev/null 2>&1; then
   echo "Installing gum..."
@@ -35,12 +35,6 @@ confirm() {
   gum confirm "$1"
 }
 
-spinner() {
-  local title="$1"
-  shift
-  gum spin --spinner dot --title "$title" -- "$@"
-}
-
 # ------------------------------------------------------------
 # Install category
 # ------------------------------------------------------------
@@ -56,10 +50,13 @@ install_category() {
     [[ -e "$script" ]] || continue
     chmod +x "$script"
 
+    echo ""
+    echo "→ Running $(basename "$script")"
+
     if [[ "$DRY_RUN" -eq 1 ]]; then
-      echo "[DRY-RUN] Would run: $script"
+      echo "[DRY-RUN] $script"
     else
-      spinner "Running $(basename "$script")" "$script"
+      "$script"
     fi
   done
 
@@ -87,16 +84,19 @@ verify_installed() {
 
     chmod +x "$script"
 
+    echo ""
+    echo "→ Verifying $category"
+
     if [[ "$DRY_RUN" -eq 1 ]]; then
-      echo "[DRY-RUN] Would run: $script"
+      echo "[DRY-RUN] $script"
     else
-      spinner "Verifying $category" "$script"
+      "$script"
     fi
   done
 }
 
 # ------------------------------------------------------------
-# Uninstall (selective)
+# Uninstall
 # ------------------------------------------------------------
 uninstall_menu() {
   header "Uninstall components"
@@ -113,11 +113,13 @@ uninstall_menu() {
     chmod +x "$script"
 
     if confirm "Uninstall $choice components?"; then
+      echo ""
+      echo "→ Uninstalling $choice"
+
       if [[ "$DRY_RUN" -eq 1 ]]; then
-        echo "[DRY-RUN] Would run: $script"
-        echo "[DRY-RUN] Would remove state: $choice"
+        echo "[DRY-RUN] $script"
       else
-        spinner "Uninstalling $choice" "$script"
+        "$script"
         rm -f "$STATE_DIR/$choice"
       fi
     fi
@@ -125,7 +127,7 @@ uninstall_menu() {
 }
 
 # ------------------------------------------------------------
-# Main menu (Omakub-style)
+# Main menu
 # ------------------------------------------------------------
 while true; do
   header "Linux Dotfiles Onboarding"

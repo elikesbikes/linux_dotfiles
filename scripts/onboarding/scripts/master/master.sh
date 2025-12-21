@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCRIPTS_DIR="$BASE_DIR/scripts"
+# --------------------------------------------------
+# Path resolution (IMPORTANT)
+# master.sh lives in: scripts/onboarding/scripts/master/
+# Categories live in: scripts/onboarding/scripts/{cli,core,desktop,security}
+# --------------------------------------------------
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPTS_DIR="$BASE_DIR"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
 LOG_DIR="$STATE_DIR/logs"
 INSTALLED_DIR="$STATE_DIR/installed"
@@ -12,8 +17,6 @@ mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 # --------------------------------------------------
 # Utilities
 # --------------------------------------------------
-ts() { date +"%a %b %d %I:%M:%S %p %Z %Y"; }
-
 log() {
   echo "$1"
 }

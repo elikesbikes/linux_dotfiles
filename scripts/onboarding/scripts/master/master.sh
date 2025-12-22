@@ -2,39 +2,46 @@
 set -euo pipefail
 
 # --------------------------------------------------
-# Path resolution (IMPORTANT)
-# master.sh lives in: scripts/onboarding/scripts/master/
-# Categories live in: scripts/onboarding/scripts/{cli,core,desktop,security}
+# Paths
 # --------------------------------------------------
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS_DIR="$BASE_DIR"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
-LOG_DIR="$STATE_DIR/logs"
-INSTALLED_DIR="$STATE_DIR/installed"
-
-mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 
 # --------------------------------------------------
 # Utilities
 # --------------------------------------------------
-log() {
-  echo "$1"
+clear_screen() {
+  clear
 }
 
 run_script() {
   local script="$1"
+  [[ -f "$script" ]] || return 0
   chmod +x "$script"
   "$script"
 }
 
+warn_no_selection() {
+  clear_screen
+
+  gum style \
+    --border normal \
+    --padding "1 2" \
+    --foreground 196 \
+    "No selection made.\n\nUse SPACE to select items.\nPress ENTER to confirm."
+
+  gum confirm "Press Enter to continue" --affirmative "OK" >/dev/null
+
+  clear_screen
+}
+
 # --------------------------------------------------
-# Ensure gum (Charm repo, Omakub-style)
+# Ensure gum (Ubuntu/Debian)
 # --------------------------------------------------
 ensure_gum() {
-  if command -v gum >/dev/null 2>&1; then
-    return 0
-  fi
+  command -v gum >/dev/null 2>&1 && return
 
+  clear_screen
   echo "Installing gum (Charm repo)..."
 
   sudo apt-get update
@@ -65,6 +72,7 @@ run_category() {
 
   [[ -d "$dir" ]] || return 0
 
+  clear_screen
   gum style --border normal --padding "1 2" "Installing: $category"
 
   for script in "$dir"/install_*.sh; do
@@ -72,72 +80,116 @@ run_category() {
     echo "→ Running $(basename "$script")"
     run_script "$script"
   done
-
-  touch "$INSTALLED_DIR/$category"
 }
 
 verify_category() {
   local category="$1"
-  local dir="$SCRIPTS_DIR/$category"
+  local verify_script="$SCRIPTS_DIR/verify/verify_${category}.sh"
+  local fallback_dir="$SCRIPTS_DIR/$category"
 
-  gum style --border normal --padding "1 2" "VERIFY: $category"
+  clear_screen
+  set +e
+  set +o pipefail
 
-  for script in "$dir"/verify_*.sh; do
-    [[ -f "$script" ]] || continue
-    run_script "$script"
-  done
+  local output
+  output=$(
+    {
+      echo "======================================"
+      echo " VERIFY: $category"
+      echo "======================================"
+      echo
+
+      if [[ -f "$verify_script" ]]; then
+        "$verify_script"
+      else
+        for script in "$fallback_dir"/verify_*.sh; do
+          [[ -f "$script" ]] || continue
+          "$script"
+        done
+      fi
+    } 2>&1
+  )
+
+  local status=$?
+
+  set -euo pipefail
+
+  printf "%s\n\nExit code: %s\n" "$output" "$status" | gum pager
+
+  clear_screen
 }
 
 uninstall_category() {
   local category="$1"
-  local dir="$SCRIPTS_DIR/$category"
+  local cleanup="$SCRIPTS_DIR/cleanup/cleanup_${category}.sh"
 
+  clear_screen
   gum style --border normal --padding "1 2" "UNINSTALL: $category"
 
-  for script in "$dir"/uninstall_*.sh; do
-    [[ -f "$script" ]] || continue
-    run_script "$script"
-  done
-
-  rm -f "$INSTALLED_DIR/$category"
+  if [[ -f "$cleanup" ]]; then
+    run_script "$cleanup"
+  else
+    echo "No uninstall script for $category"
+    gum confirm "Press Enter to continue" --affirmative "OK" >/dev/null
+  fi
 }
 
 # --------------------------------------------------
 # Menus
 # --------------------------------------------------
 install_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
+  while true; do
+    clear_screen
+    local choices
+    choices=$(printf "dotfiles\ncore\ncli\ndesktop\nextensions\nsecurity\nback" \
+      | gum choose --no-limit)
 
-  [[ -z "$choices" ]] && return
+    [[ "$choices" == *"back"* ]] && { clear_screen; return; }
+    [[ -z "$choices" ]] && { warn_no_selection; continue; }
 
-  for choice in $choices; do
-    [[ "$choice" == "back" ]] && return
-    run_category "$choice"
+    for choice in $choices; do
+      run_category "$choice"
+    done
+
+    clear_screen
+    return
   done
 }
 
 verify_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
+  while true; do
+    clear_screen
+    local choices
+    choices=$(printf "core\ncli\ndesktop\nextensions\nsecurity\nback" \
+      | gum choose --no-limit)
 
-  [[ -z "$choices" ]] && return
+    [[ "$choices" == *"back"* ]] && { clear_screen; return; }
+    [[ -z "$choices" ]] && { warn_no_selection; continue; }
 
-  for choice in $choices; do
-    [[ "$choice" == "back" ]] && return
-    verify_category "$choice"
+    for choice in $choices; do
+      verify_category "$choice"
+    done
+
+    return
   done
 }
 
 uninstall_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nback" | gum choose --no-limit)
+  while true; do
+    clear_screen
+    local choices
+    choices=$(printf "cli\ndesktop\nsecurity\nextensions\nback" \
+      | gum choose --no-limit)
 
-  [[ -z "$choices" ]] && return
+    [[ "$choices" == *"back"* ]] && { clear_screen; return; }
+    [[ -z "$choices" ]] && { warn_no_selection; continue; }
 
-  for choice in $choices; do
-    [[ "$choice" == "back" ]] && return
-    uninstall_category "$choice"
+    for choice in $choices; do
+      uninstall_category "$choice"
+    done
+
+    clear_screen
+    return
   done
 }
 
@@ -146,6 +198,7 @@ uninstall_menu() {
 # --------------------------------------------------
 main_menu() {
   while true; do
+    clear_screen
     gum style --border double --padding "1 4" "Linux Dotfiles Onboarding"
 
     choice=$(printf "Install components\nVerify system\nUninstall components\nExit\n" \
@@ -155,7 +208,7 @@ main_menu() {
       "Install components") install_menu ;;
       "Verify system") verify_menu ;;
       "Uninstall components") uninstall_menu ;;
-      "Exit") exit 0 ;;
+      "Exit") clear_screen; exit 0 ;;
     esac
   done
 }

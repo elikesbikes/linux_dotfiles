@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resolve script directory (works even if symlinked)
+# Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Backup root directory
-BACKUP_ROOT="${SCRIPT_DIR}/backups"
-mkdir -p "$BACKUP_ROOT"
-
-# Timestamp
-TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
-BACKUP_DIR="${BACKUP_ROOT}/gnome-keybindings-${TIMESTAMP}"
+# Fixed backup directory
+BACKUP_DIR="${SCRIPT_DIR}/backups/current"
 mkdir -p "$BACKUP_DIR"
 
 echo "Saving GNOME configuration backup to:"
 echo "  $BACKUP_DIR"
 echo
+
+# Clean previous backup contents
+rm -f "$BACKUP_DIR"/*
 
 # --------------------------------------------------
 # System / built-in keybindings
@@ -33,13 +31,13 @@ gsettings list-recursively org.gnome.mutter.keybindings \
   > "$BACKUP_DIR/mutter-keybindings.txt"
 
 # --------------------------------------------------
-# Custom keybindings (correct dconf path)
+# Custom keybindings (GNOME-correct)
 # --------------------------------------------------
 dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ \
   > "$BACKUP_DIR/custom-keybindings.dconf"
 
 # --------------------------------------------------
-# Dock configuration (Ubuntu Dock / Dash-to-Dock)
+# Dock configuration (Dash-to-Dock / Ubuntu Dock)
 # --------------------------------------------------
 dconf dump /org/gnome/shell/extensions/dash-to-dock/ \
   > "$BACKUP_DIR/dock-dash-to-dock.dconf"
@@ -51,5 +49,5 @@ dconf dump / > "$BACKUP_DIR/full-gnome-backup.conf"
 
 echo
 echo "Backup complete."
-echo "Files created:"
+echo "Files saved:"
 ls -1 "$BACKUP_DIR"

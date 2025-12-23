@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==================================================
-# GNOME Extensions Installer (Interactive & Safe)
+# GNOME Extensions Installer (INTERACTIVE + TTY SAFE)
 # ==================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,9 +20,9 @@ echo
 
 if ! command -v gnome-extensions >/dev/null 2>&1; then
   echo "GNOME Shell not detected."
-  echo "This system does not support GNOME extensions."
+  echo "Skipping GNOME extensions setup."
   echo
-  read -rp "Press Enter to return to menu..."
+  read -r -p "Press Enter to return to menu..." </dev/tty
   exit 0
 fi
 
@@ -30,20 +30,20 @@ if [[ ! -f "$CONF_FILE" ]]; then
   echo "ERROR: extensions.conf not found:"
   echo "  $CONF_FILE"
   echo
-  read -rp "Press Enter to return to menu..."
+  read -r -p "Press Enter to return to menu..." </dev/tty
   exit 1
 fi
 
-echo "Detected GNOME Shell:"
+echo "Detected:"
 gnome-shell --version
 echo
 
-echo "This script will:"
-echo " • Install missing extensions"
-echo " • Enable / disable extensions to match config"
-echo " • NOT reinstall extensions already in correct state"
+echo "This will reconcile GNOME extensions state:"
+echo " • Enable / disable installed extensions"
+echo " • Skip reinstall if already correct"
+echo " • Never hide output"
 echo
-read -rp "Continue? [Enter = yes | Ctrl+C = cancel] "
+read -r -p "Press Enter to continue (Ctrl+C to cancel)..." </dev/tty
 
 echo
 echo "--------------------------------------------------"
@@ -52,7 +52,7 @@ echo "--------------------------------------------------"
 echo
 
 # --------------------------------------------------
-# Helper functions
+# Helpers
 # --------------------------------------------------
 
 is_installed() {
@@ -77,45 +77,45 @@ while IFS=":" read -r EXT_ID DESIRED_STATE; do
 
   echo "→ $EXT_ID"
 
-  if is_installed "$EXT_ID"; then
-    echo "  status : installed"
-  else
+  if ! is_installed "$EXT_ID"; then
     echo "  status : NOT installed"
-    echo "  action : install required"
+    echo "  action : manual install required"
+    echo "  URL    : https://extensions.gnome.org"
     echo
-    echo "⚠️  Automatic installation of GNOME extensions"
-    echo "    is NOT yet implemented."
-    echo "    Install manually from:"
-    echo "    https://extensions.gnome.org/extension/"
-    echo
-    read -rp "Press Enter to continue to next extension..."
+    read -r -p "Press Enter to continue..." </dev/tty
     echo
     continue
   fi
 
-  if [[ "$DESIRED_STATE" == "enabled" ]]; then
-    if is_enabled "$EXT_ID"; then
-      echo "  state  : already enabled"
-      echo "  action : none"
-    else
-      echo "  state  : disabled"
-      echo "  action : enabling"
-      gnome-extensions enable "$EXT_ID"
-      echo "  result : enabled"
-    fi
-  fi
+  echo "  status : installed"
 
-  if [[ "$DESIRED_STATE" == "disabled" ]]; then
-    if is_disabled "$EXT_ID"; then
-      echo "  state  : already disabled"
-      echo "  action : none"
-    else
-      echo "  state  : enabled"
-      echo "  action : disabling"
-      gnome-extensions disable "$EXT_ID"
-      echo "  result : disabled"
-    fi
-  fi
+  case "$DESIRED_STATE" in
+    enabled)
+      if is_enabled "$EXT_ID"; then
+        echo "  state  : already enabled"
+        echo "  action : none"
+      else
+        echo "  state  : disabled"
+        echo "  action : enabling"
+        gnome-extensions enable "$EXT_ID"
+        echo "  result : enabled"
+      fi
+      ;;
+    disabled)
+      if is_disabled "$EXT_ID"; then
+        echo "  state  : already disabled"
+        echo "  action : none"
+      else
+        echo "  state  : enabled"
+        echo "  action : disabling"
+        gnome-extensions disable "$EXT_ID"
+        echo "  result : disabled"
+      fi
+      ;;
+    *)
+      echo "  WARNING: unknown desired state '$DESIRED_STATE'"
+      ;;
+  esac
 
   echo
 done < "$CONF_FILE"
@@ -128,7 +128,6 @@ echo "=================================================="
 echo " Extensions reconciliation complete"
 echo "=================================================="
 echo
-echo "If GNOME Shell was restarted or extensions"
-echo "behave unexpectedly, log out and back in."
+echo "If extensions misbehave, log out and log back in."
 echo
-read -rp "Press Enter to return to menu..."
+read -r -p "Press Enter to return to menu..." </dev/tty

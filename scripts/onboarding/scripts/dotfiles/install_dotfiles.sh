@@ -1,69 +1,72 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES_REPO="https://github.com/elikesbikes/linux_dotfiles"
-DOTFILES_DIR="$HOME/devops/github/linux_dotfiles"
-MASTER_SCRIPT="$DOTFILES_DIR/scripts/onboarding/scripts/master/master.sh"
+# ==================================================
+# Linux Dotfiles Bootstrap (FORCE OVERWRITE + STOW)
+# ==================================================
+
+# --------------------------------------------------
+# Hard safety rule:
+# Never operate from inside the repo we may delete
+# --------------------------------------------------
+cd "$HOME"
+
+TARGET_DIR="$HOME/devops/github/linux_dotfiles"
+REPO_URL="https://github.com/elikesbikes/linux_dotfiles"
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
+LOG_DIR="$STATE_DIR/logs"
+mkdir -p "$LOG_DIR"
+
+LOG_FILE="$LOG_DIR/install_dotfiles.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
 echo " Linux Dotfiles Bootstrap (FORCE OVERWRITE + STOW)"
 echo "=================================================="
 echo
 echo "Target directory:"
-echo "  $DOTFILES_DIR"
+echo "  $TARGET_DIR"
 echo
 
 # --------------------------------------------------
-# Always move to a safe directory first
+# Ensure required tools
 # --------------------------------------------------
-cd "$HOME"
+echo "Ensuring required tools..."
+sudo apt-get update -y
+sudo apt-get install -y git stow
 
 # --------------------------------------------------
-# Ensure required base tools
+# Remove existing repo (safe now)
 # --------------------------------------------------
-if ! command -v git >/dev/null 2>&1; then
-  echo "Installing git..."
-  sudo apt-get update
-  sudo apt-get install -y git
-fi
-
-if ! command -v stow >/dev/null 2>&1; then
-  echo "Installing stow..."
-  sudo apt-get update
-  sudo apt-get install -y stow
-fi
-
-# --------------------------------------------------
-# Force remove existing dotfiles repo
-# --------------------------------------------------
-if [[ -d "$DOTFILES_DIR" ]]; then
+if [[ -d "$TARGET_DIR" ]]; then
+  echo
   echo "Existing dotfiles directory found."
   echo "Removing it completely..."
-  rm -rf "$DOTFILES_DIR"
+  rm -rf "$TARGET_DIR"
 fi
 
 # --------------------------------------------------
-# Fresh clone
+# Clone fresh repo
 # --------------------------------------------------
+echo
 echo "Cloning dotfiles repository..."
-mkdir -p "$(dirname "$DOTFILES_DIR")"
-git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+git clone "$REPO_URL" "$TARGET_DIR"
 
 # --------------------------------------------------
-# Remove known conflicting files / directories
+# Pre-stow conflict cleanup
 # --------------------------------------------------
+echo
+echo "Preparing for stow..."
 
-# Remove Omakub bash defaults (conflict with stow)
-OMAKUB_BASH_DIR="$HOME/.local/share/omakub/defaults/bash"
-if [[ -d "$OMAKUB_BASH_DIR" ]]; then
+if [[ -d "$HOME/.local/share/omakub/defaults/bash" ]]; then
   echo "Detected Omakub bash defaults:"
-  echo "  $OMAKUB_BASH_DIR"
+  echo "  ~/.local/share/omakub/defaults/bash"
   echo "Removing to avoid stow conflicts..."
-  rm -rf "$OMAKUB_BASH_DIR"
+  rm -rf "$HOME/.local/share/omakub/defaults/bash"
 fi
 
-# Remove existing ~/.bashrc (managed by stow)
-if [[ -f "$HOME/.bashrc" || -L "$HOME/.bashrc" ]]; then
+if [[ -f "$HOME/.bashrc" ]]; then
   echo "Removing existing ~/.bashrc to allow stow-managed version..."
   rm -f "$HOME/.bashrc"
 fi
@@ -73,34 +76,13 @@ fi
 # --------------------------------------------------
 echo
 echo "Running stow..."
-cd "$DOTFILES_DIR"
-
-set +e
+cd "$TARGET_DIR"
 stow . -t ~
-STOW_EXIT_CODE=$?
-set -e
-
-if [[ "$STOW_EXIT_CODE" -ne 0 ]]; then
-  echo
-  echo "=================================================="
-  echo " Stow reported conflicts."
-  echo
-  echo "Resolve remaining conflicts, then re-run:"
-  echo
-  echo "  cd $DOTFILES_DIR"
-  echo "  stow . -t ~"
-  echo "=================================================="
-  exit 1
-fi
 
 # --------------------------------------------------
-# Launch onboarding master script
+# Launch onboarding master
 # --------------------------------------------------
-if [[ ! -x "$MASTER_SCRIPT" ]]; then
-  echo "ERROR: master.sh not found or not executable:"
-  echo "  $MASTER_SCRIPT"
-  exit 1
-fi
+MASTER="$TARGET_DIR/scripts/onboarding/scripts/master/master.sh"
 
 echo
 echo "=================================================="
@@ -109,5 +91,4 @@ echo " Launching onboarding master script"
 echo "=================================================="
 echo
 
-cd "$HOME"
-exec "$MASTER_SCRIPT"
+exec "$MASTER"

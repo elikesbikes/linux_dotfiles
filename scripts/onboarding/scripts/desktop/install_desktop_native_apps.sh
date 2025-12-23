@@ -4,8 +4,9 @@ set -euo pipefail
 SCRIPT_NAME="$(basename "$0")"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
-mkdir -p "$LOG_DIR"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 
+mkdir -p "$LOG_DIR" "$STATE_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
@@ -15,33 +16,28 @@ echo "Log: $LOG_FILE"
 echo "=================================================="
 
 # --------------------------------------------------
-# Native APT packages ONLY
+# Brave Browser (Official Repo)
 # --------------------------------------------------
-PACKAGES=(
-  kitty
-)
+if ! command -v brave-browser >/dev/null 2>&1; then
+  echo "Installing Brave Browser (official repo)..."
 
-echo "Updating apt..."
-sudo apt-get update
+  sudo apt-get install -y curl gnupg
 
-echo ""
-echo "Installing native desktop packages..."
+  sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg \
+    https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
 
-for pkg in "${PACKAGES[@]}"; do
-  if dpkg -l | awk '{print $2}' | grep -qx "$pkg"; then
-    echo "✔ $pkg already installed. Ensuring latest version..."
-    sudo apt-get install -y "$pkg"
-  else
-    echo "➕ Installing $pkg..."
-    sudo apt-get install -y "$pkg"
-  fi
-done
+  echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] \
+    https://brave-browser-apt-release.s3.brave.com/ stable main" \
+    | sudo tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null
 
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
-mkdir -p "$STATE_DIR"
-touch "$STATE_DIR/desktop-native"
+  sudo apt-get update
+  sudo apt-get install -y brave-browser
+else
+  echo "✔ Brave already installed"
+fi
 
-echo ""
+touch "$STATE_DIR/desktop_native"
+
 echo "=================================================="
 echo " Desktop Native Apps (APT) Complete"
 echo "=================================================="

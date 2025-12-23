@@ -3,7 +3,6 @@ set -euo pipefail
 
 # Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 BACKUP_DIR="${SCRIPT_DIR}/backups/current"
 
 if [ ! -d "$BACKUP_DIR" ]; then
@@ -13,39 +12,59 @@ if [ ! -d "$BACKUP_DIR" ]; then
 fi
 
 echo
-echo "GNOME Keybindings Restore"
-echo "Using backup from:"
+echo "GNOME Restore Utility"
+echo "Backup source:"
 echo "  $BACKUP_DIR"
 echo
 
-echo "Select restore mode:"
-echo "  1) Restore ONLY custom keybindings"
-echo "  2) Restore ALL keybindings (system + custom)"
-echo "  3) Restore ALL keybindings + FULL GNOME config"
-echo "  4) Restore ONLY dock configuration"
+# -----------------------------
+# Ask what to restore
+# -----------------------------
+echo "What do you want to restore?"
+echo "  1) Custom keybindings ONLY"
+echo "  2) System keybindings (GNOME defaults)"
+echo "  3) Dock configuration (Dash-to-Dock)"
+echo "  4) Full GNOME configuration"
 echo
-read -p "Enter choice [1-4]: " MODE
+echo "You may select multiple options (comma-separated)."
+echo "Example: 1,3"
+echo
+read -p "Enter selection: " SELECTION
+
+if [ -z "$SELECTION" ]; then
+  echo "No selection made. Aborting."
+  exit 1
+fi
 
 echo
-read -p "This will overwrite current settings. Continue? (yes/no): " CONFIRM
+read -p "This will overwrite selected settings. Continue? (yes/no): " CONFIRM
 if [[ "$CONFIRM" != "yes" ]]; then
   echo "Restore aborted."
   exit 0
 fi
 
+# -----------------------------
+# Restore helpers
+# -----------------------------
 restore_system_keybindings() {
-  local file="$1"
-  [ -f "$file" ] || return
-  while read -r schema key value; do
-    [[ -z "$schema" || -z "$key" || -z "$value" ]] && continue
-    gsettings set "$schema" "$key" "$value" 2>/dev/null || true
-  done < <(sed -E 's/^(org\.gnome\.[^ ]+) ([^ ]+) (.+)$/\1 \2 \3/' "$file")
+  echo "Restoring system keybindings..."
+  for file in wm-keybindings.txt media-keys.txt shell-keybindings.txt mutter-keybindings.txt; do
+    local path="$BACKUP_DIR/$file"
+    [ -f "$path" ] || continue
+    while read -r schema key value; do
+      [[ -z "$schema" || -z "$key" || -z "$value" ]] && continue
+      gsettings set "$schema" "$key" "$value" 2>/dev/null || true
+    done < <(sed -E 's/^(org\.gnome\.[^ ]+) ([^ ]+) (.+)$/\1 \2 \3/' "$path")
+  done
 }
 
 restore_custom_keybindings() {
-  local file="$1"
+  local file="$BACKUP_DIR/custom-keybindings.dconf"
+  [ -f "$file" ] || { echo "Custom keybindings backup not found."; return; }
 
-  # Rebuild custom-keybindings index (critical)
+  echo "Restoring custom keybindings..."
+
+  # Rebuild index (CRITICAL)
   gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
   "[
   $(grep '^\[' "$file" \
@@ -59,42 +78,38 @@ restore_custom_keybindings() {
 }
 
 restore_dock() {
-  local file="$1"
-  [ -f "$file" ] || return
+  local file="$BACKUP_DIR/dock-dash-to-dock.dconf"
+  [ -f "$file" ] || { echo "Dock backup not found."; return; }
+
+  echo "Restoring dock configuration..."
   dconf load /org/gnome/shell/extensions/dash-to-dock/ < "$file"
 }
 
-case "$MODE" in
-  1)
-    echo "Restoring custom keybindings only..."
-    restore_custom_keybindings "$BACKUP_DIR/custom-keybindings.dconf"
-    ;;
-  2)
-    echo "Restoring all keybindings..."
-    restore_system_keybindings "$BACKUP_DIR/wm-keybindings.txt"
-    restore_system_keybindings "$BACKUP_DIR/media-keys.txt"
-    restore_system_keybindings "$BACKUP_DIR/shell-keybindings.txt"
-    restore_system_keybindings "$BACKUP_DIR/mutter-keybindings.txt"
-    restore_custom_keybindings "$BACKUP_DIR/custom-keybindings.dconf"
-    ;;
-  3)
-    echo "Restoring all keybindings + full GNOME config..."
-    restore_system_keybindings "$BACKUP_DIR/wm-keybindings.txt"
-    restore_system_keybindings "$BACKUP_DIR/media-keys.txt"
-    restore_system_keybindings "$BACKUP_DIR/shell-keybindings.txt"
-    restore_system_keybindings "$BACKUP_DIR/mutter-keybindings.txt"
-    restore_custom_keybindings "$BACKUP_DIR/custom-keybindings.dconf"
-    dconf load / < "$BACKUP_DIR/full-gnome-backup.conf"
-    ;;
-  4)
-    echo "Restoring dock configuration only..."
-    restore_dock "$BACKUP_DIR/dock-dash-to-dock.dconf"
-    ;;
-  *)
-    echo "Invalid selection."
-    exit 1
-    ;;
-esac
+restore_full_gnome() {
+  local file="$BACKUP_DIR/full-gnome-backup.conf"
+  [ -f "$file" ] || { echo "Full GNOME backup not found."; return; }
+
+  echo "Restoring FULL GNOME configuration..."
+  dconf load / < "$file"
+}
+
+# -----------------------------
+# Execute selection(s)
+# -----------------------------
+IFS=',' read -ra OPTIONS <<< "$SELECTION"
+
+for opt in "${OPTIONS[@]}"; do
+  case "$(echo "$opt" | xargs)" in
+    1) restore_custom_keybindings ;;
+    2) restore_system_keybindings ;;
+    3) restore_dock ;;
+    4) restore_full_gnome ;;
+    *)
+      echo "Invalid option: $opt"
+      exit 1
+      ;;
+  esac
+done
 
 echo
 echo "Restore complete."

@@ -8,7 +8,7 @@ mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
-echo "[extensions] Auto-install + Reconcile (SAFE MODE)"
+echo "[extensions] GNOME Extensions Reconciliation"
 echo "=================================================="
 echo "Date: $(date)"
 echo "Log : $LOG_FILE"
@@ -54,30 +54,35 @@ is_disabled() {
   gnome-extensions info "$1" 2>/dev/null | grep -q "State: DISABLED"
 }
 
-interactive() {
+is_interactive() {
   [[ -t 0 ]]
 }
 
-manual_prompt() {
+prompt_manual_install() {
   local uuid="$1"
   local url="https://extensions.gnome.org"
 
-  if ! interactive; then
-    echo "  note   : non-interactive session, skipping manual install"
+  echo "  action : manual install required"
+  echo "  source : $url"
+
+  if ! is_interactive; then
+    echo "  note   : non-interactive session, skipping prompt"
     return
   fi
 
   if command -v gum >/dev/null 2>&1; then
-    if gum confirm "Manual install required for $uuid. Open extensions.gnome.org?"; then
+    if gum confirm "Install GNOME extension '$uuid' manually now?"; then
       xdg-open "$url" >/dev/null 2>&1 || true
+      gum spin --spinner dot --title "Install the extension in your browser, then close this spinner…" -- sleep 5
     else
       echo "  note   : user skipped manual install"
     fi
   else
     echo
-    read -rp "Manual install required for $uuid. Open extensions.gnome.org? [y/N]: " ans
+    read -rp "Install '$uuid' manually now? [y/N]: " ans
     if [[ "$ans" =~ ^[Yy]$ ]]; then
       xdg-open "$url" >/dev/null 2>&1 || true
+      read -rp "Press Enter once installation is complete…"
     else
       echo "  note   : user skipped manual install"
     fi
@@ -85,7 +90,7 @@ manual_prompt() {
 }
 
 # --------------------------------------------------
-# Reconciliation loop
+# Reconcile extensions
 # --------------------------------------------------
 
 echo "--------------------------------------------------"
@@ -103,8 +108,7 @@ while IFS='=' read -r UUID DESIRED; do
 
   if ! is_installed "$UUID"; then
     echo "  status : missing"
-    echo "  action : manual install required"
-    manual_prompt "$UUID"
+    prompt_manual_install "$UUID"
     echo
     continue
   fi
@@ -137,4 +141,4 @@ done < "$CONF_FILE"
 echo "=================================================="
 echo " Extensions reconciliation COMPLETE"
 echo "=================================================="
-echo "If changes do not apply immediately, log out and log back in."
+echo "Log out and back in if changes do not apply."

@@ -1,25 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ==================================================
-# GNOME Extensions – Auto Reconcile (Ubuntu)
-# ==================================================
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONF_FILE="$SCRIPT_DIR/extensions.conf"
-
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
-LOG_DIR="$STATE_DIR/logs"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/install_extensions.log"
-
 mkdir -p "$LOG_DIR"
+
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
-echo "[extensions] GNOME Extensions Reconciliation"
+echo "[extensions] Auto-install + Reconcile (SAFE MODE)"
 echo "=================================================="
-echo "Date : $(date)"
-echo "Log  : $LOG_FILE"
+echo "Date: $(date)"
+echo "Log : $LOG_FILE"
 echo
 
 # --------------------------------------------------
@@ -28,7 +20,7 @@ echo
 
 if ! command -v gnome-extensions >/dev/null 2>&1; then
   echo "GNOME not detected (gnome-extensions missing)."
-  echo "Skipping extensions step."
+  echo "Skipping extensions."
   exit 0
 fi
 
@@ -38,15 +30,12 @@ GNOME_MAJOR="${GNOME_VERSION%%.*}"
 echo "Detected GNOME Shell : $GNOME_VERSION"
 echo
 
-# --------------------------------------------------
-# Ubuntu deps (system extensions only)
-# --------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONF_FILE="$SCRIPT_DIR/extensions.conf"
 
-if command -v apt >/dev/null 2>&1; then
-  echo "Ensuring system GNOME extensions package (Ubuntu)..."
-  sudo apt-get update -y
-  sudo apt-get install -y gnome-shell-extensions curl jq unzip
-  echo
+if [[ ! -f "$CONF_FILE" ]]; then
+  echo "ERROR: extensions.conf not found."
+  exit 1
 fi
 
 # --------------------------------------------------
@@ -54,91 +43,98 @@ fi
 # --------------------------------------------------
 
 is_installed() {
-  gnome-extensions list | grep -qx "$1"
+  gnome-extensions info "$1" >/dev/null 2>&1
 }
 
 is_enabled() {
-  gnome-extensions list --enabled | grep -qx "$1"
+  gnome-extensions info "$1" 2>/dev/null | grep -q "State: ENABLED"
 }
 
-manual_required=()
+is_disabled() {
+  gnome-extensions info "$1" 2>/dev/null | grep -q "State: DISABLED"
+}
+
+interactive() {
+  [[ -t 0 ]]
+}
+
+manual_prompt() {
+  local uuid="$1"
+  local url="https://extensions.gnome.org"
+
+  if ! interactive; then
+    echo "  note   : non-interactive session, skipping manual install"
+    return
+  fi
+
+  if command -v gum >/dev/null 2>&1; then
+    if gum confirm "Manual install required for $uuid. Open extensions.gnome.org?"; then
+      xdg-open "$url" >/dev/null 2>&1 || true
+    else
+      echo "  note   : user skipped manual install"
+    fi
+  else
+    echo
+    read -rp "Manual install required for $uuid. Open extensions.gnome.org? [y/N]: " ans
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+      xdg-open "$url" >/dev/null 2>&1 || true
+    else
+      echo "  note   : user skipped manual install"
+    fi
+  fi
+}
 
 # --------------------------------------------------
-# Main loop
+# Reconciliation loop
 # --------------------------------------------------
 
-echo "Processing extensions.conf..."
+echo "--------------------------------------------------"
+echo " Reconciling extensions state"
+echo "--------------------------------------------------"
 echo
 
-while IFS="=" read -r EXT_ID DESIRED_STATE; do
-  [[ -z "$EXT_ID" || "$EXT_ID" =~ ^# ]] && continue
+while IFS='=' read -r UUID DESIRED; do
+  [[ -z "$UUID" || "$UUID" =~ ^# ]] && continue
 
-  echo "→ $EXT_ID"
-  echo "  desired : $DESIRED_STATE"
+  DESIRED="$(echo "$DESIRED" | tr '[:upper:]' '[:lower:]')"
 
-  if is_installed "$EXT_ID"; then
-    echo "  status  : installed"
+  echo "→ $UUID"
+  echo "  desired: $DESIRED"
 
-    if [[ "$DESIRED_STATE" == "enabled" ]]; then
-      if is_enabled "$EXT_ID"; then
-        echo "  state   : already enabled"
-        echo "  action  : none"
-      else
-        echo "  state   : disabled"
-        echo "  action  : enabling"
-        gnome-extensions enable "$EXT_ID" || true
-      fi
+  if ! is_installed "$UUID"; then
+    echo "  status : missing"
+    echo "  action : manual install required"
+    manual_prompt "$UUID"
+    echo
+    continue
+  fi
+
+  echo "  status : installed"
+
+  if [[ "$DESIRED" == "enabled" ]]; then
+    if is_enabled "$UUID"; then
+      echo "  state  : already enabled"
+      echo "  action : none"
     else
-      if is_enabled "$EXT_ID"; then
-        echo "  state   : enabled"
-        echo "  action  : disabling"
-        gnome-extensions disable "$EXT_ID" || true
-      else
-        echo "  state   : already disabled"
-        echo "  action  : none"
-      fi
+      echo "  state  : disabled"
+      echo "  action : enabling"
+      gnome-extensions enable "$UUID" || echo "  WARN   : enable failed"
     fi
-
   else
-    echo "  status  : not installed"
-    echo "  note    : third-party GNOME extension"
-    echo "  source  : https://extensions.gnome.org"
-    echo "  action  : manual install required"
-    manual_required+=("$EXT_ID")
+    if is_disabled "$UUID"; then
+      echo "  state  : already disabled"
+      echo "  action : none"
+    else
+      echo "  state  : enabled"
+      echo "  action : disabling"
+      gnome-extensions disable "$UUID" || echo "  WARN   : disable failed"
+    fi
   fi
 
   echo
 done < "$CONF_FILE"
 
-# --------------------------------------------------
-# Summary
-# --------------------------------------------------
-
 echo "=================================================="
-echo "Extensions reconciliation COMPLETE"
+echo " Extensions reconciliation COMPLETE"
 echo "=================================================="
-
-if (( ${#manual_required[@]} > 0 )); then
-  echo
-  echo "Manual installation required for the following extensions:"
-  echo
-
-  for ext in "${manual_required[@]}"; do
-    echo "  • $ext"
-  done
-
-  echo
-  echo "Reason:"
-  echo "  These are third-party GNOME extensions."
-  echo "  Ubuntu GNOME $GNOME_MAJOR does not support"
-  echo "  reliable unattended installation for them."
-  echo
-  echo "Next step:"
-  echo "  1. Install them from https://extensions.gnome.org"
-  echo "  2. Re-run: onboarding → Install → Extensions"
-fi
-
-echo
-echo "If extensions do not activate immediately,"
-echo "log out and log back in."
-echo
+echo "If changes do not apply immediately, log out and log back in."

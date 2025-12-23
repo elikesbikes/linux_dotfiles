@@ -37,8 +37,7 @@ done
 native_pkgs=(
   timeshift
   yubikey-manager-qt
-  flameshot
-  caffeine
+  flameshot  
   kitty
 )
 

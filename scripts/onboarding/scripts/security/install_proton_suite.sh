@@ -50,7 +50,7 @@ echo "Installing Proton VPN and Proton Bridge..."
 
 sudo apt-get install -y \
   #proton-mail \
-  protonvpn-pass \
+  proton-pass \
   protonmail-bridge
 
 # --------------------------------------------------

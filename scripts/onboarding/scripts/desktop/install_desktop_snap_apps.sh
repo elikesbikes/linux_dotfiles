@@ -27,12 +27,8 @@ fi
 echo ""
 echo "Installing snap desktop applications..."
 
-SNAP_APPS=(
-  brave
-  spotify
-  todoist
-  rustdesk
-  protonplus
+SNAP_APPS=(  
+  todoist    
 )
 
 for app in "${SNAP_APPS[@]}"; do

@@ -16,28 +16,32 @@ echo "Log: $LOG_FILE"
 echo "=================================================="
 
 # --------------------------------------------------
-# Brave Browser (Official Repo)
+# Native desktop packages (official APT)
 # --------------------------------------------------
-if ! command -v brave-browser >/dev/null 2>&1; then
-  echo "Installing Brave Browser (official repo)..."
+PACKAGES=(
+  timeshift
+  kitty
+)
 
-  sudo apt-get install -y curl gnupg
+echo "Updating apt..."
+sudo apt-get update
 
-  sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg \
-    https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+echo ""
+echo "Installing native desktop packages..."
 
-  echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] \
-    https://brave-browser-apt-release.s3.brave.com/ stable main" \
-    | sudo tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null
-
-  sudo apt-get update
-  sudo apt-get install -y brave-browser
-else
-  echo "✔ Brave already installed"
-fi
+for pkg in "${PACKAGES[@]}"; do
+  if dpkg -l | awk '{print $2}' | grep -qx "$pkg"; then
+    echo "✔ $pkg already installed. Ensuring latest version..."
+    sudo apt-get install -y "$pkg"
+  else
+    echo "➕ Installing $pkg..."
+    sudo apt-get install -y "$pkg"
+  fi
+done
 
 touch "$STATE_DIR/desktop_native"
 
+echo ""
 echo "=================================================="
-echo " Desktop Native Apps (APT) Complete"
+echo " Desktop Native Apps Installation Complete"
 echo "=================================================="

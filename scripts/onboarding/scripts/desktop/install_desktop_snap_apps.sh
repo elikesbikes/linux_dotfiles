@@ -24,25 +24,29 @@ if ! command -v snap >/dev/null 2>&1; then
   sudo apt-get install -y snapd
 fi
 
-# --------------------------------------------------
-# Snap apps (official)
-# --------------------------------------------------
+echo ""
+echo "Installing snap desktop applications..."
+
 SNAP_APPS=(
+  brave
   spotify
   todoist
+  rustdesk
+  protonplus
 )
 
 for app in "${SNAP_APPS[@]}"; do
   if snap list | awk '{print $1}' | grep -qx "$app"; then
     echo "✔ $app already installed"
   else
-    echo "➕ Installing $app via snap..."
+    echo "➕ Installing $app..."
     sudo snap install "$app"
   fi
 done
 
 touch "$STATE_DIR/desktop_snap"
 
+echo ""
 echo "=================================================="
 echo " Desktop Snap Apps Installation Complete"
 echo "=================================================="

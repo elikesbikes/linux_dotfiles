@@ -49,9 +49,9 @@ sudo apt-get update
 echo "Installing Proton VPN and Proton Bridge..."
 
 sudo apt-get install -y \
-  proton-vpn-gnome \
-  protonvpn-cli \
-  proton-bridge
+  #proton-mail \
+  protonvpn-pass \
+  protonmail-bridge
 
 # --------------------------------------------------
 # 4. Install Proton Mail (official .deb)

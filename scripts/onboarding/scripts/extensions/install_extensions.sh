@@ -25,8 +25,6 @@ if ! command -v gnome-extensions >/dev/null 2>&1; then
 fi
 
 GNOME_VERSION="$(gnome-shell --version | awk '{print $3}')"
-GNOME_MAJOR="${GNOME_VERSION%%.*}"
-
 echo "Detected GNOME Shell : $GNOME_VERSION"
 echo
 
@@ -42,7 +40,19 @@ fi
 # Helpers
 # --------------------------------------------------
 
-is_interactive() {
+is_installed() {
+  gnome-extensions info "$1" >/dev/null 2>&1
+}
+
+is_enabled() {
+  gnome-extensions info "$1" 2>/dev/null | grep -q "State: ENABLED"
+}
+
+is_disabled() {
+  gnome-extensions info "$1" 2>/dev/null | grep -q "State: DISABLED"
+}
+
+has_tty() {
   [[ -e /dev/tty ]]
 }
 
@@ -53,7 +63,7 @@ prompt_manual_install() {
   echo "  action : manual install required"
   echo "  source : $url"
 
-  if ! is_interactive; then
+  if ! has_tty; then
     echo "  note   : no TTY available, skipping prompt"
     return
   fi
@@ -61,9 +71,8 @@ prompt_manual_install() {
   if command -v gum >/dev/null 2>&1; then
     if gum confirm "Install GNOME extension '$uuid' manually now?" </dev/tty; then
       xdg-open "$url" >/dev/tty 2>/dev/null || true
-      gum spin --spinner dot \
-        --title "Install the extension in your browser, then close this spinner…" \
-        -- sleep 5 </dev/tty
+      echo "  note   : waiting briefly for manual install"
+      sleep 5
     else
       echo "  note   : user skipped manual install"
     fi
@@ -71,13 +80,12 @@ prompt_manual_install() {
     read -rp "Install '$uuid' manually now? [y/N]: " ans </dev/tty
     if [[ "$ans" =~ ^[Yy]$ ]]; then
       xdg-open "$url" >/dev/tty 2>/dev/null || true
-      read -rp "Press Enter once installation is complete…" </dev/tty
+      read -rp "Press Enter once installation is complete..." </dev/tty
     else
       echo "  note   : user skipped manual install"
     fi
   fi
 }
-
 
 # --------------------------------------------------
 # Reconcile extensions

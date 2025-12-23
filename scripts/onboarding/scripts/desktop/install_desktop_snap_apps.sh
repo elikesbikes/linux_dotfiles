@@ -46,7 +46,7 @@ done
 
 touch "$STATE_DIR/desktop_snap"
 
-echo ""
+echo "  "
 echo "=================================================="
 echo " Desktop Snap Apps Installation Complete"
 echo "=================================================="

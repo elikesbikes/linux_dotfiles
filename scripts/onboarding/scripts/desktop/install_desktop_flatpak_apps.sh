@@ -15,55 +15,29 @@ echo "Log: $LOG_FILE"
 echo "=================================================="
 
 # --------------------------------------------------
-# Ensure Flatpak + Flathub
+# Flatpak apps ONLY
 # --------------------------------------------------
-if ! command -v flatpak >/dev/null 2>&1; then
-  echo "Installing flatpak..."
-  sudo apt-get update
-  sudo apt-get install -y flatpak gnome-software-plugin-flatpak
-fi
-
-if ! flatpak remotes | awk '{print $1}' | grep -qx flathub; then
-  echo "Adding Flathub remote..."
-  flatpak remote-add --if-not-exists \
-    flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-else
-  echo "Flathub already configured."
-fi
-
-# --------------------------------------------------
-# Flatpak applications (authoritative list)
-# --------------------------------------------------
-APPS=(
-  de.leopoldluley.Clapgrep
+FLATPAK_APPS=(
+  org.gnome.Timeshift
+  org.yubico.YubiKeyManager
+  org.yubico.yubioath
+  org.flameshot.Flameshot
   org.cryptomator.Cryptomator
-  net.nokyan.Resources
-  md.obsidian.Obsidian
   com.github.zocker_160.SyncThingy
-  com.rustdesk.RustDesk
-  com.vysp3r.ProtonPlus
-  com.yubico.yubioath
-  io.github.flattool.Warehouse
-  io.github.sigmasd.stimulator
-  org.libretro.RetroArch
-  app.bluebubbles.BlueBubbles
 )
 
-echo ""
-echo "Installing Flatpak applications..."
-
-for app in "${APPS[@]}"; do
-  if flatpak list --app | awk '{print $1}' | grep -qx "$app"; then
-    echo "✔ $app already installed. Updating..."
-    flatpak update -y "$app"
+for app in "${FLATPAK_APPS[@]}"; do
+  if flatpak info "$app" >/dev/null 2>&1; then
+    echo "✔ $app already installed."
   else
     echo "➕ Installing $app..."
     flatpak install -y flathub "$app"
   fi
 done
+
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
-touch "$STATE_DIR/<category>"
+touch "$STATE_DIR/desktop-flatpak"
 
 echo ""
 echo "=================================================="

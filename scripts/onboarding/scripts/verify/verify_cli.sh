@@ -1,26 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/verify_cli.log"
-mkdir -p "$LOG_DIR"
-exec > >(tee -a "$LOG_FILE") 2>&1
-
-echo "=== VERIFY CLI ==="
+echo "======================================"
+echo " VERIFY CLI"
+echo "======================================"
 
 fail=0
 
 check_cmd() {
   local name="$1"
-  if command -v "$name" >/dev/null; then
-    echo "OK: $name"
+
+  if command -v "$name" >/dev/null 2>&1; then
+    echo "✔ $name : OK"
   else
-    echo "FAIL: $name missing"
+    echo "✘ $name : MISSING"
     fail=1
   fi
 }
 
-check_cmd exa || check_cmd eza
+# exa / eza compatibility
+if command -v exa >/dev/null 2>&1; then
+  echo "✔ exa : OK"
+elif command -v eza >/dev/null 2>&1; then
+  echo "✔ eza : OK (replacement for exa)"
+else
+  echo "✘ exa/eza : MISSING"
+  fail=1
+fi
+
 check_cmd fastfetch
 check_cmd stow
 check_cmd zoxide
@@ -29,12 +36,20 @@ check_cmd figlet
 check_cmd starship
 check_cmd nvim
 
+echo
 echo "Checking yazi (snap)..."
-if snap list 2>/dev/null | awk '{print $1}' | grep -qx yazi; then
-  echo "OK: yazi snap installed"
+if command -v snap >/dev/null 2>&1 && snap list 2>/dev/null | awk '{print $1}' | grep -qx yazi; then
+  echo "✔ yazi : OK (snap)"
 else
-  echo "FAIL: yazi snap missing"
+  echo "✘ yazi : MISSING (snap)"
   fail=1
 fi
 
-exit $fail
+echo
+if [ "$fail" -eq 0 ]; then
+  echo "✓ CLI verification PASSED"
+else
+  echo "⚠ CLI verification FAILED"
+fi
+
+exit "$fail"

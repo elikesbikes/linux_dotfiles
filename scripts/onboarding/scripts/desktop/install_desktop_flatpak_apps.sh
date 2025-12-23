@@ -33,8 +33,7 @@ fi
 # --------------------------------------------------
 # Desktop Flatpak applications
 # --------------------------------------------------
-FLATPAK_APPS=(
-  org.gnome.Timeshift
+FLATPAK_APPS=(  
   org.yubico.YubiKeyManager
   org.yubico.yubioath
   org.flameshot.Flameshot

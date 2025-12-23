@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resolve script directory
+# Resolve script directory (even if symlinked)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Fixed backup directory
@@ -31,7 +31,7 @@ gsettings list-recursively org.gnome.mutter.keybindings \
   > "$BACKUP_DIR/mutter-keybindings.txt"
 
 # --------------------------------------------------
-# Custom keybindings (GNOME-correct)
+# Custom keybindings (GNOME-correct: index + data)
 # --------------------------------------------------
 dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ \
   > "$BACKUP_DIR/custom-keybindings.dconf"
@@ -41,6 +41,12 @@ dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ \
 # --------------------------------------------------
 dconf dump /org/gnome/shell/extensions/dash-to-dock/ \
   > "$BACKUP_DIR/dock-dash-to-dock.dconf"
+
+# --------------------------------------------------
+# Dock pinned applications (icons + order)
+# --------------------------------------------------
+gsettings get org.gnome.shell favorite-apps \
+  > "$BACKUP_DIR/dock-favorite-apps.txt"
 
 # --------------------------------------------------
 # Optional: full GNOME configuration backup

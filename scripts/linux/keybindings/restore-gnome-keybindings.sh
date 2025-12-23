@@ -17,17 +17,15 @@ echo "Backup source:"
 echo "  $BACKUP_DIR"
 echo
 
-# -----------------------------
-# Ask what to restore
-# -----------------------------
 echo "What do you want to restore?"
 echo "  1) Custom keybindings ONLY"
 echo "  2) System keybindings (GNOME defaults)"
 echo "  3) Dock configuration (Dash-to-Dock)"
-echo "  4) Full GNOME configuration"
+echo "  4) Dock pinned applications (icons/order)"
+echo "  5) FULL GNOME configuration"
 echo
 echo "You may select multiple options (comma-separated)."
-echo "Example: 1,3"
+echo "Example: 1,3,4"
 echo
 read -p "Enter selection: " SELECTION
 
@@ -43,9 +41,9 @@ if [[ "$CONFIRM" != "yes" ]]; then
   exit 0
 fi
 
-# -----------------------------
+# --------------------------------------------------
 # Restore helpers
-# -----------------------------
+# --------------------------------------------------
 restore_system_keybindings() {
   echo "Restoring system keybindings..."
   for file in wm-keybindings.txt media-keys.txt shell-keybindings.txt mutter-keybindings.txt; do
@@ -64,7 +62,7 @@ restore_custom_keybindings() {
 
   echo "Restoring custom keybindings..."
 
-  # Rebuild index (CRITICAL)
+  # Rebuild the index list (CRITICAL)
   gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
   "[
   $(grep '^\[' "$file" \
@@ -77,12 +75,20 @@ restore_custom_keybindings() {
     < "$file"
 }
 
-restore_dock() {
+restore_dock_config() {
   local file="$BACKUP_DIR/dock-dash-to-dock.dconf"
-  [ -f "$file" ] || { echo "Dock backup not found."; return; }
+  [ -f "$file" ] || { echo "Dock configuration backup not found."; return; }
 
   echo "Restoring dock configuration..."
   dconf load /org/gnome/shell/extensions/dash-to-dock/ < "$file"
+}
+
+restore_dock_favorites() {
+  local file="$BACKUP_DIR/dock-favorite-apps.txt"
+  [ -f "$file" ] || { echo "Dock favorites backup not found."; return; }
+
+  echo "Restoring dock pinned applications..."
+  gsettings set org.gnome.shell favorite-apps "$(cat "$file")"
 }
 
 restore_full_gnome() {
@@ -93,17 +99,18 @@ restore_full_gnome() {
   dconf load / < "$file"
 }
 
-# -----------------------------
-# Execute selection(s)
-# -----------------------------
+# --------------------------------------------------
+# Execute selections
+# --------------------------------------------------
 IFS=',' read -ra OPTIONS <<< "$SELECTION"
 
 for opt in "${OPTIONS[@]}"; do
   case "$(echo "$opt" | xargs)" in
     1) restore_custom_keybindings ;;
     2) restore_system_keybindings ;;
-    3) restore_dock ;;
-    4) restore_full_gnome ;;
+    3) restore_dock_config ;;
+    4) restore_dock_favorites ;;
+    5) restore_full_gnome ;;
     *)
       echo "Invalid option: $opt"
       exit 1

@@ -42,20 +42,8 @@ fi
 # Helpers
 # --------------------------------------------------
 
-is_installed() {
-  gnome-extensions info "$1" >/dev/null 2>&1
-}
-
-is_enabled() {
-  gnome-extensions info "$1" 2>/dev/null | grep -q "State: ENABLED"
-}
-
-is_disabled() {
-  gnome-extensions info "$1" 2>/dev/null | grep -q "State: DISABLED"
-}
-
 is_interactive() {
-  [[ -t 0 ]]
+  [[ -e /dev/tty ]]
 }
 
 prompt_manual_install() {
@@ -66,28 +54,30 @@ prompt_manual_install() {
   echo "  source : $url"
 
   if ! is_interactive; then
-    echo "  note   : non-interactive session, skipping prompt"
+    echo "  note   : no TTY available, skipping prompt"
     return
   fi
 
   if command -v gum >/dev/null 2>&1; then
-    if gum confirm "Install GNOME extension '$uuid' manually now?"; then
-      xdg-open "$url" >/dev/null 2>&1 || true
-      gum spin --spinner dot --title "Install the extension in your browser, then close this spinner…" -- sleep 5
+    if gum confirm "Install GNOME extension '$uuid' manually now?" </dev/tty; then
+      xdg-open "$url" >/dev/tty 2>/dev/null || true
+      gum spin --spinner dot \
+        --title "Install the extension in your browser, then close this spinner…" \
+        -- sleep 5 </dev/tty
     else
       echo "  note   : user skipped manual install"
     fi
   else
-    echo
-    read -rp "Install '$uuid' manually now? [y/N]: " ans
+    read -rp "Install '$uuid' manually now? [y/N]: " ans </dev/tty
     if [[ "$ans" =~ ^[Yy]$ ]]; then
-      xdg-open "$url" >/dev/null 2>&1 || true
-      read -rp "Press Enter once installation is complete…"
+      xdg-open "$url" >/dev/tty 2>/dev/null || true
+      read -rp "Press Enter once installation is complete…" </dev/tty
     else
       echo "  note   : user skipped manual install"
     fi
   fi
 }
+
 
 # --------------------------------------------------
 # Reconcile extensions

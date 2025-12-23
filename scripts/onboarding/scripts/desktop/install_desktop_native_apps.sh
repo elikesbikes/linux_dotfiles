@@ -9,19 +9,15 @@ mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
-echo "[$SCRIPT_NAME] Installing Desktop Native Apps"
+echo "[$SCRIPT_NAME] Installing Desktop Native Apps (APT)"
 echo "Date: $(date)"
 echo "Log: $LOG_FILE"
 echo "=================================================="
 
 # --------------------------------------------------
-# Native desktop packages
+# Native APT packages ONLY
 # --------------------------------------------------
 PACKAGES=(
-  timeshift
-  yubikey-manager-qt
-  flameshot
-  caffeine
   kitty
 )
 
@@ -33,20 +29,19 @@ echo "Installing native desktop packages..."
 
 for pkg in "${PACKAGES[@]}"; do
   if dpkg -l | awk '{print $2}' | grep -qx "$pkg"; then
-    echo "✔ $pkg already installed. Upgrading..."
+    echo "✔ $pkg already installed. Ensuring latest version..."
     sudo apt-get install -y "$pkg"
   else
     echo "➕ Installing $pkg..."
     sudo apt-get install -y "$pkg"
   fi
 done
+
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
-touch "$STATE_DIR/<category>"
-
-
+touch "$STATE_DIR/desktop-native"
 
 echo ""
 echo "=================================================="
-echo " Desktop Native Apps Installation Complete"
+echo " Desktop Native Apps (APT) Complete"
 echo "=================================================="

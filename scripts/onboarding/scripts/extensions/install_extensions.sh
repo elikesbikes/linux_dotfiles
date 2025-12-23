@@ -2,14 +2,19 @@
 set -euo pipefail
 
 # ==================================================
-# GNOME Extensions: Auto-install + Reconcile (NO PROMPTS)
-# - Supports extensions.conf lines like:
-#     uuid|enabled
-#     uuid=enabled
-#     uuid:enabled
-# - Auto-installs missing extensions on Ubuntu via:
-#     - extensions.gnome.org (download zip + gnome-extensions install)
-#     - apt fallback for some Ubuntu-provided extensions
+# GNOME Extensions (Ubuntu GNOME 46 production-safe)
+#
+# Strategy:
+# - Ubuntu/Debian system extensions: install via apt (automatic)
+# - Third-party extensions (extensions.gnome.org): DO NOT auto-install on Ubuntu GNOME 46
+#   because CLI installs can "succeed" but not register. Instead:
+#     - If missing: print manual install URL + continue
+#     - If present: enforce enabled/disabled state
+#
+# Config formats supported in extensions.conf:
+#   uuid|enabled
+#   uuid=enabled
+#   uuid:enabled
 # ==================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -40,9 +45,8 @@ gnome_shell_major() {
 }
 
 trim() {
-  local s="$1"
   # shellcheck disable=SC2001
-  echo "$(echo "$s" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  echo "$(echo "$1" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
 }
 
 parse_line() {
@@ -65,7 +69,6 @@ parse_line() {
     uuid="${line%%:*}"
     state="${line##*:}"
   else
-    # If state missing, default enabled
     uuid="$line"
     state="enabled"
   fi
@@ -98,7 +101,8 @@ ensure_deps_ubuntu() {
   sudo apt-get install -y curl jq unzip gnome-shell-extensions
 }
 
-# For some Ubuntu-provided extensions, installing via apt is the right move on greenfield.
+# Map known Ubuntu/system extensions to apt packages.
+# Return 0 if we attempted apt install, 1 otherwise.
 ubuntu_apt_install_for_uuid() {
   local uuid="$1"
 
@@ -107,7 +111,6 @@ ubuntu_apt_install_for_uuid() {
       sudo apt-get install -y gnome-shell-extension-ubuntu-dock || true
       ;;
     ding@rastersoft.com)
-      # Desktop Icons NG on Ubuntu
       sudo apt-get install -y gnome-shell-extension-desktop-icons-ng || true
       ;;
     tiling-assistant@ubuntu.com)
@@ -124,106 +127,11 @@ ubuntu_apt_install_for_uuid() {
   return 0
 }
 
-# ---- extensions.gnome.org helpers ----
-# query:
-# https://extensions.gnome.org/extension-query/?search=<uuid>
-# download:
-# https://extensions.gnome.org/download-extension/<uuid>.shell-extension.zip?version_tag=<tag>
-fetch_version_tag() {
-  local uuid="$1"
-  local url json
-
-  url="https://extensions.gnome.org/extension-query/?search=${uuid}"
-  json="$(curl -fsSL "$url")" || return 1
-
-  # Find exact match first; else first result.
-  # Then pick max pk from shell_version_map (latest compatible build on server side).
-  echo "$json" | jq -r --arg u "$uuid" '
-    (.extensions // [])
-    | (map(select(.uuid == $u)) | .[0] // .[0])
-    | (.shell_version_map | map(.pk) | max // empty)
-  ' 2>/dev/null
-}
-
-download_extension_zip() {
-  local uuid="$1"
-  local version_tag="$2"
-  local out_zip="$3"
-
-  local dl
-  dl="https://extensions.gnome.org/download-extension/${uuid}.shell-extension.zip?version_tag=${version_tag}"
-  curl -fsSL -o "$out_zip" "$dl"
-}
-
-install_from_ego() {
-  local uuid="$1"
-
-  local tag tmpdir zip
-  tag="$(fetch_version_tag "$uuid" | tr -d '\r\n' || true)"
-  if [[ -z "$tag" || "$tag" == "null" ]]; then
-    log "  ERROR : could not get version_tag from extensions.gnome.org for $uuid"
-    return 1
-  fi
-
-  tmpdir="$(mktemp -d)"
-  zip="$tmpdir/${uuid}.zip"
-
-  download_extension_zip "$uuid" "$tag" "$zip" || {
-    log "  ERROR : download failed for $uuid"
-    rm -rf "$tmpdir"
-    return 1
-  }
-
-  # Install to user extensions (safe + repeatable)
-  gnome-extensions install --force "$zip" >/dev/null 2>&1 || {
-    log "  ERROR : gnome-extensions install failed for $uuid"
-    rm -rf "$tmpdir"
-    return 1
-  }
-
-  rm -rf "$tmpdir"
-  return 0
-}
-
-ensure_installed() {
-  local uuid="$1"
-  local distro="$2"
-
-  if is_installed "$uuid"; then
-    log "  status : installed"
-    log "  action : install skipped"
-    return 0
-  fi
-
-  log "  status : missing"
-  log "  action : installing"
-
-  if [[ "$distro" == "ubuntu" || "$distro" == "debian" ]]; then
-    # First try apt for known Ubuntu-provided extensions
-    if ubuntu_apt_install_for_uuid "$uuid"; then
-      if is_installed "$uuid"; then
-        log "  OK     : installed via apt"
-        return 0
-      fi
-      log "  WARN   : apt attempted but extension still missing (will try extensions.gnome.org)"
-    fi
-
-    # Then try extensions.gnome.org
-    if install_from_ego "$uuid"; then
-      if is_installed "$uuid"; then
-        log "  OK     : installed via extensions.gnome.org"
-        return 0
-      fi
-      log "  ERROR  : install reported success but extension still missing"
-      return 1
-    else
-      log "  ERROR  : failed to install from extensions.gnome.org"
-      return 1
-    fi
-  else
-    log "  WARN   : automatic install not implemented for distro '$distro' (reconcile only)"
-    return 1
-  fi
+ego_url_for_uuid() {
+  # We cannot reliably derive the numeric extension ID without an API query,
+  # but the UUID is still useful context. Provide the base site.
+  # If you want direct per-extension URLs later, we can add an API lookup.
+  echo "https://extensions.gnome.org"
 }
 
 reconcile_state() {
@@ -267,7 +175,7 @@ main() {
   : >"$LOG_FILE"
 
   log "=================================================="
-  log "[extensions] Auto-install + Reconcile (NO PROMPTS)"
+  log "[extensions] Ubuntu-safe reconcile (NO fake installs)"
   log "=================================================="
   log "Date: $(date)"
   log "Log : $LOG_FILE"
@@ -291,7 +199,6 @@ main() {
   log "GNOME Shell (major)  : ${shell_major:-unknown}"
   log ""
 
-  # If we might need sudo, validate once up front (visible prompt if required)
   if [[ "$distro" == "ubuntu" || "$distro" == "debian" ]]; then
     log "Preparing system dependencies..."
     sudo -v
@@ -303,6 +210,7 @@ main() {
   log ""
 
   local any_fail=0
+  local any_manual=0
 
   while IFS= read -r line || [[ -n "${line:-}" ]]; do
     local parsed uuid desired
@@ -315,25 +223,48 @@ main() {
     log "→ $uuid"
     log "  desired: $desired"
 
-    # Install missing if we can
     if ! is_installed "$uuid"; then
-      if ! ensure_installed "$uuid" "$distro"; then
+      # Try apt for known Ubuntu/system extensions
+      if [[ "$distro" == "ubuntu" || "$distro" == "debian" ]]; then
+        if ubuntu_apt_install_for_uuid "$uuid"; then
+          if is_installed "$uuid"; then
+            log "  status : installed (via apt)"
+          else
+            log "  status : missing (apt attempted, still missing)"
+            log "  action : manual install required"
+            log "  source : $(ego_url_for_uuid "$uuid")"
+            any_manual=1
+            any_fail=1
+          fi
+        else
+          # Third-party extension: on Ubuntu GNOME 46 we do NOT attempt CLI installs.
+          log "  status : missing"
+          log "  action : manual install required"
+          log "  source : $(ego_url_for_uuid "$uuid")"
+          any_manual=1
+          any_fail=1
+        fi
+      else
+        log "  status : missing"
+        log "  action : install not implemented for distro '$distro'"
         any_fail=1
       fi
     else
       log "  status : installed"
     fi
 
-    # Reconcile enable/disable regardless
     reconcile_state "$uuid" "$desired"
     log ""
   done < "$CONF_FILE"
 
   log "=================================================="
   if [[ "$any_fail" -eq 0 ]]; then
-    log " Extensions install + reconcile COMPLETE (OK)"
+    log " Extensions reconcile COMPLETE (OK)"
   else
-    log " Extensions install + reconcile COMPLETE (WITH ERRORS)"
+    log " Extensions reconcile COMPLETE (WITH WARNINGS)"
+    if [[ "$any_manual" -eq 1 ]]; then
+      log " Manual installs are required for some third-party extensions on Ubuntu GNOME 46."
+    fi
     log " Check log: $LOG_FILE"
   fi
   log "=================================================="

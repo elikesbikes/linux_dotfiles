@@ -31,14 +31,17 @@ if ! flatpak remote-list | awk '{print $1}' | grep -qx flathub; then
 fi
 
 # --------------------------------------------------
-# Desktop Flatpak applications
+# Desktop Flatpak applications (FINAL SET)
 # --------------------------------------------------
 FLATPAK_APPS=(
-  org.yubico.YubiKeyManager
-  org.yubico.yubioath
-  org.flameshot.Flameshot
-  org.cryptomator.Cryptomator
+  app.bluebubbles.BlueBubbles
   com.github.zocker_160.SyncThingy
+  com.yubico.yubioath
+  de.leopoldluley.Clapgrep
+  io.github.flattool.Warehouse
+  io.github.sigmasd.stimulator
+  net.nokyan.Resources
+  org.cryptomator.Cryptomator
 )
 
 echo ""

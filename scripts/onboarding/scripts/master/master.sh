@@ -3,8 +3,6 @@ set -euo pipefail
 
 # --------------------------------------------------
 # Path resolution
-# master.sh lives in: scripts/onboarding/scripts/master/
-# Categories live in: scripts/onboarding/scripts/{cli,core,desktop,security,extensions}
 # --------------------------------------------------
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS_DIR="$BASE_DIR"
@@ -30,17 +28,15 @@ pause_and_clear() {
 }
 
 # --------------------------------------------------
-# Ensure gum (Charm repo)
+# Ensure gum
 # --------------------------------------------------
 ensure_gum() {
   if command -v gum >/dev/null 2>&1; then
-    return 0
+    return
   fi
 
-  echo "Installing gum..."
   sudo apt-get update
   sudo apt-get install -y curl ca-certificates gnupg
-
   sudo install -d -m 0755 /etc/apt/keyrings
 
   if [[ ! -f /etc/apt/keyrings/charm.gpg ]]; then
@@ -50,7 +46,7 @@ ensure_gum() {
 
   if [[ ! -f /etc/apt/sources.list.d/charm.list ]]; then
     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" \
-      | sudo tee /etc/apt/sources.list.d/charm.list > /dev/null
+      | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
   fi
 
   sudo apt-get update
@@ -83,6 +79,7 @@ run_category() {
 verify_category() {
   local category="$1"
   local dir="$SCRIPTS_DIR/$category"
+  local tmp
 
   [[ -d "$dir" ]] || return
 
@@ -90,10 +87,20 @@ verify_category() {
   gum style --border normal --padding "1 2" "VERIFY: $category"
   echo
 
+  tmp="$(mktemp)"
+
+  # Capture ALL output explicitly
   for script in "$dir"/verify_*.sh; do
     [[ -f "$script" ]] || continue
-    run_script "$script"
+    echo "→ Running $(basename "$script")" >>"$tmp"
+    echo "--------------------------------------" >>"$tmp"
+    bash "$script" >>"$tmp" 2>&1 || true
+    echo >>"$tmp"
   done
+
+  # Replay output
+  cat "$tmp"
+  rm -f "$tmp"
 
   echo
   gum style --foreground 241 "Verification complete."
@@ -126,12 +133,7 @@ install_menu() {
   choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
     | gum choose --no-limit)
 
-  if [[ -z "$choices" ]]; then
-    gum style --foreground 196 "No selection made."
-    sleep 1
-    clear
-    return
-  fi
+  [[ -z "$choices" ]] && return
 
   for choice in $choices; do
     [[ "$choice" == "back" ]] && return
@@ -144,12 +146,7 @@ verify_menu() {
   choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
     | gum choose --no-limit)
 
-  if [[ -z "$choices" ]]; then
-    gum style --foreground 196 "No selection made."
-    sleep 1
-    clear
-    return
-  fi
+  [[ -z "$choices" ]] && return
 
   for choice in $choices; do
     [[ "$choice" == "back" ]] && return
@@ -162,12 +159,7 @@ uninstall_menu() {
   choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
     | gum choose --no-limit)
 
-  if [[ -z "$choices" ]]; then
-    gum style --foreground 196 "No selection made."
-    sleep 1
-    clear
-    return
-  fi
+  [[ -z "$choices" ]] && return
 
   for choice in $choices; do
     [[ "$choice" == "back" ]] && return

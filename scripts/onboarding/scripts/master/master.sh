@@ -1,11 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ==================================================
+# Script: master.sh
+# Version: 1.0.5
+# Date: 2025-12-23
+# Author: Tars (ELIKESBIKES)
+#
+# Changelog:
+#   1.0.5 - FIX: Hybrid verification routing.
+#           - cli/core/desktop/security verified via
+#             scripts/verify/verify_<category>.sh
+#           - extensions verified via
+#             scripts/extensions/verify_extensions.sh
+#           No file moves. No UX changes.
+#   1.0.3 - Attach verify scripts to /dev/tty.
+#   1.0.2 - UX baseline.
+# ==================================================
+
 # --------------------------------------------------
 # Path resolution
 # --------------------------------------------------
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS_DIR="$BASE_DIR"
+VERIFY_DIR="$BASE_DIR/verify"
+EXTENSIONS_DIR="$BASE_DIR/extensions"
+
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
 LOG_DIR="$STATE_DIR/logs"
 INSTALLED_DIR="$STATE_DIR/installed"
@@ -15,39 +35,33 @@ mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 # --------------------------------------------------
 # Utilities
 # --------------------------------------------------
+pause() {
+  echo
+  read -r -p "Press Enter to return to menu..." </dev/tty
+}
+
 run_script() {
+  chmod +x "$1"
+  "$1"
+}
+
+# Run script attached to real terminal (CTT-style)
+run_script_tty() {
   local script="$1"
   chmod +x "$script"
-  "$script"
-}
-
-pause_and_clear() {
-  echo
-  read -rp "Press ENTER to return to menu..."
-  clear
+  bash "$script" </dev/tty >/dev/tty 2>/dev/tty
+  return $?
 }
 
 # --------------------------------------------------
-# Ensure gum
+# Ensure gum (menus only)
 # --------------------------------------------------
 ensure_gum() {
-  if command -v gum >/dev/null 2>&1; then
-    return
-  fi
+  command -v gum >/dev/null 2>&1 && return
 
-  sudo apt-get update
-  sudo apt-get install -y curl ca-certificates gnupg
-  sudo install -d -m 0755 /etc/apt/keyrings
-
-  if [[ ! -f /etc/apt/keyrings/charm.gpg ]]; then
-    curl -fsSL https://repo.charm.sh/apt/gpg.key \
-      | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-  fi
-
-  if [[ ! -f /etc/apt/sources.list.d/charm.list ]]; then
-    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" \
-      | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
-  fi
+  clear
+  echo "Installing gum (required for menu)..."
+  echo
 
   sudo apt-get update
   sudo apt-get install -y gum
@@ -64,47 +78,55 @@ run_category() {
 
   clear
   gum style --border normal --padding "1 2" "Installing: $category"
+  echo
 
   for script in "$dir"/install_*.sh; do
     [[ -f "$script" ]] || continue
-    echo
     echo "→ Running $(basename "$script")"
+    echo
     run_script "$script"
+    echo
   done
 
   touch "$INSTALLED_DIR/$category"
-  pause_and_clear
+  pause
 }
 
 verify_category() {
   local category="$1"
-  local dir="$SCRIPTS_DIR/$category"
-  local tmp
-
-  [[ -d "$dir" ]] || return
+  local script=""
 
   clear
-  gum style --border normal --padding "1 2" "VERIFY: $category"
+  echo "======================================"
+  echo " VERIFY: $category"
+  echo "======================================"
   echo
 
-  tmp="$(mktemp)"
+  if [[ "$category" == "extensions" ]]; then
+    script="$EXTENSIONS_DIR/verify_extensions.sh"
+  else
+    script="$VERIFY_DIR/verify_${category}.sh"
+  fi
 
-  # Capture ALL output explicitly
-  for script in "$dir"/verify_*.sh; do
-    [[ -f "$script" ]] || continue
-    echo "→ Running $(basename "$script")" >>"$tmp"
-    echo "--------------------------------------" >>"$tmp"
-    bash "$script" >>"$tmp" 2>&1 || true
-    echo >>"$tmp"
-  done
+  if [[ ! -f "$script" ]]; then
+    echo "⚠ No verify script found for category '$category'"
+    pause
+    return
+  fi
 
-  # Replay output
-  cat "$tmp"
-  rm -f "$tmp"
+  set +e
+  run_script_tty "$script"
+  rc=$?
+  set -e
 
   echo
-  gum style --foreground 241 "Verification complete."
-  pause_and_clear
+  if [[ "$rc" -eq 0 ]]; then
+    echo "✓ Verification category '$category' PASSED"
+  else
+    echo "⚠ Verification category '$category' FAILED"
+  fi
+
+  pause
 }
 
 uninstall_category() {
@@ -115,53 +137,55 @@ uninstall_category() {
 
   clear
   gum style --border normal --padding "1 2" "UNINSTALL: $category"
+  echo
 
   for script in "$dir"/uninstall_*.sh; do
     [[ -f "$script" ]] || continue
     run_script "$script"
+    echo
   done
 
   rm -f "$INSTALLED_DIR/$category"
-  pause_and_clear
+  pause
 }
 
 # --------------------------------------------------
 # Menus
 # --------------------------------------------------
 install_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
-    | gum choose --no-limit)
+  local selections
+  selections="$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
+    | gum choose --no-limit)"
 
-  [[ -z "$choices" ]] && return
+  [[ -z "$selections" ]] && return
 
-  for choice in $choices; do
+  for choice in $selections; do
     [[ "$choice" == "back" ]] && return
     run_category "$choice"
   done
 }
 
 verify_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
-    | gum choose --no-limit)
+  local selections
+  selections="$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
+    | gum choose --no-limit)"
 
-  [[ -z "$choices" ]] && return
+  [[ -z "$selections" ]] && return
 
-  for choice in $choices; do
+  for choice in $selections; do
     [[ "$choice" == "back" ]] && return
     verify_category "$choice"
   done
 }
 
 uninstall_menu() {
-  local choices
-  choices=$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
-    | gum choose --no-limit)
+  local selections
+  selections="$(printf "core\ncli\ndesktop\nsecurity\nextensions\nback" \
+    | gum choose --no-limit)"
 
-  [[ -z "$choices" ]] && return
+  [[ -z "$selections" ]] && return
 
-  for choice in $choices; do
+  for choice in $selections; do
     [[ "$choice" == "back" ]] && return
     uninstall_category "$choice"
   done
@@ -175,14 +199,14 @@ main_menu() {
     clear
     gum style --border double --padding "1 4" "Linux Dotfiles Onboarding"
 
-    choice=$(printf "Install components\nVerify system\nUninstall components\nExit\n" \
-      | gum choose)
+    choice="$(printf "Install components\nVerify system\nUninstall components\nExit\n" \
+      | gum choose)"
 
     case "$choice" in
       "Install components") install_menu ;;
       "Verify system") verify_menu ;;
       "Uninstall components") uninstall_menu ;;
-      "Exit") exit 0 ;;
+      "Exit") clear; exit 0 ;;
     esac
   done
 }

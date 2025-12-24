@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 #
+# Script : desktop-native-apps.sh
+# Version: 1.2.0
+#
+# Version history:
+# - 1.0.0 : Initial implementation (native APT installs only)
+# - 1.1.0 : Added Spotify (official APT) and RustDesk (official .deb)
+# - 1.2.0 : Enforced strict idempotency (install only if missing)
+#
+# Versioning scheme (lightweight semver):
+# - MAJOR : UX changes, structural rewrites, behavior changes
+# - MINOR : Logic fixes, flow fixes, feature additions
+# - PATCH : Comments, logging, safety (no behavior change)
+#
 # Helper rules:
 # - stdout is DATA ONLY
 # - stderr is logs / progress / errors
@@ -9,11 +22,13 @@
 # - Official sources only
 # - APT preferred
 # - NO SNAP
-# - Idempotent (install-once, no rework)
+# - Idempotent (install only if missing)
 
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
+SCRIPT_VERSION="1.2.0"
+
 STATE_BASE="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
 LOG_DIR="$STATE_BASE/logs"
 LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
@@ -26,10 +41,11 @@ mkdir -p "$LOG_DIR" "$STATE_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
-echo "[$SCRIPT_NAME] Installing Desktop Native Apps (APT)"
-echo "Policy: Official sources only | NO SNAP"
-echo "Date: $(date)"
-echo "Log : $LOG_FILE"
+echo "[$SCRIPT_NAME] Desktop Native Apps Installer"
+echo "Version: $SCRIPT_VERSION"
+echo "Policy : Official sources only | NO SNAP"
+echo "Date   : $(date)"
+echo "Log    : $LOG_FILE"
 echo "=================================================="
 
 # --------------------------------------------------

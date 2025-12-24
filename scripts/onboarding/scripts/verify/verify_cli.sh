@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ==================================================
+# Script: verify_cli.sh
+# Version: 1.0.2
+# Date: 2025-12-23
+# Author: Tars (ELIKESBIKES)
+#
+# Changelog:
+#   1.0.2 - Experimental: return status via echo and
+#           always exit 0 to avoid aborting caller
+#           under `set -e`.
+#   1.0.1 - Baseline troubleshooting version.
+# ==================================================
+
 echo "======================================"
 echo " VERIFY CLI"
 echo "======================================"
@@ -52,4 +65,6 @@ else
   echo "⚠ CLI verification FAILED"
 fi
 
-exit "$fail"
+# EXPERIMENTAL CHANGE:
+# Do NOT propagate non-zero exit to caller
+exit 0

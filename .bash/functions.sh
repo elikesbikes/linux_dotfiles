@@ -326,5 +326,51 @@ gpull_tutorials() {
   popd > /dev/null
 }
 
+# ------------------------------------------------------------
+# gacp_tutorials_wcopy
+# ------------------------------------------------------------
+# Copies a docker project into the tutorials repo and runs gacp.
+#
+# Source:
+#   /home/ecloaiza/devops/docker/<project>
+#
+# Destination:
+#   /home/ecloaiza/devops/github/tutorials/docker-compose/<project>
+#
+# Usage:
+#   gacp_tutorials_wcopy <source_path> "Commit message"
+# ------------------------------------------------------------
+gacp_tutorials_wcopy() {
+  local SRC_PATH="$1"
+  shift || true
+
+  if [[ -z "${SRC_PATH}" || ! -d "${SRC_PATH}" ]]; then
+    echo "ERROR: Source path must be an existing directory"
+    return 1
+  fi
+
+  local PROJECT_NAME
+  PROJECT_NAME="$(basename "${SRC_PATH}")"
+
+  local TUTORIALS_ROOT="/home/ecloaiza/devops/github/tutorials"
+  local DEST_PATH="${TUTORIALS_ROOT}/docker-compose/${PROJECT_NAME}"
+
+  echo "Copying project:"
+  echo "  Source      : ${SRC_PATH}"
+  echo "  Destination : ${DEST_PATH}"
+
+  mkdir -p "${DEST_PATH}"
+
+  # Copy contents, not the parent folder itself
+  rsync -a --delete \
+    --exclude=".git" \
+    "${SRC_PATH}/" \
+    "${DEST_PATH}/"
+
+  pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
 
 echo "Git helper functions loaded (gacp, gcap, gcpp, dotfiles, tutorials, ssh)."

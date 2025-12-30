@@ -3,13 +3,25 @@ set -euo pipefail
 
 #####################################
 # nfs-auto-mount.sh
-# Version: 1.1.1-dev
+# Version: 1.1.2
 #
-# Status: ACTIVE ITERATION (NOT FROZEN)
+# Status: FROZEN / PRODUCTION
 #
-# Changelog (cumulative)
-# - 1.1.0: Replaced ICMP ping with TCP/2049 health check; time-bounded unmounts
-# - 1.1.1-dev: Normalize mount points & exports to fix trailing-slash mismatch
+# Description:
+# Safely manages NFS mounts by mounting when the NFS transport
+# is reachable and forcibly detaching stale mounts when it is not.
+# Designed to be cron-safe and resilient against stale NFS hangs.
+#
+# Changelog (cumulative):
+# - 1.1.0:
+#   * Replaced ICMP ping with TCP/2049 health check
+#   * Time-bounded forced lazy unmounts to prevent hangs
+# - 1.1.1:
+#   * Normalize mount points and exports to remove trailing slashes
+#   * Fix false-negative mount detection for stubborn NFS mounts
+# - 1.1.2:
+#   * Canonicalize logging to /var/log/nfs-auto-mount.log
+#   * Ensure consistent logging across cron, root, and manual runs
 #####################################
 
 #####################################
@@ -17,8 +29,8 @@ set -euo pipefail
 #####################################
 HOSTNAME="$(hostname -s)"
 
-DEFAULT_LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/nfs-auto-mount"
-DEFAULT_LOG_FILE="$DEFAULT_LOG_DIR/nfs-auto-mount.log"
+# Canonical log file (override allowed via LOG_FILE env)
+DEFAULT_LOG_FILE="/var/log/nfs-auto-mount.log"
 LOG_FILE="${LOG_FILE:-$DEFAULT_LOG_FILE}"
 
 DEFAULT_ENV_FILE_1="/home/ecloaiza/.nfs-mount.env"   # preferred (hidden)
@@ -30,8 +42,10 @@ DEFAULT_ENV_FILE_2="/home/ecloaiza/nfs-mount.env"    # legacy
 log() {
   local msg="[$(date '+%Y-%m-%d %H:%M:%S')] [$HOSTNAME] $*"
   echo "$msg"
+
+  # Best-effort append; never fail the script
   {
-    mkdir -p "$(dirname "$LOG_FILE")"
+    touch "$LOG_FILE"
     echo "$msg" >> "$LOG_FILE"
   } 2>/dev/null || true
 }
@@ -60,7 +74,7 @@ source "$ENV_FILE"
 #####################################
 # VALIDATION
 #####################################
-: "${NFS_MOUNTS:?NFS_MOUNTS must be defined}"
+: "${NFS_MOUNTS:?NFS_MOUNTS must be defined in the env file}"
 
 NFS_PORT="${NFS_PORT:-2049}"
 NFS_CONNECT_TIMEOUT_SECONDS="${NFS_CONNECT_TIMEOUT_SECONDS:-2}"
@@ -69,7 +83,6 @@ UMOUNT_TIMEOUT_SECONDS="${UMOUNT_TIMEOUT_SECONDS:-5}"
 #####################################
 # HELPERS
 #####################################
-
 normalize_path() {
   local p="$1"
   [[ "$p" != "/" ]] && p="${p%/}"
@@ -107,7 +120,8 @@ safe_umount_lazy_force() {
 #####################################
 log "========================================"
 log "NFS auto-mount run starting"
-log "Version: 1.1.1-dev"
+log "Version: 1.1.2 (FROZEN)"
+log "Log file: $LOG_FILE"
 log "Using env: $ENV_FILE"
 log "========================================"
 
@@ -119,7 +133,7 @@ while IFS= read -r line; do
 
   IFS='|' read -r NAS_IP NFS_EXPORT MOUNT_POINT MOUNT_OPTS <<< "$line"
 
-  # 🔑 Normalize paths (critical fix)
+  # Canonicalize paths
   NFS_EXPORT="$(normalize_path "$NFS_EXPORT")"
   MOUNT_POINT="$(normalize_path "$MOUNT_POINT")"
 
@@ -129,7 +143,6 @@ while IFS= read -r line; do
   log "Mount:  $MOUNT_POINT"
   log "Opts:   $MOUNT_OPTS"
 
-  # IMPORTANT: NFS transport check FIRST
   if nfs_transport_ok "$NAS_IP" "$NFS_PORT"; then
     log "NFS transport reachable on TCP/$NFS_PORT"
 
@@ -149,7 +162,6 @@ while IFS= read -r line; do
   else
     log "NFS transport NOT reachable on TCP/$NFS_PORT"
 
-    # DO NOT touch the mount path except for umount
     if is_mounted_proc "$NAS_IP" "$NFS_EXPORT" "$MOUNT_POINT"; then
       log "Stale/blocked NFS mount detected → forcing lazy unmount"
       if safe_umount_lazy_force "$MOUNT_POINT"; then

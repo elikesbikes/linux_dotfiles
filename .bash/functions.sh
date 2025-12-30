@@ -329,31 +329,35 @@ gpull_tutorials() {
 # ------------------------------------------------------------
 # gacp_tutorials_wcopy
 # ------------------------------------------------------------
-# Copies a docker project into the tutorials repo and runs gacp.
+# Copies a docker project from devops/docker into the tutorials
+# repo and runs gacp.
 #
 # Source:
 #   /home/ecloaiza/devops/docker/<project>
 #
 # Destination:
-#   /home/ecloaiza/devops/github/tutorials/docker-compose/<project>
+#   tutorials/docker-compose/<project>
 #
 # Usage:
-#   gacp_tutorials_wcopy <source_path> "Commit message"
+#   gacp_tutorials_wcopy <project> "Commit message"
 # ------------------------------------------------------------
 gacp_tutorials_wcopy() {
-  local SRC_PATH="$1"
+  local PROJECT_NAME="$1"
   shift || true
 
-  if [[ -z "${SRC_PATH}" || ! -d "${SRC_PATH}" ]]; then
-    echo "ERROR: Source path must be an existing directory"
+  if [[ -z "${PROJECT_NAME}" ]]; then
+    echo "ERROR: Project name is required"
     return 1
   fi
 
-  local PROJECT_NAME
-  PROJECT_NAME="$(basename "${SRC_PATH}")"
-
+  local SRC_PATH="/home/ecloaiza/devops/docker/${PROJECT_NAME}"
   local TUTORIALS_ROOT="/home/ecloaiza/devops/github/tutorials"
   local DEST_PATH="${TUTORIALS_ROOT}/docker-compose/${PROJECT_NAME}"
+
+  if [[ ! -d "${SRC_PATH}" ]]; then
+    echo "ERROR: Source project does not exist: ${SRC_PATH}"
+    return 1
+  fi
 
   echo "Copying project:"
   echo "  Source      : ${SRC_PATH}"
@@ -361,7 +365,6 @@ gacp_tutorials_wcopy() {
 
   mkdir -p "${DEST_PATH}"
 
-  # Copy contents, not the parent folder itself
   rsync -a --delete \
     --exclude=".git" \
     "${SRC_PATH}/" \
@@ -370,6 +373,54 @@ gacp_tutorials_wcopy() {
   pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
   gacp "$@"
   popd > /dev/null
+}
+
+# ------------------------------------------------------------
+# gpull_tutorials_wcopy
+# ------------------------------------------------------------
+# Pulls latest changes in the tutorials repo and copies a
+# docker-compose project back into the devops/docker workspace.
+#
+# Source:
+#   tutorials/docker-compose/<project>
+#
+# Destination:
+#   /home/ecloaiza/devops/docker/<project>
+#
+# Usage:
+#   gpull_tutorials_wcopy <project>
+# ------------------------------------------------------------
+gpull_tutorials_wcopy() {
+  local PROJECT_NAME="$1"
+
+  if [[ -z "${PROJECT_NAME}" ]]; then
+    echo "ERROR: Project name is required"
+    return 1
+  fi
+
+  local TUTORIALS_ROOT="/home/ecloaiza/devops/github/tutorials"
+  local SRC_PATH="${TUTORIALS_ROOT}/docker-compose/${PROJECT_NAME}"
+  local DEST_PATH="/home/ecloaiza/devops/docker/${PROJECT_NAME}"
+
+  if [[ ! -d "${SRC_PATH}" ]]; then
+    echo "ERROR: Source project does not exist: ${SRC_PATH}"
+    return 1
+  fi
+
+  pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
+  gpull
+  popd > /dev/null
+
+  echo "Copying project:"
+  echo "  Source      : ${SRC_PATH}"
+  echo "  Destination : ${DEST_PATH}"
+
+  mkdir -p "${DEST_PATH}"
+
+  rsync -a --delete \
+    --exclude=".git" \
+    "${SRC_PATH}/" \
+    "${DEST_PATH}/"
 }
 
 

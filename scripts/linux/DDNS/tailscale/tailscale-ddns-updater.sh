@@ -2,13 +2,13 @@
 
 # ============================================
 # Tailscale Cloudflare DNS Updater
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Tailscale DDNS Script
 # ============================================
 
 # Configuration
 SCRIPT_NAME="tailscale-ddns-updater"
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.1.0"
 LOG_DIR="/var/log/${SCRIPT_NAME}"
 LOG_FILE="${LOG_DIR}/${SCRIPT_NAME}.log"
 CONFIG_DIR="/home/ecloaiza"
@@ -17,7 +17,7 @@ STATE_FILE="${CONFIG_DIR}/.tailscale-ddns.state"
 LOCK_FILE="/tmp/${SCRIPT_NAME}.lock"
 
 # Cloudflare DNS Configuration
-DNS_RECORD_NAME="ranger0.home"
+DNS_RECORD_NAME="ranger0.home.elikesbikes.com"
 DNS_RECORD_TYPE="A"
 
 # Tailscale interface (default, but can be overridden)
@@ -32,12 +32,14 @@ setup_logging() {
     if [ ! -d "${LOG_DIR}" ]; then
         mkdir -p "${LOG_DIR}"
         chmod 755 "${LOG_DIR}"
+        log_info "Created log directory: ${LOG_DIR}"
     fi
     
     # Create log file if it doesn't exist
     if [ ! -f "${LOG_FILE}" ]; then
         touch "${LOG_FILE}"
         chmod 644 "${LOG_FILE}"
+        log_info "Created log file: ${LOG_FILE}"
     fi
 }
 
@@ -46,7 +48,12 @@ log_message() {
     local message="$2"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
-    echo "[${timestamp}] [${level}] ${message}" | tee -a "${LOG_FILE}"
+    # Log to file and stdout
+    if [ -f "${LOG_FILE}" ]; then
+        echo "[${timestamp}] [${level}] ${message}" | tee -a "${LOG_FILE}" >/dev/null
+    else
+        echo "[${timestamp}] [${level}] ${message}"
+    fi
 }
 
 log_info() {
@@ -55,6 +62,10 @@ log_info() {
 
 log_error() {
     log_message "ERROR" "$1"
+}
+
+log_warning() {
+    log_message "WARNING" "$1"
 }
 
 log_debug() {
@@ -69,17 +80,18 @@ load_configuration() {
     if [ ! -f "${ENV_FILE}" ]; then
         log_error "Configuration file not found: ${ENV_FILE}"
         log_error "Please create the configuration file with the following variables:"
-        log_error "  CLOUDFLARE_API_TOKEN=your_api_token_here"
-        log_error "  CLOUDFLARE_ZONE_ID=your_zone_id_here"
-        log_error "  CLOUDFLARE_RECORD_ID=your_record_id_here"
+        log_error "  CLOUDFLARE_EMAIL=your_email@example.com"
+        log_error "  CLOUDFLARE_API_KEY=your_global_api_key"
+        log_error "  CLOUDFLARE_ZONE_ID=your_zone_id"
+        log_error "  CLOUDFLARE_RECORD_ID=your_record_id"
         exit 1
     fi
     
     # Load environment variables
     source "${ENV_FILE}"
     
-    # Validate required variables
-    local required_vars=("CLOUDFLARE_API_TOKEN" "CLOUDFLARE_ZONE_ID" "CLOUDFLARE_RECORD_ID")
+    # Validate required variables for Global API Key
+    local required_vars=("CLOUDFLARE_EMAIL" "CLOUDFLARE_API_KEY" "CLOUDFLARE_ZONE_ID" "CLOUDFLARE_RECORD_ID")
     local missing_vars=()
     
     for var in "${required_vars[@]}"; do
@@ -94,6 +106,9 @@ load_configuration() {
     fi
     
     log_info "Configuration loaded successfully"
+    log_debug "Using Cloudflare email: ${CLOUDFLARE_EMAIL}"
+    log_debug "Zone ID: ${CLOUDFLARE_ZONE_ID}"
+    log_debug "Record ID: ${CLOUDFLARE_RECORD_ID}"
 }
 
 # ============================================
@@ -146,33 +161,19 @@ get_tailscale_ip() {
     return 0
 }
 
-get_current_dns_ip() {
-    local dns_ip
-    
-    # Use dig to query Cloudflare DNS directly
-    dns_ip=$(dig +short ${DNS_RECORD_NAME} @1.1.1.1 2>/dev/null | head -n1)
-    
-    if [ -z "${dns_ip}" ]; then
-        log_warning "Could not resolve DNS record for ${DNS_RECORD_NAME}"
-        echo ""
-        return 1
-    fi
-    
-    log_info "Current DNS IP: ${dns_ip}"
-    echo "${dns_ip}"
-    return 0
-}
-
 # ============================================
-# Cloudflare API Functions
+# Cloudflare API Functions (Global API Key Version)
 # ============================================
 
 get_cloudflare_record() {
     local response
     local current_ip
     
+    log_debug "Fetching DNS record from Cloudflare..."
+    
     response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records/${CLOUDFLARE_RECORD_ID}" \
-        -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+        -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
+        -H "X-Auth-Key: ${CLOUDFLARE_API_KEY}" \
         -H "Content-Type: application/json")
     
     if echo "${response}" | grep -q '"success":true'; then
@@ -191,10 +192,11 @@ update_cloudflare_dns() {
     local new_ip="$1"
     local response
     
-    log_info "Updating DNS record to ${new_ip}"
+    log_info "Updating DNS record ${DNS_RECORD_NAME} to ${new_ip}"
     
     response=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records/${CLOUDFLARE_RECORD_ID}" \
-        -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+        -H "X-Auth-Email: ${CLOUDFLARE_EMAIL}" \
+        -H "X-Auth-Key: ${CLOUDFLARE_API_KEY}" \
         -H "Content-Type: application/json" \
         --data "{\"type\":\"${DNS_RECORD_TYPE}\",\"name\":\"${DNS_RECORD_NAME}\",\"content\":\"${new_ip}\",\"ttl\":120,\"proxied\":false}")
     

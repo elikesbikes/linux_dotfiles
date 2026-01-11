@@ -16,3 +16,4 @@ alias takeover="sudo chown -R ecloaiza:ecloaiza *"
 alias fixperm="sudo chmod -R 775 *"
 alias idrive="/opt/IDriveForLinux/bin/idrive"
 alias sudoers="/home/ecloaiza/scripts/linux/install-sudoers.sh"
+alias syncn='unison obsidian_sync'

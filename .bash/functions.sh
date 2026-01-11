@@ -423,5 +423,57 @@ gpull_tutorials_wcopy() {
     "${DEST_PATH}/"
 }
 
+# ------------------------------------------------------------
+# gacp_homelab
+# ------------------------------------------------------------
+# Runs the gacp workflow inside the homelab repository.
+# Optionally supports creating and pushing an annotated Git tag.
+#
+# Usage:
+#   gacp_homelab "Commit message"
+#   gacp_homelab --tag v1.0.1 "Commit message"
+# ------------------------------------------------------------
+gacp_homelab() {
+    local TAG=""
+    local MESSAGE=""
+
+    # Argument handling for optional tagging
+    if [ "$1" = "--tag" ]; then
+        TAG="$2"
+        MESSAGE="$3"
+    else
+        MESSAGE="$1"
+    fi
+
+    # Validation: Ensure a message is provided
+    if [ -z "$MESSAGE" ]; then
+        echo "Error: Commit message is required."
+        return 1
+    fi
+
+    # Navigate to the homelab directory
+    if ! pushd /home/ecloaiza/devops/github/homelab > /dev/null; then
+        echo "Error: homelab repo path not found."
+        return 1
+    fi
+
+    # Execute the core gacp workflow
+    gacp "$MESSAGE" || {
+        popd > /dev/null
+        return 1
+    }
+
+    # Handle optional tagging logic
+    if [ -n "$TAG" ]; then
+        echo "--> Creating annotated tag: $TAG"
+        git tag -a "$TAG" -m "$MESSAGE" && git push origin "$TAG" || {
+            popd > /dev/null
+            return 1
+        }
+    fi
+
+    # Return to the original directory
+    popd > /dev/null
+}
 
 echo "Git helper functions loaded (gacp, gcap, gcpp, dotfiles, tutorials, ssh)."

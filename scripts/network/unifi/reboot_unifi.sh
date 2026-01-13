@@ -4,62 +4,73 @@
 # CHANGELOG
 # ------------------------------------------------------------------------------
 # DATE        | VERSION | AUTHOR             | CHANGE DESCRIPTION
-# 2026-01-13  | 2.1.0   | Tars (ELIKESBIKES) | Switched to SSH Jump Host pattern.
-#             |         |                    | Uses Agent Forwarding to bypass 
-#             |         |                    | Gateway password requirement.
-# 2026-01-13  | 2.0.0   | Tars (ELIKESBIKES) | Major Pivot: Gateway as Jump Host.
+# 2026-01-13  | 2.3.0   | Tars (ELIKESBIKES) | Relocated logs to /var/log/ and
+#             |         |                    | standardized logging logic.
+# 2026-01-13  | 2.2.0   | Tars (ELIKESBIKES) | Added 'tee' for live output.
 # ==============================================================================
 
-# --- Rule 2.2: Load Environment Variables ---
+# --- Rule 2.2: Load Environment ---
 ENV_FILE="$HOME/.unifi_ops.env"
 
 if [ -f "$ENV_FILE" ]; then
     source "$ENV_FILE"
 else
-    echo "ERROR: Environment file $ENV_FILE not found."
+    echo "CRITICAL ERROR: Environment file $ENV_FILE not found."
     exit 1
 fi
 
-VERSION="2.1.0"
-LOG_DIR="/home/ecloaiza/scripts/network/unifi/logs"
+VERSION="2.3.0"
+# --- Rule 2.5: Compliance - System-level logging ---
+LOG_DIR="/var/log/network/unifi"
 LOG_FILE="$LOG_DIR/reboot_$(date +%Y%m).log"
-mkdir -p "$LOG_DIR"
+
+# --- Function: Log and Print ---
+log_msg() {
+    # Ensure directory exists (Rule 2.4: Portability)
+    [ -d "$LOG_DIR" ] || mkdir -p "$LOG_DIR"
+    echo "[$VERSION] $(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
 
 notify() {
     local message="$1"
     if [ -n "$NTFY_TOPIC" ]; then
-        curl -H "Title: Jump-Host Reboot" -d "$message" "ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1
+        curl -s -H "Title: Network Maintenance" -d "$message" "ntfy.sh/$NTFY_TOPIC" > /dev/null 2>&1
     fi
 }
 
-START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-echo "[$START_TIME] [v$VERSION] Initiating Jump-Host sequence via $GATEWAY_IP..." >> "$LOG_FILE"
+# --- Pre-Flight Checks ---
+if ! ssh-add -l > /dev/null 2>&1; then
+    log_msg "ERROR: SSH agent empty. Loading key..."
+    ssh-add "$UNIFI_SSH_KEY" 2>/dev/null
+fi
+
+log_msg "Initiating sequence via Gateway Jump ($GATEWAY_IP)..."
 
 # --- Execution ---
 for AP_IP in $UNIFI_DEVICES; do
-    if [ "$AP_IP" == "$GATEWAY_IP" ]; then continue; fi
+    # Skip the Gateway as per earlier rules
+    [ "$AP_IP" == "$GATEWAY_IP" ] && continue
 
-    echo "[$AP_IP] Attempting reboot via Gateway jump..." >> "$LOG_FILE"
+    log_msg "Targeting Access Point: $AP_IP"
 
-    # Rule 2.4: Portability. 
-    # -J (Jump): Connects to Gateway, then tunnels to the AP.
-    # -o BatchMode: Prevents hanging if the AP rejects the key.
+    # SSH via Jump Host (Rule 2.4)
     ssh -i "$UNIFI_SSH_KEY" \
         -o BatchMode=yes \
         -o StrictHostKeyChecking=no \
+        -o ConnectTimeout=10 \
         -J "$UNIFI_USER@$GATEWAY_IP" \
         "$UNIFI_USER@$AP_IP" "reboot" >> "$LOG_FILE" 2>&1
 
     if [ $? -eq 0 ]; then
-        echo "[$AP_IP] Success: Reboot triggered." >> "$LOG_FILE"
+        log_msg "SUCCESS: Reboot signaled for $AP_IP."
     else
-        echo "[$AP_IP] FAILURE: Key rejected by AP or AP unreachable from Gateway." >> "$LOG_FILE"
+        log_msg "FAILURE: Could not signal $AP_IP. Review log for details."
     fi
 done
 
-END_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+log_msg "Sequence Complete."
 notify "UniFi AP Reboot Complete
-Mode: Jump-Host (v$VERSION)
-End: $END_TIME"
+Version: $VERSION
+Log: $LOG_FILE"
 
 exit 0

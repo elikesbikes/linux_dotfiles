@@ -359,16 +359,14 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
-  echo "Copying project:"
-  echo "  Source      : ${SRC_PATH}"
-  echo "  Destination : ${DEST_PATH}"
-
+  echo "Copying only YML files (flattened) to destination..."
+  
+  # Ensure destination exists
   mkdir -p "${DEST_PATH}"
 
-  rsync -a --delete \
-    --exclude=".git" \
-    "${SRC_PATH}/" \
-    "${DEST_PATH}/"
+  # 1. Find all .yml files in the source (including subdirectories)
+  # 2. Copy them (-t) into the destination folder (flattened)
+  find "${SRC_PATH}" -name "*.yml" -type f -exec cp -t "${DEST_PATH}/" {} +
 
   pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
   gacp "$@"

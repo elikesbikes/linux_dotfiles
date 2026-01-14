@@ -411,13 +411,14 @@ gpull_tutorials_wcopy() {
   gpull
   popd > /dev/null
 
-  echo "Copying project:"
+  echo "Copying project (Additive Mode):"
   echo "  Source      : ${SRC_PATH}"
   echo "  Destination : ${DEST_PATH}"
 
   mkdir -p "${DEST_PATH}"
 
-  rsync -a --delete \
+  # Removed --delete to ensure destination files are preserved
+  rsync -a \
     --exclude=".git" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"

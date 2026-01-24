@@ -360,7 +360,7 @@ gacp_tutorials_wcopy() {
   fi
 
   echo "Copying only YML files (flattened) to destination..."
-  
+
   # Ensure destination exists
   mkdir -p "${DEST_PATH}"
 
@@ -474,5 +474,32 @@ gacp_homelab() {
     # Return to the original directory
     popd > /dev/null
 }
+clone_tutorials() {
+    local base_dir="/home/ecloaiza/devops/github"
+    local tutorials_dir="$base_dir/tutorials"
+
+    # Check if tutorials directory exists and delete it
+    if [ -d "$tutorials_dir" ]; then
+        echo "Tutorials directory exists. Deleting $tutorials_dir..."
+        rm -rf "$tutorials_dir"
+    else
+        echo "Tutorials directory doesn't exist."
+    fi
+
+    # Create base directory if it doesn't exist
+    if [ ! -d "$base_dir" ]; then
+        echo "Creating $base_dir..."
+        mkdir -p "$base_dir"
+    fi
+
+    # Change to the base directory
+    cd "$base_dir" || return 1
+
+    # Clone the repository
+    echo "Cloning repository..."
+    git clone https://github.com/elikesbikes/tutorials.git
+}
+
+
 
 echo "Git helper functions loaded (gacp, gcap, gcpp, dotfiles, tutorials, ssh)."

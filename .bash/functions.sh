@@ -359,16 +359,32 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
+<<<<<<< HEAD
   echo "Copying only YML files (flattened) to destination..."
+=======
+  echo "Copying project (Filtered: .yml, .py, .sh):"
+  echo "  Source      : ${SRC_PATH}"
+  echo "  Destination : ${DEST_PATH}"
+>>>>>>> 7ce4ed0 (new keybind script)
 
   # Ensure destination exists
   mkdir -p "${DEST_PATH}"
 
-  # 1. Find all .yml files in the source (including subdirectories)
-  # 2. Copy them (-t) into the destination folder (flattened)
-  find "${SRC_PATH}" -name "*.yml" -type f -exec cp -t "${DEST_PATH}/" {} +
+  # -a: archive mode (preserves permissions, recursive)
+  # -m: prune empty directories
+  # Includes folders and specific extensions, excludes everything else
+  rsync -am \
+    --include="*/" \
+    --include="*.yml" \
+    --include="*.py" \
+    --include="*.sh" \
+    --exclude="*" \
+    "${SRC_PATH}/" \
+    "${DEST_PATH}/"
 
+  # Commit and push changes
   pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
+  # Assuming gacp is a defined alias or function (e.g., git add, commit, push)
   gacp "$@"
   popd > /dev/null
 }
@@ -406,18 +422,25 @@ gpull_tutorials_wcopy() {
   fi
 
   pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
-  gpull
+  # Assuming gpull is a defined alias or function in your environment
+  gpull 
   popd > /dev/null
 
-  echo "Copying project (Additive Mode):"
+  echo "Copying filtered files (.yml, .py, .sh):"
   echo "  Source      : ${SRC_PATH}"
   echo "  Destination : ${DEST_PATH}"
 
   mkdir -p "${DEST_PATH}"
 
-  # Removed --delete to ensure destination files are preserved
-  rsync -a \
-    --exclude=".git" \
+  # -a: archive mode
+  # -m: prune empty directories (doesn't copy folders that end up empty)
+  # include "*/" allows rsync to recurse into subdirectories
+  rsync -am \
+    --include="*/" \
+    --include="*.yml" \
+    --include="*.py" \
+    --include="*.sh" \
+    --exclude="*" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"
 }

@@ -1,0 +1,17 @@
+# Dock Configuration Backup
+# Generated: Sat Jan 31 11:29:15 AM PST 2026
+
+## Favorite Applications (Dock Icons)
+  - kitty.desktop
+  - brave-browser.desktop
+  - code.desktop
+  - org.remmina.Remmina.desktop
+  - proton-pass.desktop
+  - Proton Authenticator.desktop
+  - md.obsidian.Obsidian.desktop
+  - Activity.desktop
+  - Omakub.desktop
+  - org.gnome.Nautilus.desktop
+  - spotify.desktop
+  - todoist_todoist.desktop
+  - org.gnome.Epiphany.WebApp_youtube.desktop

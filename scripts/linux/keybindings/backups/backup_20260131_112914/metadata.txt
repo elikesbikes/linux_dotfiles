@@ -1,0 +1,42 @@
+# Backup Metadata
+Timestamp: 20260131_112914
+Date: Sat Jan 31 11:29:15 AM PST 2026
+Hostname: tars
+User: ecloaiza
+Ubuntu Version: Ubuntu 24.04.3 LTS
+Desktop Environment: ubuntu:GNOME
+Session Type: x11
+
+# Installed Extensions
+kiwi@kemma
+undecorate@sun.wxg@gmail.com
+AlphabeticalAppGrid@stuarthayhurst
+appmenu-is-back@fthx
+background-logo@fedorahosted.org
+blur-my-shell@aunetx
+tophat@fflewddur.github.io
+apps-menu@gnome-shell-extensions.gcampax.github.com
+unlockDialogBackground@sun.wxg@gmail.com
+just-perfection-desktop@just-perfection
+space-bar@luchrioh
+Vitals@CoreCoding.com
+logomenu@aryan_k
+caffeine@patapon.info
+tactile@lundal.io
+appindicatorsupport@rgcjonas.gmail.com
+tiling-assistant@ubuntu.com
+workspace-indicator@gnome-shell-extensions.gcampax.github.com
+auto-move-windows@gnome-shell-extensions.gcampax.github.com
+native-window-placement@gnome-shell-extensions.gcampax.github.com
+ubuntu-appindicators@ubuntu.com
+drive-menu@gnome-shell-extensions.gcampax.github.com
+places-menu@gnome-shell-extensions.gcampax.github.com
+user-theme@gnome-shell-extensions.gcampax.github.com
+ubuntu-dock@ubuntu.com
+screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com
+window-list@gnome-shell-extensions.gcampax.github.com
+launch-new-instance@gnome-shell-extensions.gcampax.github.com
+ding@rastersoft.com
+light-style@gnome-shell-extensions.gcampax.github.com
+system-monitor@gnome-shell-extensions.gcampax.github.com
+windowsNavigator@gnome-shell-extensions.gcampax.github.com

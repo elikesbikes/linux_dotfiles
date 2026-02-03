@@ -359,13 +359,7 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
-<<<<<<< HEAD
   echo "Copying only YML files (flattened) to destination..."
-=======
-  echo "Copying project (Filtered: .yml, .py, .sh):"
-  echo "  Source      : ${SRC_PATH}"
-  echo "  Destination : ${DEST_PATH}"
->>>>>>> 7ce4ed0 (new keybind script)
 
   # Ensure destination exists
   mkdir -p "${DEST_PATH}"

@@ -6,7 +6,7 @@ set -euo pipefail
 # ==================================================
 
 # Proxmox connection (use the hostname that works with BatchMode!)
-PROXMOX_HOST="proxmox-prod-2s"
+PROXMOX_HOST="proxmox-prod-1s"
 PROXMOX_USER="root"
 SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
 

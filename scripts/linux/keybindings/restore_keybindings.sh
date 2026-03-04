@@ -1,15 +1,19 @@
 #!/bin/bash
 
 ###############################################################################
-# Ubuntu Keybindings and Dock Restore Script
+# Ubuntu Keybindings and Dock Restore Script (IMPROVED)
 # 
 # This script restores:
 # - GNOME keybindings (all or custom only)
 # - Dock/Dash-to-Dock configuration
 # - Favorite applications (dock icons)
 #
+# IMPROVEMENTS:
+# - Merge or Replace option for custom keybindings
+# - Automatic safety backup before restore
+# - Better error handling
+#
 # Author: ecloaiza
-# Created: $(date +%Y-%m-%d)
 ###############################################################################
 
 set -e  # Exit on error
@@ -27,7 +31,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="${SCRIPT_DIR}/backups"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Ubuntu Keybindings & Dock Restore Script             ║${NC}"
+echo -e "${BLUE}║  Ubuntu Keybindings & Dock Restore Script (v2)        ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -38,30 +42,23 @@ select_backup() {
     echo -e "${YELLOW}Available backups:${NC}"
     echo ""
     
-    # Check if backup directory exists
     if [ ! -d "${BACKUP_DIR}" ]; then
         echo -e "${RED}Error: No backup directory found at ${BACKUP_DIR}${NC}"
         exit 1
     fi
     
-    # List available backups
     local backups=($(ls -1dt "${BACKUP_DIR}"/backup_* 2>/dev/null || true))
     
     if [ ${#backups[@]} -eq 0 ]; then
-        echo -e "${RED}Error: No backups found in ${BACKUP_DIR}${NC}"
-        echo ""
-        echo "Please run the backup script first:"
-        echo "  ./backup_keybindings.sh"
+        echo -e "${RED}Error: No backups found${NC}"
         exit 1
     fi
     
-    # Show backups with index
     local i=1
     for backup in "${backups[@]}"; do
         local backup_name=$(basename "$backup")
         local backup_date=$(echo "$backup_name" | sed 's/backup_//' | sed 's/_/ /')
         
-        # Check if metadata exists
         if [ -f "$backup/metadata.txt" ]; then
             local ubuntu_version=$(grep "Ubuntu Version:" "$backup/metadata.txt" | cut -d: -f2- | xargs)
             local hostname=$(grep "Hostname:" "$backup/metadata.txt" | cut -d: -f2 | xargs)
@@ -74,8 +71,7 @@ select_backup() {
         ((i++))
     done
     
-    # Let user select backup
-    echo -e -n "${YELLOW}Select backup to restore [1-${#backups[@]}] or 'latest': ${NC}"
+    echo -e -n "${YELLOW}Select backup [1-${#backups[@]}] or 'latest': ${NC}"
     read -r selection
     
     if [ "$selection" = "latest" ] || [ "$selection" = "l" ]; then
@@ -93,7 +89,7 @@ select_backup() {
     fi
     
     echo ""
-    echo -e "${GREEN}Selected backup: $(basename "$SELECTED_BACKUP")${NC}"
+    echo -e "${GREEN}Selected: $(basename "$SELECTED_BACKUP")${NC}"
     echo ""
 }
 
@@ -101,43 +97,56 @@ select_backup() {
 # Function to ask restore scope
 ###############################################################################
 ask_restore_scope() {
-    echo -e "${YELLOW}What would you like to restore?${NC}"
+    echo -e "${YELLOW}What to restore?${NC}"
     echo ""
     echo -e "${CYAN}[1]${NC} Custom keybindings only"
     echo -e "${CYAN}[2]${NC} All keybindings (system + custom)"
     echo -e "${CYAN}[3]${NC} Dock configuration only"
-    echo -e "${CYAN}[4]${NC} Everything (all keybindings + dock)"
+    echo -e "${CYAN}[4]${NC} Everything"
     echo ""
-    echo -e -n "${YELLOW}Your choice [1-4]: ${NC}"
+    echo -e -n "${YELLOW}Choice [1-4]: ${NC}"
     read -r RESTORE_CHOICE
     
     case $RESTORE_CHOICE in
-        1)
-            RESTORE_CUSTOM_ONLY=true
-            RESTORE_ALL_KEYBINDINGS=false
-            RESTORE_DOCK=false
-            ;;
-        2)
-            RESTORE_CUSTOM_ONLY=false
-            RESTORE_ALL_KEYBINDINGS=true
-            RESTORE_DOCK=false
-            ;;
-        3)
-            RESTORE_CUSTOM_ONLY=false
-            RESTORE_ALL_KEYBINDINGS=false
-            RESTORE_DOCK=true
-            ;;
-        4)
-            RESTORE_CUSTOM_ONLY=false
-            RESTORE_ALL_KEYBINDINGS=true
-            RESTORE_DOCK=true
-            ;;
-        *)
-            echo -e "${RED}Invalid choice${NC}"
-            exit 1
-            ;;
+        1) RESTORE_CUSTOM_ONLY=true; RESTORE_ALL_KEYBINDINGS=false; RESTORE_DOCK=false ;;
+        2) RESTORE_CUSTOM_ONLY=false; RESTORE_ALL_KEYBINDINGS=true; RESTORE_DOCK=false ;;
+        3) RESTORE_CUSTOM_ONLY=false; RESTORE_ALL_KEYBINDINGS=false; RESTORE_DOCK=true ;;
+        4) RESTORE_CUSTOM_ONLY=false; RESTORE_ALL_KEYBINDINGS=true; RESTORE_DOCK=true ;;
+        *) echo -e "${RED}Invalid${NC}"; exit 1 ;;
     esac
     echo ""
+    
+    if [ "$RESTORE_CUSTOM_ONLY" = true ] || [ "$RESTORE_ALL_KEYBINDINGS" = true ]; then
+        echo -e "${YELLOW}How to restore custom keybindings?${NC}"
+        echo ""
+        echo -e "${CYAN}[1]${NC} Merge - Add to existing ${GREEN}(SAFE - recommended)${NC}"
+        echo -e "${CYAN}[2]${NC} Replace - Delete all existing first ${RED}(DESTRUCTIVE)${NC}"
+        echo ""
+        echo -e -n "${YELLOW}Choice [1-2]: ${NC}"
+        read -r MERGE_CHOICE
+        
+        case $MERGE_CHOICE in
+            1) MERGE_KEYBINDINGS=true; echo -e "${GREEN}Will merge${NC}" ;;
+            2) MERGE_KEYBINDINGS=false; echo -e "${YELLOW}Will replace${NC}" ;;
+            *) MERGE_KEYBINDINGS=true; echo -e "${YELLOW}Defaulting to merge${NC}" ;;
+        esac
+        echo ""
+    fi
+}
+
+###############################################################################
+# Function to create safety backup
+###############################################################################
+create_safety_backup() {
+    echo -e "${YELLOW}[•] Creating safety backup...${NC}"
+    
+    SAFETY_BACKUP_DIR="${BACKUP_DIR}/safety_backup_$(date +%Y%m%d_%H%M%S)"
+    mkdir -p "$SAFETY_BACKUP_DIR"
+    
+    dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ > "${SAFETY_BACKUP_DIR}/custom-keybindings.dconf" 2>/dev/null || true
+    gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings > "${SAFETY_BACKUP_DIR}/custom-paths.txt" 2>/dev/null || true
+    
+    echo -e "${GREEN}  ✓ Safety backup: ${SAFETY_BACKUP_DIR}${NC}"
 }
 
 ###############################################################################
@@ -149,22 +158,102 @@ restore_custom_keybindings() {
     local custom_kb_file="${SELECTED_BACKUP}/custom-keybindings.dconf"
     
     if [ ! -f "$custom_kb_file" ]; then
-        echo -e "${RED}  ✗ Custom keybindings backup not found${NC}"
+        echo -e "${RED}  ✗ Backup file not found${NC}"
         return 1
     fi
     
-    # Clear existing custom keybindings first
-    echo "  - Clearing existing custom keybindings..."
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
+    create_safety_backup
     
-    # Restore custom keybindings
-    echo "  - Loading custom keybindings from backup..."
-    dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "$custom_kb_file"
+    if [ "$MERGE_KEYBINDINGS" = true ]; then
+        echo "  - Mode: MERGE (preserving existing)"
+        
+        # Get current paths
+        local current_paths=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null)
+        
+        # Find highest number
+        local max_num=0
+        if [ "$current_paths" != "[]" ] && [ "$current_paths" != "@as []" ]; then
+            max_num=$(echo "$current_paths" | grep -oP "custom[0-9]+" | sed 's/custom//' | sort -n | tail -1 || echo "0")
+            max_num=$((max_num + 1))
+        fi
+        
+        # Load backup to temp location first
+        local temp_restore="/tmp/custom-kb-restore-$$"
+        dconf dump /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ > "$temp_restore" 2>/dev/null
+        dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "$custom_kb_file"
+        
+        # Get what was just loaded
+        local backup_paths=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+        
+        # Restore original
+        if [ -f "$temp_restore" ]; then
+            dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "$temp_restore"
+            rm "$temp_restore"
+        fi
+        
+        # Now merge them
+        local base_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+        local new_paths=()
+        
+        # Extract each keybinding from backup and create with new number
+        echo "$backup_paths" | tr -d "[]'" | tr ',' '\n' | while read -r path; do
+            path=$(echo "$path" | xargs)
+            if [ -n "$path" ]; then
+                # Get the keybinding details from backup (temporarily load it)
+                dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "$custom_kb_file"
+                
+                local name=$(gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" name 2>/dev/null || echo "")
+                local command=$(gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" command 2>/dev/null || echo "")
+                local binding=$(gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" binding 2>/dev/null || echo "")
+                
+                # Restore current state
+                if [ -f "${SAFETY_BACKUP_DIR}/custom-keybindings.dconf" ]; then
+                    dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "${SAFETY_BACKUP_DIR}/custom-keybindings.dconf"
+                fi
+                
+                if [ -n "$name" ] && [ "$name" != "''" ]; then
+                    local new_path="${base_path}/custom${max_num}/"
+                    
+                    echo "    + $(echo $name | tr -d "'")"
+                    
+                    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${new_path}" name "$name"
+                    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${new_path}" command "$command"
+                    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${new_path}" binding "$binding"
+                    
+                    new_paths+=("'${new_path}'")
+                    max_num=$((max_num + 1))
+                fi
+            fi
+        done
+        
+        # Update paths list
+        if [ ${#new_paths[@]} -gt 0 ]; then
+            local all_paths=()
+            
+            if [ "$current_paths" != "[]" ] && [ "$current_paths" != "@as []" ]; then
+                while IFS= read -r p; do
+                    [ -n "$p" ] && all_paths+=("$p")
+                done < <(echo "$current_paths" | tr -d '[]' | tr ',' '\n' | xargs -n1 echo)
+            fi
+            
+            all_paths+=("${new_paths[@]}")
+            
+            local combined=$(printf "%s," "${all_paths[@]}")
+            combined="[${combined%,}]"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$combined"
+        fi
+        
+    else
+        echo "  - Mode: REPLACE (deleting all existing)"
+        
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
+        dconf reset -f /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/
+        
+        dconf load /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ < "$custom_kb_file"
+    fi
     
-    # Verify restoration
-    local restored_count=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings | grep -o '/' | wc -l)
-    
-    echo -e "${GREEN}  ✓ Custom keybindings restored (${restored_count} custom keybindings)${NC}"
+    local final_count=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings | grep -o '/' | wc -l)
+    echo -e "${GREEN}  ✓ Done (${final_count} total keybindings)${NC}"
 }
 
 ###############################################################################
@@ -173,7 +262,7 @@ restore_custom_keybindings() {
 restore_all_keybindings() {
     echo -e "${YELLOW}[•] Restoring all keybindings...${NC}"
     
-    local keybinding_schemas=(
+    local schemas=(
         "org.gnome.desktop.wm.keybindings"
         "org.gnome.mutter.keybindings"
         "org.gnome.mutter.wayland.keybindings"
@@ -181,138 +270,88 @@ restore_all_keybindings() {
         "org.gnome.shell.keybindings"
     )
     
-    for schema in "${keybinding_schemas[@]}"; do
-        local schema_file="${SELECTED_BACKUP}/${schema}.dconf"
-        
-        if [ -f "$schema_file" ]; then
-            echo "  - Restoring ${schema}..."
-            dconf load "/${schema//./\/}/" < "$schema_file"
-        else
-            echo "  - Skipping ${schema} (not found in backup)"
+    for schema in "${schemas[@]}"; do
+        local file="${SELECTED_BACKUP}/${schema}.dconf"
+        if [ -f "$file" ]; then
+            echo "  - ${schema}"
+            dconf load "/${schema//./\/}/" < "$file"
         fi
     done
     
-    # Also restore custom keybindings
     restore_custom_keybindings
-    
     echo -e "${GREEN}  ✓ All keybindings restored${NC}"
 }
 
 ###############################################################################
-# Function to restore dock configuration
+# Function to restore dock
 ###############################################################################
 restore_dock() {
-    echo -e "${YELLOW}[•] Restoring dock configuration...${NC}"
+    echo -e "${YELLOW}[•] Restoring dock...${NC}"
     
-    # Restore favorite apps
-    local fav_apps_file="${SELECTED_BACKUP}/favorite-apps.txt"
-    if [ -f "$fav_apps_file" ]; then
-        echo "  - Restoring favorite applications..."
-        local favorites=$(cat "$fav_apps_file")
-        gsettings set org.gnome.shell favorite-apps "$favorites"
+    if [ -f "${SELECTED_BACKUP}/favorite-apps.txt" ]; then
+        echo "  - Favorite apps"
+        gsettings set org.gnome.shell favorite-apps "$(cat "${SELECTED_BACKUP}/favorite-apps.txt")"
     fi
     
-    # Restore GNOME Shell settings
-    local gnome_shell_file="${SELECTED_BACKUP}/org.gnome.shell.dconf"
-    if [ -f "$gnome_shell_file" ]; then
-        echo "  - Restoring GNOME Shell configuration..."
-        dconf load /org/gnome/shell/ < "$gnome_shell_file"
+    if [ -f "${SELECTED_BACKUP}/org.gnome.shell.dconf" ]; then
+        echo "  - GNOME Shell settings"
+        dconf load /org/gnome/shell/ < "${SELECTED_BACKUP}/org.gnome.shell.dconf"
     fi
     
-    # Restore Dash-to-Dock if it exists
-    local dash_to_dock_file="${SELECTED_BACKUP}/dash-to-dock.dconf"
-    if [ -f "$dash_to_dock_file" ]; then
+    if [ -f "${SELECTED_BACKUP}/dash-to-dock.dconf" ]; then
         if gsettings list-schemas | grep -q "org.gnome.shell.extensions.dash-to-dock"; then
-            echo "  - Restoring Dash-to-Dock configuration..."
-            dconf load /org/gnome/shell/extensions/dash-to-dock/ < "$dash_to_dock_file"
-        else
-            echo -e "  ${YELLOW}! Dash-to-Dock not installed, skipping${NC}"
+            echo "  - Dash-to-Dock"
+            dconf load /org/gnome/shell/extensions/dash-to-dock/ < "${SELECTED_BACKUP}/dash-to-dock.dconf"
         fi
     fi
     
-    # Restore Dash-to-Panel if it exists
-    local dash_to_panel_file="${SELECTED_BACKUP}/dash-to-panel.dconf"
-    if [ -f "$dash_to_panel_file" ]; then
-        if gsettings list-schemas | grep -q "org.gnome.shell.extensions.dash-to-panel"; then
-            echo "  - Restoring Dash-to-Panel configuration..."
-            dconf load /org/gnome/shell/extensions/dash-to-panel/ < "$dash_to_panel_file"
-        else
-            echo -e "  ${YELLOW}! Dash-to-Panel not installed, skipping${NC}"
-        fi
-    fi
-    
-    echo -e "${GREEN}  ✓ Dock configuration restored${NC}"
+    echo -e "${GREEN}  ✓ Dock restored${NC}"
 }
 
 ###############################################################################
-# Function to restart GNOME Shell
-###############################################################################
-restart_gnome_shell() {
-    echo ""
-    echo -e "${YELLOW}Would you like to restart GNOME Shell to apply changes?${NC}"
-    echo -e "${CYAN}Note: This will briefly freeze your screen${NC}"
-    echo ""
-    echo -e -n "${YELLOW}Restart GNOME Shell? [y/N]: ${NC}"
-    read -r restart_choice
-    
-    if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
-        if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-            echo -e "${YELLOW}Running on Wayland - you'll need to log out and back in for all changes to take effect${NC}"
-            echo "Changes have been applied, but a logout/login is recommended."
-        else
-            echo "Restarting GNOME Shell..."
-            killall -SIGQUIT gnome-shell 2>/dev/null || true
-            echo -e "${GREEN}GNOME Shell restarted${NC}"
-        fi
-    else
-        echo "Skipping GNOME Shell restart."
-        echo -e "${YELLOW}Note: You may need to log out and back in for all changes to take effect${NC}"
-    fi
-}
-
-###############################################################################
-# Main execution
+# Main
 ###############################################################################
 main() {
     select_backup
     ask_restore_scope
     
-    echo -e "${BLUE}Starting restore process...${NC}"
+    echo -e "${BLUE}Restoring...${NC}"
     echo ""
     
-    # Restore based on user choice
     if [ "$RESTORE_ALL_KEYBINDINGS" = true ]; then
         restore_all_keybindings
     elif [ "$RESTORE_CUSTOM_ONLY" = true ]; then
         restore_custom_keybindings
     fi
     
-    if [ "$RESTORE_DOCK" = true ]; then
-        restore_dock
-    fi
+    [ "$RESTORE_DOCK" = true ] && restore_dock
     
     echo ""
     echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  Restore completed successfully!                      ║${NC}"
+    echo -e "${GREEN}║  ✓ Restore completed!                                 ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
     echo ""
     
-    restart_gnome_shell
+    if [ -n "$SAFETY_BACKUP_DIR" ]; then
+        echo -e "${CYAN}💾 Safety backup: ${SAFETY_BACKUP_DIR}${NC}"
+        echo ""
+    fi
+    
+    echo -e "${YELLOW}Restart GNOME Shell? [y/N]: ${NC}"
+    read -r restart
+    
+    if [[ "$restart" =~ ^[Yy]$ ]]; then
+        if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+            echo -e "${YELLOW}Wayland detected - please log out/in${NC}"
+        else
+            killall -SIGQUIT gnome-shell 2>/dev/null || true
+            echo -e "${GREEN}GNOME Shell restarted${NC}"
+        fi
+    fi
     
     echo ""
-    echo -e "${CYAN}Restore Summary:${NC}"
-    if [ "$RESTORE_ALL_KEYBINDINGS" = true ]; then
-        echo "  ✓ All keybindings restored"
-    elif [ "$RESTORE_CUSTOM_ONLY" = true ]; then
-        echo "  ✓ Custom keybindings restored"
-    fi
-    if [ "$RESTORE_DOCK" = true ]; then
-        echo "  ✓ Dock configuration restored"
-    fi
-    echo ""
-    echo -e "${YELLOW}Tip: If keybindings don't work immediately, try logging out and back in${NC}"
+    echo -e "${CYAN}Tip: Log out/in if keybindings don't work immediately${NC}"
     echo ""
 }
 
-# Run main function
 main

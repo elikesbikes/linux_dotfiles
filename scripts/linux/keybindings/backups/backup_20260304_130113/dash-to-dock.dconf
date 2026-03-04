@@ -1,0 +1,15 @@
+[/]
+background-opacity=0.80000000000000004
+dash-max-icon-size=58
+dock-fixed=false
+dock-position='BOTTOM'
+extend-height=false
+height-fraction=0.40000000000000002
+hot-keys=false
+isolate-monitors=true
+isolate-workspaces=true
+preferred-monitor=-2
+preferred-monitor-by-connector='DP-2'
+preview-size-scale=0.5
+show-mounts=false
+show-trash=false

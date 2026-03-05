@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ###############################################################################
-# Ubuntu Keybindings Restore Script v4 - FIXED
+# Ubuntu Keybindings Restore Script v5 - ACTUALLY WORKING NOW
 # 
-# This version properly parses the dconf backup file format
+# Fixed: Properly handles quoted values from dconf format
 ###############################################################################
 
 RED='\033[0;31m'
@@ -17,7 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="${SCRIPT_DIR}/backups"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Ubuntu Keybindings Restore Script v4                 ║${NC}"
+echo -e "${BLUE}║  Ubuntu Keybindings Restore Script v5                 ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -128,7 +128,7 @@ safety_backup() {
 }
 
 ###############################################################################
-# Parse dconf file and extract keybindings
+# Parse dconf file - FIXED to handle quoted values correctly
 ###############################################################################
 parse_dconf_file() {
     local file="$1"
@@ -151,7 +151,7 @@ parse_dconf_file() {
             command=""
             binding=""
             
-        # Key-value pairs
+        # Key-value pairs - values are already quoted in dconf format
         elif [[ "$line" =~ ^name=(.+)$ ]]; then
             name="${BASH_REMATCH[1]}"
         elif [[ "$line" =~ ^command=(.+)$ ]]; then
@@ -168,7 +168,7 @@ parse_dconf_file() {
 }
 
 ###############################################################################
-# Restore custom keybindings - WORKING VERSION
+# Restore custom keybindings - FIXED VERSION
 ###############################################################################
 restore_custom() {
     echo -e "${YELLOW}[•] Restoring custom keybindings...${NC}"
@@ -211,18 +211,15 @@ restore_custom() {
         for kb in "${keybindings[@]}"; do
             IFS='|' read -r name command binding <<< "$kb"
             
-            # Remove quotes if present
-            name=$(echo "$name" | sed "s/^['\"]//;s/['\"]$//")
-            command=$(echo "$command" | sed "s/^['\"]//;s/['\"]$//")
-            binding=$(echo "$binding" | sed "s/^['\"]//;s/['\"]$//")
-            
-            echo "  [$index] $name"
+            # Values already have quotes from dconf file, use them as-is
+            echo "  [$index] $(echo "$name" | sed "s/'//g")"
             
             local path="${base_path}/custom${index}/"
             
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" name "'${name}'"
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" command "'${command}'"
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" binding "'${binding}'"
+            # Use the quoted values directly - no extra quotes needed
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" name "$name"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" command "$command"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" binding "$binding"
             
             paths+=("'${path}'")
             index=$((index + 1))
@@ -261,18 +258,15 @@ restore_custom() {
         for kb in "${keybindings[@]}"; do
             IFS='|' read -r name command binding <<< "$kb"
             
-            # Remove quotes
-            name=$(echo "$name" | sed "s/^['\"]//;s/['\"]$//")
-            command=$(echo "$command" | sed "s/^['\"]//;s/['\"]$//")
-            binding=$(echo "$binding" | sed "s/^['\"]//;s/['\"]$//")
-            
-            echo "  [$index] $name"
+            # Display without quotes
+            echo "  [$index] $(echo "$name" | sed "s/'//g")"
             
             local path="${base_path}/custom${index}/"
             
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" name "'${name}'"
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" command "'${command}'"
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" binding "'${binding}'"
+            # Use quoted values as-is from dconf file
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" name "$name"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" command "$command"
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${path}" binding "$binding"
             
             new_paths+=("'${path}'")
             index=$((index + 1))
@@ -298,6 +292,18 @@ restore_custom() {
     echo ""
     local final_count=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings | grep -o "custom" | wc -l || echo "0")
     echo -e "${GREEN}✓ Done - Total keybindings now: ${final_count}${NC}"
+    
+    # Show what was actually set for verification
+    echo ""
+    echo -e "${CYAN}Verification:${NC}"
+    local verify_paths=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+    echo "$verify_paths" | tr -d '[]' | tr ',' '\n' | while read -r vp; do
+        vp=$(echo "$vp" | xargs | tr -d "'")
+        if [ -n "$vp" ]; then
+            local vname=$(gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:"${vp}" name 2>/dev/null | sed "s/'//g")
+            [ -n "$vname" ] && echo "  ✓ $vname"
+        fi
+    done
 }
 
 ###############################################################################
@@ -372,10 +378,11 @@ main() {
     
     [ -n "$SAFETY_DIR" ] && echo -e "${CYAN}Safety: ${SAFETY_DIR}${NC}" && echo ""
     
-    echo -e "${YELLOW}Testing: Press your custom keybindings now${NC}"
-    echo "If they don't work, try:"
-    echo "  1. Log out and log back in"
-    echo "  2. Check apps are installed"
+    echo -e "${YELLOW}Test your keybindings now!${NC}"
+    echo ""
+    echo "If they don't work immediately:"
+    echo "  1. Try logging out and back in"
+    echo "  2. Check that apps are installed (ulauncher, flameshot, etc.)"
     echo ""
     
     echo -e -n "${YELLOW}Restart GNOME Shell? [y/N]: ${NC}"
@@ -383,10 +390,10 @@ main() {
     
     if [[ "$restart" =~ ^[Yy]$ ]]; then
         if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-            echo -e "${YELLOW}Wayland: Please log out/in${NC}"
+            echo -e "${YELLOW}Wayland: Please log out/in for changes to take full effect${NC}"
         else
             killall -SIGQUIT gnome-shell 2>/dev/null || true
-            echo -e "${GREEN}Restarted${NC}"
+            echo -e "${GREEN}GNOME Shell restarted${NC}"
         fi
     fi
 }

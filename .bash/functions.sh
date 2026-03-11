@@ -434,6 +434,7 @@ gpull_tutorials_wcopy() {
     --include="*.yml" \
     --include="*.py" \
     --include="*.sh" \
+    --include="*.md" \
     --exclude="*" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"

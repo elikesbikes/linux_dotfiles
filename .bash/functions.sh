@@ -359,7 +359,7 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
-  echo "Copying only YML files (flattened) to destination..."
+  echo "Copying filtered files (.yml, .py, .sh, .md) to destination..."
 
   # Ensure destination exists
   mkdir -p "${DEST_PATH}"
@@ -372,7 +372,9 @@ gacp_tutorials_wcopy() {
     --include="*.yml" \
     --include="*.py" \
     --include="*.sh" \
-    --include="*.md" \
+    --include="*.[mM][dD]" \
+    --include="*.json" \
+    --include="*.png" \
     --exclude="*" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"
@@ -435,7 +437,7 @@ gpull_tutorials_wcopy() {
     --include="*.yml" \
     --include="*.py" \
     --include="*.sh" \
-    --include="*.md" \
+    --include="*.[mM][dD]" \
     --exclude="*" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"

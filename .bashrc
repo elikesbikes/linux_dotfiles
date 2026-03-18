@@ -14,6 +14,8 @@ source ~/.local/share/omakub/defaults/bash/rc
 # ==============================================================================
 
 ## Sourcing Custom Scripts
+[[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant
+[[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh
@@ -70,6 +72,7 @@ bind -f ~/.inputrc
 #export PATH=$PATH:/home/ecloaiza/.spicetify
 #alias idrive='/opt/IDriveForLinux/bin/idrive'
 export PATH="$HOME/.spicetify:$PATH"
+export PATH="$HOME/.local/go/bin:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

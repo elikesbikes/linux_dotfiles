@@ -1,0 +1,9 @@
+[09:35:47 2026-03-21] FETCHING Version 2.42.14
+[09:35:47 2026-03-21] CREATING /home/ecloaiza/.spicetify
+[09:35:47 2026-03-21] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.42.14/spicetify-2.42.14-linux-amd64.tar.gz
+[09:35:47 2026-03-21] EXTRACTING /home/ecloaiza/.spicetify/spicetify.tar.gz
+[09:35:47 2026-03-21] SETTING EXECUTABLE PERMISSIONS TO /home/ecloaiza/.spicetify/spicetify
+[09:35:47 2026-03-21] REMOVING /home/ecloaiza/.spicetify/spicetify.tar.gz
+[09:35:47 2026-03-21] spicetify path already set in /home/ecloaiza/.bashrc, continuing...
+[09:35:47 2026-03-21] spicetify v2.42.14 was installed successfully to /home/ecloaiza/.spicetify
+[09:35:47 2026-03-21] Run 'spicetify --help' to get started

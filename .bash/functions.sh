@@ -85,12 +85,17 @@ gacp() {
     echo "--> Running: git commit -m \"$MESSAGE\""
     git commit -m "$MESSAGE" || return 1
 
+    echo "--> Running: git pull --rebase origin main"
+    git pull --rebase origin main || {
+        echo "ERROR: Rebase failed. Resolve conflicts, then run 'git rebase --continue'."
+        return 1
+    }
+
     echo "--> Running: git push -u origin main"
     git push -u origin main || return 1
 
     echo "SUCCESS: Changes committed and pushed to main."
 }
-
 
 # ------------------------------------------------------------
 # gpull

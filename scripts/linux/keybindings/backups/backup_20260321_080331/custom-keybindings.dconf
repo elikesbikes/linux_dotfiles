@@ -1,0 +1,56 @@
+[custom0]
+binding='<Super>space'
+command=' ulauncher'
+name='Ulauncher'
+
+[custom1]
+binding='<Control>Print'
+command='sh -c -- "flameshot gui"'
+name='Flameshot'
+
+[custom10]
+binding='<Control><Alt>a'
+command='code'
+name='VS Code'
+
+[custom11]
+binding='<Control><Alt>s'
+command='/home/ecloaiza/.local/bin/stt-toggle.sh'
+name='Speech to Text'
+
+[custom2]
+binding='<Shift><Alt>2'
+command='alacritty'
+name='New Alacritty Window'
+
+[custom3]
+binding='<Control><Alt>k'
+command='kitty'
+name='KItty'
+
+[custom4]
+binding=" grep ^/dev/usb/hiddev | cut -d: -f1) -- -5000'\"|'<Control>F1'"
+name='Apple Brightness Down (ASDControl)'
+
+[custom5]
+binding=" grep ^/dev/usb/hiddev | cut -d: -f1) -- +5000'\"|'<Control>F2'"
+name='Apple Brightness Up (ASDControl)'
+
+[custom6]
+binding=" grep ^/dev/usb/hiddev | cut -d: -f1) -- +60000'\"|'<Control><Shift>F2'"
+name='Apple Brightness Max (ASDControl)'
+
+[custom7]
+binding='<Control><Alt>m'
+command='spotify'
+name='Spotify'
+
+[custom8]
+binding='<Control><Alt>o'
+command='flatpak run md.obsidian.Obsidian'
+name='Obsidian'
+
+[custom9]
+binding='<Control><Alt>e'
+command='thunderbird'
+name='Thunderbird'

@@ -1,77 +1,42 @@
-# install-sudoers.sh
+# sync-sudoers.sh
 
-## Purpose
+Syncs sudoers drop-in files from a homelab Git repo to `/etc/sudoers.d` using Unison. Handles both traditional `sudo` and `sudo-rs` (automatically detects which is installed and skips incompatible files).
 
-This script is the single authoritative installer for sudoers configuration on this host.
+## Prerequisites
 
-It installs all sudoers fragments found in:
+- [`unison`](https://github.com/bcpierce00/unison) installed and configured with a `sudoers` profile at `~/.unison/sudoers.prf`
+- Homelab repo cloned at `/home/ecloaiza/devops/github/homelab` with sudoers files under `sudoers.d/`
+- `sudo` access
 
-    /home/ecloaiza/sudoers
+## Usage
 
-into:
+```bash
+./sync-sudoers.sh
+```
 
-    /etc/sudoers.d/
+No arguments needed. The script is interactive when there are uncommitted changes in the repo.
 
-The script validates each fragment and the full sudo configuration before completion and performs an automatic rollback on failure.
+## What It Does
 
+1. **Detects sudo implementation** — identifies `sudo-rs` vs traditional `sudo` and adjusts accordingly
+2. **Checks Git status** — if there are uncommitted changes, prompts you to choose:
+   - Commit and push them now
+   - Stash them and pull latest
+   - Sync locally only (skip git operations)
+   - Abort
+3. **Pulls latest** from the remote Git repo (unless skipped)
+4. **Validates** all files with `visudo -c` before touching the system — aborts on any syntax error
+5. **Copies Unison profile** to root's home (`/root/.unison/sudoers.prf`)
+6. **Runs Unison** as root to sync files from the repo to `/etc/sudoers.d`
+7. **Fixes permissions** — sets `0440 root:root` on all synced files
 
-## Why this exists
+## sudo-rs Compatibility
 
-- Avoids editing /etc/sudoers directly
-- Prevents partial sudo configuration
-- Prevents sudo lockouts
-- Provides auditable, repeatable changes
+When `sudo-rs` is detected, `00-defaults-logging` is automatically excluded from the sync since it uses directives not supported by `sudo-rs`. The exclusion is applied temporarily to the Unison profile and cleaned up after the sync.
 
+## Source
 
-## Source of Truth
-
-Sudoers fragments live in:
-
-    /home/ecloaiza/sudoers
-
-Only files matching the pattern:
-
-    NN-*
-
-are installed (example: `00-defaults`, `10-admin`).
-
-All other files (README.md, legacy configs) are ignored.
-
-
-## What the Script Does
-
-1. Discovers sudoers fragments
-2. Backs up existing `/etc/sudoers.d` entries
-3. Installs each fragment with mode `0440`
-4. Validates each fragment using `visudo -cf`
-5. Validates the full sudo configuration
-6. Rolls back automatically on error
-
-
-## Execution
-
-Run as the regular user:
-
-    /home/ecloaiza/scripts/linux/sudoers/install-sudoers.sh
-
-The script uses sudo internally where required.
-
-
-## Logging
-
-Sudo execution logging is controlled by sudoers fragments
-(e.g. `00-defaults`, `40-scripts`).
-
-This script itself does not write logs.
-
-
-## Notes
-
-- This script is intentionally single-purpose.
-- Do not modify sudo behavior here.
-- All policy changes must be done via `/home/ecloaiza/sudoers`.
-
-
-## Author
-
-ELIKESBIKES (Tars)
+Sudoers files live in the homelab repo:
+```
+/home/ecloaiza/devops/github/homelab/sudoers.d/
+```

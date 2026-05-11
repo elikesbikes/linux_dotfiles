@@ -40,3 +40,4 @@ Sudoers files live in the homelab repo:
 ```
 /home/ecloaiza/devops/github/homelab/sudoers.d/
 ```
+claude --resume 4642e37b-50cc-4405-8afb-95a6ce494d75

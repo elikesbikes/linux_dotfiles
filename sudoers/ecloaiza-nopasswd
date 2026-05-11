@@ -1,0 +1,33 @@
+# Preserve terminal capabilities for sudo commands
+Defaults env_keep += "TERMINFO"
+
+# Allow ecloaiza to run selected admin, filesystem, troubleshooting, and approved scripts without a password
+ecloaiza ALL=(ALL) NOPASSWD: \
+    /usr/bin/apt-get, \
+    /usr/bin/docker, \
+    /usr/bin/systemctl, \
+    /usr/bin/ls, \
+    /usr/bin/chmod, \
+    /usr/bin/chown, \
+    /usr/bin/dmesg, \
+    /usr/bin/journalctl, \
+    /usr/bin/df, \
+    /usr/bin/du, \
+    /usr/bin/lsblk, \
+    /usr/bin/findmnt, \
+    /usr/bin/stat, \
+    /usr/bin/ps, \
+    /usr/bin/top, \
+    /usr/bin/htop, \
+    /usr/bin/free, \
+    /usr/bin/vmstat, \
+    /usr/bin/uptime, \
+    /usr/bin/watch, \
+    /usr/bin/lsof, \
+    /usr/bin/strace, \
+    /usr/bin/pmap, \
+    /usr/bin/ulimit, \
+    /home/ecloaiza/scripts/linux/install-sudoers.sh, \
+    /home/ecloaiza/scripts/linux/restic-backup.sh, \
+    /home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh, \
+    /home/ecloaiza/scripts/linux/monitor-idrive-by-filename.sh

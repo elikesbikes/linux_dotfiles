@@ -1,0 +1,9 @@
+root = /home/ecloaiza/.claude/skills
+root = ssh://ranger0//home/ecloaiza/.claude/skills
+
+batch = true
+auto = true
+times = true
+prefer = newer
+
+ignore = Name {.*}

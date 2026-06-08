@@ -1,0 +1,10 @@
+# Sync sudoers across homelab via Tailscale
+
+root = /home/ecloaiza/devops/github/homelab/sudoers.d
+root = ssh://host2//home/ecloaiza/devops/github/homelab/sudoers.d
+
+# Non-interactive mode
+batch = true
+
+# Use newest file in conflicts
+prefer = newer

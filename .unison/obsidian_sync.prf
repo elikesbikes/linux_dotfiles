@@ -1,0 +1,24 @@
+# Roots
+root = /home/ecloaiza/devops/github
+root = /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+# Filter Logic
+ignore = Name {.*}
+ignore = Name {*.[^m]*,*.m[^d]*}
+ignore = Regex elikesbikes\.com/.*
+ignore = Regex homelab/Monitoring/UptimeKuma/Claude/.+
+ignorenot = Regex homelab/Monitoring/UptimeKuma/Claude/[^/]+\.md
+ignorenot = Path *
+
+# Bi-directional Sync Behavior
+batch = true
+auto = true
+times = true
+prefer = newer
+
+# Protect devops from any deletions that originate on the Obsidian side.
+nodeletion = /home/ecloaiza/devops/github
+
+# Safety: If you delete a lot of files, it will ask for confirmation
+# unless you set this to false. Set to false for background sync.
+confirmbigdel = false

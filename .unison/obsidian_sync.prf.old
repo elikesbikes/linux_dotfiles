@@ -1,0 +1,20 @@
+# Roots
+root = /home/ecloaiza/devops/github
+root = /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+# Ignore everything first
+ignore = Name *
+
+# UN-ignore directories so Unison can scan subfolders
+ignorenot = Path *
+
+# UN-ignore the markdown files
+ignorenot = Name *.md
+
+# Re-ignore hidden files (to keep .git out of Obsidian)
+ignore = Name {.*}
+
+# Automation settings
+batch = true
+auto = true
+times = true

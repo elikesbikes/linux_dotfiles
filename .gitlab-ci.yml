@@ -1,0 +1,18 @@
+stages:
+  - deploy
+
+deploy_dotfiles:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - chmod 600 "$SSH_PRIVATE_KEY"
+  script:
+    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.30
+        "cd ~/devops/github/linux_dotfiles && git pull"
+    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.16
+        "cd ~/devops/github/linux_dotfiles && git pull"
+    # - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@GARGANTUA_IP
+    #     "cd ~/devops/github/linux_dotfiles && git pull"
+  only:
+    - main

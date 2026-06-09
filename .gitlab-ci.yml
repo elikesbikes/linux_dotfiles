@@ -12,6 +12,8 @@ deploy_dotfiles:
         "cd ~/devops/github/linux_dotfiles && git pull"
     - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.16
         "cd ~/devops/github/linux_dotfiles && git pull"
+    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.127
+        "cd ~/devops/github/linux_dotfiles && git pull"
     # - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@GARGANTUA_IP
     #     "cd ~/devops/github/linux_dotfiles && git pull"
   only:

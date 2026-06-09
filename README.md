@@ -1,5 +1,5 @@
 # linux_dotfiles
-Copper and TARS
+Copper
 Opinionated Linux dotfiles curated and battle-tested by **elikesbikes**.
 
 This repository is not a generic dotfiles starter kit. It reflects a very specific workflow built over time across Linux workstations, servers, and homelab systems. The focus is on **clarity, control, and repeatability** — not magic installers or fragile abstractions.

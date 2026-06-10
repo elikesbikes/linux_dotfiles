@@ -335,20 +335,22 @@ gpull_tutorials() {
 # gacp_tutorials_wcopy
 # ------------------------------------------------------------
 # Copies a docker project from devops/docker into the tutorials
-# repo and runs gacp.
-#
-# Source:
-#   /home/ecloaiza/devops/docker/<project>
-#
-# Destination:
-#   tutorials/docker-compose/<project>
+# repo, pushes it, and optionally triggers a GitLab deploy.
 #
 # Usage:
-#   gacp_tutorials_wcopy <project> "Commit message"
+#   gacp_tutorials_wcopy <project> "Commit message" [host]
+#
+#   host: ranger0 | endurance | all   (omit to push only)
+#
+# Examples:
+#   gacp_tutorials_wcopy restic "update config"
+#   gacp_tutorials_wcopy restic "update config" ranger0
+#   gacp_tutorials_wcopy restic "update config" all
 # ------------------------------------------------------------
 gacp_tutorials_wcopy() {
   local PROJECT_NAME="$1"
-  shift || true
+  local COMMIT_MSG="$2"
+  local DEPLOY_HOST="${3:-}"
 
   if [[ -z "${PROJECT_NAME}" ]]; then
     echo "ERROR: Project name is required"
@@ -366,12 +368,8 @@ gacp_tutorials_wcopy() {
 
   echo "Copying filtered files (.yml, .py, .sh, .md) to destination..."
 
-  # Ensure destination exists
   mkdir -p "${DEST_PATH}"
 
-  # -a: archive mode (preserves permissions, recursive)
-  # -m: prune empty directories
-  # Includes folders and specific extensions, excludes everything else
   rsync -am \
     --include="*/" \
     --include="*.yml" \
@@ -384,11 +382,97 @@ gacp_tutorials_wcopy() {
     "${SRC_PATH}/" \
     "${DEST_PATH}/"
 
-  # Commit and push changes
   pushd "${TUTORIALS_ROOT}" > /dev/null || return 1
-  # Assuming gacp is a defined alias or function (e.g., git add, commit, push)
-  gacp "$@"
+  gacp "${COMMIT_MSG}"
+  local PUSH_STATUS=$?
+  local PUSHED_SHA
+  PUSHED_SHA=$(git rev-parse HEAD)
   popd > /dev/null
+
+  if [[ $PUSH_STATUS -ne 0 ]]; then
+    return $PUSH_STATUS
+  fi
+
+  if [[ -n "${DEPLOY_HOST}" ]]; then
+    _gitlab_deploy_tutorials "${PROJECT_NAME}" "${DEPLOY_HOST}" "${PUSHED_SHA}"
+  fi
+}
+
+# ------------------------------------------------------------
+# _gitlab_deploy_tutorials  (internal helper)
+# ------------------------------------------------------------
+# Polls for the GitLab pipeline triggered by a push SHA, then
+# plays the deploy job(s) for the requested host(s).
+# Requires GITLAB_URL and GITLAB_TOKEN from ~/.secrets/gitlab
+# ------------------------------------------------------------
+_gitlab_deploy_tutorials() {
+  local PROJECT="$1"
+  local HOST="$2"
+  local SHA="$3"
+  local GL_URL="${GITLAB_URL:-https://gitlab.home.elikesbikes.com}"
+  local GL_PROJECT="ecloaiza%2Ftutorials"
+  local TOKEN="${GITLAB_TOKEN:-}"
+
+  if [[ -z "${TOKEN}" ]]; then
+    echo "ERROR: GITLAB_TOKEN not set — source ~/.secrets/gitlab or set it manually"
+    return 1
+  fi
+
+  local JOB_NAMES=()
+  case "${HOST}" in
+    ranger0)   JOB_NAMES=("deploy:ranger0") ;;
+    endurance) JOB_NAMES=("deploy:endurance") ;;
+    all)       JOB_NAMES=("deploy:ranger0" "deploy:endurance") ;;
+    *)
+      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, or all"
+      return 1
+      ;;
+  esac
+
+  echo "Waiting for pipeline (SHA ${SHA:0:8})..."
+  local PIPELINE_ID=""
+  local i
+  for i in $(seq 1 12); do
+    PIPELINE_ID=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/pipelines?sha=${SHA}" \
+      -H "PRIVATE-TOKEN: ${TOKEN}" \
+      | python3 -c "import sys,json;d=json.load(sys.stdin);print(d[0]['id'] if d else '')" 2>/dev/null)
+    if [[ -n "${PIPELINE_ID}" ]]; then
+      echo "Pipeline #${PIPELINE_ID} created"
+      break
+    fi
+    sleep 5
+  done
+
+  if [[ -z "${PIPELINE_ID}" ]]; then
+    echo "ERROR: No pipeline appeared after 60s for SHA ${SHA}"
+    return 1
+  fi
+
+  for JOB_NAME in "${JOB_NAMES[@]}"; do
+    local JOB_ID=""
+    for i in $(seq 1 6); do
+      JOB_ID=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/pipelines/${PIPELINE_ID}/jobs" \
+        -H "PRIVATE-TOKEN: ${TOKEN}" \
+        | python3 -c "
+import sys,json
+jobs=json.load(sys.stdin)
+match=[x for x in jobs if x['name']=='${JOB_NAME}']
+print(match[0]['id'] if match else '')
+" 2>/dev/null)
+      [[ -n "${JOB_ID}" ]] && break
+      sleep 5
+    done
+
+    if [[ -z "${JOB_ID}" ]]; then
+      echo "ERROR: Job '${JOB_NAME}' not found in pipeline #${PIPELINE_ID}"
+      continue
+    fi
+
+    curl -sf -X POST "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}/play" \
+      -H "PRIVATE-TOKEN: ${TOKEN}" > /dev/null
+    echo "Triggered ${JOB_NAME} (job #${JOB_ID})"
+    echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}"
+  done
 }
 
 # ------------------------------------------------------------

@@ -16,6 +16,7 @@ source ~/.local/share/omakub/defaults/bash/rc
 ## Sourcing Custom Scripts
 [[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant
 [[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma
+[[ -f ~/.secrets/gitlab ]] && source ~/.secrets/gitlab
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh

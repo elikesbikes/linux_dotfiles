@@ -371,6 +371,9 @@ gacp_tutorials_wcopy() {
   mkdir -p "${DEST_PATH}"
 
   rsync -am \
+    --exclude="logs/" \
+    --exclude=".env" \
+    --exclude="backup/" \
     --include="*/" \
     --include="*.yml" \
     --include="*.py" \

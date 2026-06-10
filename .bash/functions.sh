@@ -374,13 +374,18 @@ gacp_tutorials_wcopy() {
     --exclude="logs/" \
     --exclude=".env" \
     --exclude="backup/" \
+    --exclude="*.conf" \
+    --exclude="docker-compose.override.yml" \
     --include="*/" \
     --include="*.yml" \
+    --include="*.yaml" \
     --include="*.py" \
     --include="*.sh" \
     --include="*.[mM][dD]" \
     --include="*.json" \
+    --include="*.example" \
     --include="*.png" \
+    --include="*.txt" \
     --exclude="*" \
     "${SRC_PATH}/" \
     "${DEST_PATH}/"

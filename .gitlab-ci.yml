@@ -1,20 +1,45 @@
 stages:
   - deploy
 
+variables:
+  GIT_DEPTH: "0"
+
 deploy_dotfiles:
   stage: deploy
   image: alpine:latest
   before_script:
-    - apk add --no-cache openssh-client
+    - apk add --no-cache openssh-client git
     - chmod 600 "$SSH_PRIVATE_KEY"
   script:
-    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.30
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main"
-    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.16
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main"
-    - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.127
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main"
-    # - ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@GARGANTUA_IP
-    #     "cd ~/devops/github/linux_dotfiles && git pull"
+    - |
+      # Check if sudoers/ files changed in this commit
+      if git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
+        SUDOERS_CHANGED="false"
+      else
+        SUDOERS_CHANGED="true"
+      fi
+      echo "Sudoers changed: $SUDOERS_CHANGED"
+      export SUDOERS_CHANGED
+
+    - |
+      # Deploy function: git pull + conditional sync
+      deploy_to_host() {
+        local host=$1
+        local sudoers_changed=$2
+        ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no "ecloaiza@$host" bash -s "$sudoers_changed" << 'EOF'
+          SUDOERS_CHANGED=$1
+          cd ~/devops/github/linux_dotfiles || exit 1
+          git fetch origin && git reset --hard origin/main || exit 1
+
+          if [ "$SUDOERS_CHANGED" = "true" ]; then
+            echo "ℹ️  Syncing sudoers on $(hostname)..."
+            bash scripts/sync-sudoers-ci.sh || exit 1
+          fi
+        EOF
+      }
+
+    - deploy_to_host "192.168.5.30" "$SUDOERS_CHANGED"
+    - deploy_to_host "192.168.5.16" "$SUDOERS_CHANGED"
+    - deploy_to_host "192.168.5.127" "$SUDOERS_CHANGED"
   only:
     - main

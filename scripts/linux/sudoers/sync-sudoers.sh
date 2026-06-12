@@ -2,7 +2,7 @@
 set -e
 
 #REPO_DIR="/home/ecloaiza/devops/github/homelab"
-REPO_DIR="/home/ecloaiza/devops/github/linux_dotfiles"
+REPO_DIR="/home/ecloaiza/devops/github/linux_dotfiles/sudoers"
 SUDOERS_SOURCE="${REPO_DIR}/sudoers.d"
 SUDOERS_DEST="/etc/sudoers.d"
 

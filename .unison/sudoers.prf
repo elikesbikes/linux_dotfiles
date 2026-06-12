@@ -1,6 +1,6 @@
 # Local repo to system sudoers sync
 
-root = /home/ecloaiza/devops/github/homelab/sudoers.d
+root = /home/ecloaiza/devops/github/linux_dotfiles/sudoers/sudoers.d
 root = /etc/sudoers.d
 
 batch = true
@@ -8,7 +8,7 @@ confirmbigdel = true
 fastcheck = true
 
 # Prefer repo version in conflicts
-prefer = /home/ecloaiza/devops/github/homelab/sudoers.d
+prefer = /home/ecloaiza/devops/github/linux_dotfiles/sudoers/sudoers.d
 
 # Ignore patterns
 ignore = Name README

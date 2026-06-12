@@ -3,7 +3,7 @@ set -e
 
 #REPO_DIR="/home/ecloaiza/devops/github/homelab"
 REPO_DIR="/home/ecloaiza/devops/github/linux_dotfiles"
-SUDOERS_SOURCE="${REPO_DIR}"
+SUDOERS_SOURCE="${REPO_DIR}/sudoers.d"
 SUDOERS_DEST="/etc/sudoers.d"
 
 echo "🔄 Syncing sudoers..."

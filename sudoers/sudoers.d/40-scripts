@@ -2,4 +2,4 @@
 ecloaiza ALL=(ALL) NOPASSWD: \
     /home/ecloaiza/scripts/linux/install-sudoers.sh, \
     /home/ecloaiza/scripts/linux/restic-backup.sh, \
-    /home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh, \
+    /home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh

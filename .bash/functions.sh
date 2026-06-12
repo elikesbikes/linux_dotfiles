@@ -476,10 +476,43 @@ print(match[0]['id'] if match else '')
       continue
     fi
 
-    curl -sf -X POST "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}/play" \
-      -H "PRIVATE-TOKEN: ${TOKEN}" > /dev/null
-    echo "Triggered ${JOB_NAME} (job #${JOB_ID})"
-    echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}"
+    # Wait until the job is playable. A manual deploy job stays in
+    # 'created' while earlier stages (validate/preflight) are still
+    # running; playing it then returns 400 "Unplayable Job". Only
+    # 'manual' status means it can be triggered.
+    local JOB_STATUS=""
+    for i in $(seq 1 24); do
+      JOB_STATUS=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}" \
+        -H "PRIVATE-TOKEN: ${TOKEN}" \
+        | python3 -c "import sys,json;print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
+      case "${JOB_STATUS}" in
+        manual)
+          break ;;
+        failed|canceled|skipped)
+          echo "ERROR: ${JOB_NAME} not playable (status: ${JOB_STATUS}) — an earlier stage likely failed"
+          break ;;
+      esac
+      sleep 5
+    done
+
+    if [[ "${JOB_STATUS}" != "manual" ]]; then
+      echo "ERROR: ${JOB_NAME} did not reach a playable state (last status: ${JOB_STATUS:-unknown})"
+      continue
+    fi
+
+    # Play the job and verify the response actually moved it out of 'manual'.
+    local PLAY_STATUS
+    PLAY_STATUS=$(curl -sf -X POST "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}/play" \
+      -H "PRIVATE-TOKEN: ${TOKEN}" \
+      | python3 -c "import sys,json;print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
+    case "${PLAY_STATUS}" in
+      pending|running|created)
+        echo "Triggered ${JOB_NAME} (job #${JOB_ID}) — status: ${PLAY_STATUS}"
+        echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}" ;;
+      *)
+        echo "ERROR: Failed to trigger ${JOB_NAME} (job #${JOB_ID}) — play returned status: ${PLAY_STATUS:-none}"
+        echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}" ;;
+    esac
   done
 }
 

@@ -22,3 +22,4 @@ alias sync_claude='unison claude_skills'
 alias claudepower='claude --enable-auto-mode --dangerously-skip-permissions'
 alias cleanupdotfiles='rm -rf /home/ecloaiza/devops/github/linux_dotfiles/ && cd /home/ecloaiza/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git
 '
+alias upgraderustdek='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o 'https://[^"]*x86_64\.deb' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'

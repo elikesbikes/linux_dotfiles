@@ -65,7 +65,7 @@ fi
 # Installation (exa, with eza fallback)
 # --------------------------------------------------
 echo "Installing exa via apt..."
-sudo apt-get update
+# Per rule 3: non-core categories assume the apt cache is already fresh.
 if sudo apt-get install -y exa; then
   echo "exa installed successfully."
   exa --version || true

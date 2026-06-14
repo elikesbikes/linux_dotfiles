@@ -20,7 +20,7 @@ echo "=================================================="
 # --------------------------------------------------
 if ! command -v snap >/dev/null 2>&1; then
   echo "Installing snapd..."
-  sudo apt-get update
+  # Per rule 3: non-core categories assume the apt cache is already fresh.
   sudo apt-get install -y snapd
 fi
 

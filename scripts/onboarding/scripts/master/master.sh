@@ -91,15 +91,28 @@ run_category() {
   gum style --border normal --padding "1 2" "Installing: $category"
   echo
 
+  local failures=0 rc
   for script in "$dir"/install_*.sh; do
     [[ -f "$script" ]] || continue
     echo "→ Running $(basename "$script")"
     echo
+    # Do not let one failing installer (set -e) tear down the whole menu.
+    set +e
     run_script "$script"
+    rc=$?
+    set -e
+    if [[ "$rc" -ne 0 ]]; then
+      echo "⚠ $(basename "$script") failed (exit $rc) — continuing"
+      failures=$((failures+1))
+    fi
     echo
   done
 
-  touch "$INSTALLED_DIR/$category"
+  if [[ "$failures" -eq 0 ]]; then
+    touch "$INSTALLED_DIR/$category"
+  else
+    echo "⚠ $category finished with $failures failure(s); not marking category as installed."
+  fi
   pause
 }
 

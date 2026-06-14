@@ -14,11 +14,11 @@ set -euo pipefail
 #         so it takes precedence on PATH over the distro binary.
 # ==================================================
 
-SCRIPT_NAME="install_neovim.sh"
+SCRIPT_NAME="$(basename "$0")"
 SCRIPT_VERSION="1.3.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/install_neovim.log"
+LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 STATE_FILE="$STATE_DIR/neovim"

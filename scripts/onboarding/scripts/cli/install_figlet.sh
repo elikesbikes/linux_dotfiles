@@ -12,11 +12,11 @@ set -euo pipefail
 #         - Use XDG state marker as source of truth
 # ==================================================
 
-SCRIPT_NAME="install_figlet.sh"
+SCRIPT_NAME="$(basename "$0")"
 SCRIPT_VERSION="1.2.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/install_figlet.log"
+LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 STATE_FILE="$STATE_DIR/figlet"

@@ -17,8 +17,9 @@ CONF_FILE="$SCRIPT_DIR/extensions.conf"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
 LOG_DIR="$STATE_DIR/logs"
 LOG_FILE="$LOG_DIR/install_extensions.log"
+INSTALLED_DIR="$STATE_DIR/installed"
 
-mkdir -p "$LOG_DIR"
+mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=================================================="
@@ -75,7 +76,7 @@ detect_distro() {
 
 install_pkgs_ubuntu() {
   local pkgs=("$@")
-  sudo apt-get update
+  # Per rule 3: non-core categories assume the apt cache is already fresh.
   sudo apt-get install -y "${pkgs[@]}"
 }
 
@@ -319,6 +320,7 @@ done < "$CONF_FILE"
 copy_and_compile_schemas
 
 if [[ "$ERRORS" -eq 0 ]]; then
+  touch "$INSTALLED_DIR/extensions"
   echo "=================================================="
   echo " Extensions install + reconcile COMPLETE (OK)"
   echo "=================================================="

@@ -2,3 +2,7 @@
 .inputrc
 .git
 README.md
+CHANGELOG.md
+PIPELINE.md
+.gitlab-ci.yml
+.env

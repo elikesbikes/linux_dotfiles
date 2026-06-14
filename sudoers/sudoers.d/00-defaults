@@ -1,12 +1,7 @@
 # Global sudo defaults
+#
+# Keep this file sudo-rs compatible: only directives that BOTH traditional
+# sudo and sudo-rs understand belong here. I/O logging (log_output / iolog_dir)
+# is NOT supported by sudo-rs and lives in 00-defaults-logging, which
+# sync-sudoers.sh excludes when sudo-rs is detected.
 Defaults env_keep += "TERMINFO"
-
-# Dedicated sudo I/O logging for approved scripts
-Defaults log_output
-Defaults!/home/ecloaiza/scripts/linux/install-sudoers.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/restic-backup.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/monitor-idrive-by-filename.sh log_output
-
-# Log file location
-Defaults iolog_dir="/var/log/sudo-io"

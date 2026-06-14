@@ -1,0 +1,16 @@
+# Sudo I/O logging — traditional sudo ONLY.
+#
+# sudo-rs does not implement log_output / iolog_dir and errors on them
+# ("unknown setting: 'log_output'"). sync-sudoers.sh excludes this file
+# (EXCLUDE_FILES="00-defaults-logging") when it detects sudo-rs, so these
+# directives are only deployed on hosts running traditional sudo.
+
+# Dedicated sudo I/O logging for approved scripts
+Defaults log_output
+Defaults!/home/ecloaiza/scripts/linux/install-sudoers.sh log_output
+Defaults!/home/ecloaiza/scripts/linux/restic-backup.sh log_output
+Defaults!/home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh log_output
+Defaults!/home/ecloaiza/scripts/linux/monitor-idrive-by-filename.sh log_output
+
+# Log file location
+Defaults iolog_dir="/var/log/sudo-io"

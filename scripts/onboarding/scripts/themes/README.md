@@ -1,51 +1,39 @@
 # Onboarding Themes
 
-Author: Tars (ELIKESBIKES)
+User-level theme scripts for the Brave browser, intended for onboarding and dotfiles workflows.
 
-## Purpose
+Design goals: HOME directory only, no `/etc`, no managed policies, no automatic installs — deterministic, reversible, and logged.
 
-This directory contains **user-level theme scripts** for Brave, intended for
-onboarding and dotfiles workflows.
+## 1. Available Themes
 
-Design goals:
-- HOME directory only
-- No `/etc`
-- No managed policies
-- No automatic installs
-- Deterministic, reversible, logged
+| Script | Palette |
+|--------|---------|
+| `apply_brave_catppuccin_macchiato.sh` | Catppuccin Macchiato |
+| `apply_brave_catppuccin_mocha.sh` | Catppuccin Mocha |
 
----
-
-## Available Themes
-
-### Catppuccin Macchiato
-Script: `apply_brave_catppuccin_macchiato.sh`
-
-What it does:
-- Targets the Brave Default profile
-- Backs up the Preferences file
-- Applies Catppuccin Macchiato colors to `theme.color_palette`
-- Verifies the change
+Each script:
+- Targets the Brave **Default** profile
+- Backs up the `Preferences` file (timestamped)
+- Patches `theme.color_palette` with `jq`
+- Verifies the change was written
 - Logs execution
 
-### Catppuccin Mocha
-Script: `apply_brave_catppuccin_mocha.sh`
+## 2. Usage
 
-Same behavior, different palette.
-
----
-
-## Usage
-
-1. Close Brave completely
-2. Run the desired script
+1. Close Brave completely (the script refuses to run while Brave is open)
+2. Run the desired script:
+   ```bash
+   bash apply_brave_catppuccin_macchiato.sh
+   ```
 3. Restart Brave
 
----
+## 3. Requirements
 
-## Notes
+- `jq`, `pgrep`, `cp`, `mv`, `date` available on `PATH` (no auto-installs)
+- An initialized Brave Default profile (launch Brave once first)
 
-- These scripts do not install theme extensions.
-- Brave UI must not be set to "Use system theme" for colors to appear.
-- Backups are stored under:
-  `~/.local/state/onboarding/backups/brave/`
+## 4. Notes
+
+- These scripts do **not** install theme extensions
+- Brave must not be set to "Use system theme" for colors to appear
+- Backups are stored under `~/.local/state/onboarding/backups/brave/`

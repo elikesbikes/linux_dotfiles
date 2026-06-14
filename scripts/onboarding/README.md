@@ -98,4 +98,4 @@ Paths honor `XDG_STATE_HOME` when set. Re-running an already-installed script is
 - `sudo` privileges
 - GNOME (for the `extensions` category)
 - Internet access
-- `gum` is auto-installed by the master menu on first run
+- `gum` is auto-installed by the master menu on first runs

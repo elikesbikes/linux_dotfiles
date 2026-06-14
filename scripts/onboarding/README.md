@@ -99,3 +99,5 @@ Paths honor `XDG_STATE_HOME` when set. Re-running an already-installed script is
 - GNOME (for the `extensions` category)
 - Internet access
 - `gum` is auto-installed by the master menu on first runss
+
+Author TARS

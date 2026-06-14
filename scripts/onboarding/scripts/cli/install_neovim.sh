@@ -10,10 +10,12 @@ set -euo pipefail
 # 1.2.0 - Add state-based idempotency:
 #         - Exit immediately if Neovim is already marked as installed
 #         - Use XDG state marker as source of truth
+# 1.3.0 - Copy the apt-installed nvim binary to /usr/local/bin/nvim
+#         so it takes precedence on PATH over the distro binary.
 # ==================================================
 
 SCRIPT_NAME="install_neovim.sh"
-SCRIPT_VERSION="1.2.0"
+SCRIPT_VERSION="1.3.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/install_neovim.log"
@@ -81,6 +83,16 @@ if command -v nvim >/dev/null 2>&1; then
 else
   log "FAIL: Neovim not found after install"
   exit 1
+fi
+
+# --------------------------------------------------
+# Copy binary to /usr/local/bin so it wins on PATH
+# --------------------------------------------------
+if [[ -x /usr/bin/nvim ]]; then
+  log "Copying /usr/bin/nvim -> /usr/local/bin/nvim"
+  run "sudo install -m 0755 /usr/bin/nvim /usr/local/bin/nvim"
+else
+  log "WARN: /usr/bin/nvim not found; skipping copy to /usr/local/bin"
 fi
 
 # --------------------------------------------------

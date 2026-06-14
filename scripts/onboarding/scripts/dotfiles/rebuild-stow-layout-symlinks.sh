@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="$HOME/linux_dotfiles"
+REPO_DIR="${DOTFILES_REPO_DIR:-$HOME/devops/github/linux_dotfiles}"
 HOME_DIR="$HOME"
 TS="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="/tmp/stow-rebuild-symlinks-$TS"

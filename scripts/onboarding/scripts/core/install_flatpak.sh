@@ -41,7 +41,7 @@ echo "Flatpak remotes:"
 flatpak remotes
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
 mkdir -p "$STATE_DIR"
-touch "$STATE_DIR/<category>"
+touch "$STATE_DIR/flatpak"
 
 echo ""
 echo "=================================================="

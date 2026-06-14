@@ -38,19 +38,19 @@ while IFS='=' read -r EXT STATE; do
 
   if ! is_installed "$EXT"; then
     echo "MISSING"
-    ((FAIL++))
+    FAIL=$((FAIL+1))
     continue
   fi
 
   if [[ "$STATE" == "enabled" ]]; then
     is_enabled "$EXT" && echo "OK (enabled)" || {
       echo "FAIL (disabled)"
-      ((FAIL++))
+      FAIL=$((FAIL+1))
     }
   else
     is_enabled "$EXT" && {
       echo "FAIL (enabled)"
-      ((FAIL++))
+      FAIL=$((FAIL+1))
     } || echo "OK (disabled)"
   fi
 done <"$CONF_FILE"

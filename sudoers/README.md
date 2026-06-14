@@ -71,15 +71,6 @@ However, sudoers fragments may enable:
 
 Refer to sudoers fragment documentation for logging behavior.
 
-### sudo-rs compatibility
-
-`sudo-rs` does not implement `log_output` / `iolog_dir` and errors with
-`unknown setting: 'log_output'` if they are present. All I/O-logging
-directives therefore live in a dedicated fragment, **`00-defaults-logging`**,
-which `sync-sudoers.sh` excludes when it detects `sudo-rs`. The base
-`00-defaults` fragment is kept sudo-rs-clean (only directives both
-implementations understand, e.g. `env_keep`).
-
 
 ## Safety Guarantees
 

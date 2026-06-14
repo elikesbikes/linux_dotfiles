@@ -71,5 +71,15 @@ Categories: `core`, `cli`, `desktop`, `security`, `extensions`, `themes`, `dotfi
 
 The user commits with the `gacp_dotfiles "message"` shell function, which does
 `git add . && commit && pull --rebase && push` to `main` (GitHub + GitLab remotes).
-Commit only when asked. Work in this repo is not safe until committed — uncommitted
-changes are lost if the repo is re-cloned.
+
+**This working tree is auto-reset to `origin/main`** (the reflog shows recurring
+`reset: moving to origin/main`). Any change that is only saved to disk — but not
+committed AND pushed — is silently wiped on the next sync. This has repeatedly
+destroyed uncommitted README edits.
+
+Rules:
+- **Edit → commit immediately.** Never leave edits (code OR docs) sitting
+  uncommitted across steps. Bundle the `gacp_dotfiles` commit in the same turn.
+- Only committed+pushed work survives; a clean `git status` after edits means the
+  edits are gone, not saved.
+- After committing, confirm the push hit **both** GitHub and GitLab.

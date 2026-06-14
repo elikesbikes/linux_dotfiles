@@ -57,7 +57,9 @@ fi
 echo "Installing kitty via apt..."
 
 sudo apt-get update
-sudo apt-get install -y kitty
+# kitty-terminfo ships the xterm-kitty terminfo entry so remote/SSH sessions
+# launched from a Kitty terminal don't fail with "unknown terminal type".
+sudo apt-get install -y kitty kitty-terminfo
 
 # --------------------------------------------------
 # Post-install validation

@@ -95,14 +95,14 @@ install_proton_vpn() {
     "https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_1.0.8_all.deb" \
     "protonvpn-stable-release.deb")"; then
 
-    if install_deb "$repo_deb"; then
-      sudo apt-get install -y proton-vpn-gnome-desktop
+    if install_deb "$repo_deb" && sudo apt-get install -y proton-vpn-gnome-desktop; then
       mark_installed proton-vpn
-      return
+      return 0
     fi
   fi
 
   echo "ERROR: Proton VPN install failed" >&2
+  return 1
 }
 
 # --------------------------------------------------
@@ -120,11 +120,12 @@ install_proton_mail_desktop() {
 
     if install_deb "$deb"; then
       mark_installed proton-mail-desktop
-      return
+      return 0
     fi
   fi
 
   echo "ERROR: Proton Mail Desktop install failed" >&2
+  return 1
 }
 
 # --------------------------------------------------
@@ -142,11 +143,12 @@ install_proton_mail_bridge() {
 
     if install_deb "$deb"; then
       mark_installed proton-mail-bridge
-      return
+      return 0
     fi
   fi
 
   echo "ERROR: Proton Mail Bridge install failed" >&2
+  return 1
 }
 
 # --------------------------------------------------
@@ -164,11 +166,12 @@ install_proton_pass() {
 
     if install_deb "$deb"; then
       mark_installed proton-pass
-      return
+      return 0
     fi
   fi
 
   echo "ERROR: Proton Pass install failed" >&2
+  return 1
 }
 
 # --------------------------------------------------
@@ -186,11 +189,12 @@ install_proton_authenticator() {
 
     if install_deb "$deb"; then
       mark_installed proton-authenticator
-      return
+      return 0
     fi
   fi
 
   echo "ERROR: Proton Authenticator install failed" >&2
+  return 1
 }
 
 # --------------------------------------------------
@@ -199,16 +203,21 @@ install_proton_authenticator() {
 install_deps
 apt_update
 
-install_proton_vpn
-install_proton_mail_desktop
-install_proton_mail_bridge
-install_proton_pass
-install_proton_authenticator
+FAILURES=0
+install_proton_vpn            || FAILURES=$((FAILURES+1))
+install_proton_mail_desktop   || FAILURES=$((FAILURES+1))
+install_proton_mail_bridge    || FAILURES=$((FAILURES+1))
+install_proton_pass           || FAILURES=$((FAILURES+1))
+install_proton_authenticator  || FAILURES=$((FAILURES+1))
 
 # --------------------------------------------------
-# Category marker (for master.sh)
+# Category marker (for master.sh) — only on full success
 # --------------------------------------------------
-touch "$STATE_DIR/security"
+if [[ "$FAILURES" -eq 0 ]]; then
+  touch "$STATE_DIR/security"
+else
+  echo "WARNING: $FAILURES Proton component(s) failed; not marking 'security' as complete." >&2
+fi
 
 echo "=================================================="
 echo " Proton Suite Installation COMPLETE"

@@ -29,7 +29,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 # State tracking
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed"
-STATE_MARKER="$STATE_DIR/cli_yazi"
+STATE_MARKER="$STATE_DIR/yazi"
 mkdir -p "$STATE_DIR"
 
 echo "=================================================="
@@ -48,7 +48,7 @@ echo "Checking for snapd..."
 
 if ! command -v snap >/dev/null 2>&1; then
   echo "snapd not found. Installing snapd..."
-  sudo apt-get update
+  # Per rule 3: non-core categories assume the apt cache is already fresh.
   sudo apt-get install -y snapd
 else
   echo "snapd already present."

@@ -64,7 +64,7 @@ for pkg in "${PACKAGES[@]}"; do
     echo "✔ $pkg already installed — skipping"
   else
     echo "➕ Installing $pkg..."
-    sudo apt-get update
+    # Per rule 3: non-core categories assume the apt cache is already fresh.
     sudo apt-get install -y "$pkg"
   fi
 done

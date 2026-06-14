@@ -11,8 +11,17 @@ set -euo pipefail
 # --------------------------------------------------
 cd "$HOME"
 
+# Where the dotfiles repo gets cloned to on this machine. Everything below
+# (clone, stow, launching onboarding) operates on this path.
 TARGET_DIR="$HOME/devops/github/linux_dotfiles"
+
+# Source of truth we clone FROM. GitHub is the public/primary remote and the
+# only address a fresh `git clone` knows about.
 REPO_URL="https://github.com/elikesbikes/linux_dotfiles"
+
+# Second remote used for PUSHING only (the home GitLab server that runs CI).
+# A fresh clone does not know about it, so further down we add it as an extra
+# push URL on `origin` — that way commits reach GitLab and trigger the pipeline.
 GITLAB_URL="https://gitlab.home.elikesbikes.com/ecloaiza/linux_dotfiles.git"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"

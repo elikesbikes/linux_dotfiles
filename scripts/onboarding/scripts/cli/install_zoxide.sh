@@ -57,7 +57,7 @@ fi
 # --------------------------------------------------
 echo "Installing zoxide via apt..."
 
-sudo apt-get update
+# Per rule 3: non-core categories assume the apt cache is already fresh.
 sudo apt-get install -y zoxide
 
 # --------------------------------------------------

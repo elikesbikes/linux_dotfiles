@@ -20,3 +20,5 @@ alias syncn='rsync -a --exclude=".git" --include="*/" --exclude="*" /home/ecloai
 alias syncs='/home/ecloaiza/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
 alias claudepower='claude --enable-auto-mode --dangerously-skip-permissions'
+alias cleanupdotfiles='rm -rf /home/ecloaiza/devops/github/linux_dotfiles/ && cd /home/ecloaiza/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git
+'

@@ -440,7 +440,7 @@ _gitlab_deploy_tutorials() {
   echo "Waiting for pipeline (SHA ${SHA:0:8})..."
   local PIPELINE_ID=""
   local i
-  for i in $(seq 1 12); do
+  for i in $(seq 1 15); do
     PIPELINE_ID=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/pipelines?sha=${SHA}" \
       -H "PRIVATE-TOKEN: ${TOKEN}" \
       | python3 -c "import sys,json;d=json.load(sys.stdin);print(d[0]['id'] if d else '')" 2>/dev/null)
@@ -448,17 +448,17 @@ _gitlab_deploy_tutorials() {
       echo "Pipeline #${PIPELINE_ID} created"
       break
     fi
-    sleep 5
+    sleep 3
   done
 
   if [[ -z "${PIPELINE_ID}" ]]; then
-    echo "ERROR: No pipeline appeared after 60s for SHA ${SHA}"
+    echo "ERROR: No pipeline appeared after 45s for SHA ${SHA}"
     return 1
   fi
 
   for JOB_NAME in "${JOB_NAMES[@]}"; do
     local JOB_ID=""
-    for i in $(seq 1 6); do
+    for i in $(seq 1 8); do
       JOB_ID=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/pipelines/${PIPELINE_ID}/jobs" \
         -H "PRIVATE-TOKEN: ${TOKEN}" \
         | python3 -c "
@@ -468,7 +468,7 @@ match=[x for x in jobs if x['name']=='${JOB_NAME}']
 print(match[0]['id'] if match else '')
 " 2>/dev/null)
       [[ -n "${JOB_ID}" ]] && break
-      sleep 5
+      sleep 3
     done
 
     if [[ -z "${JOB_ID}" ]]; then
@@ -476,43 +476,43 @@ print(match[0]['id'] if match else '')
       continue
     fi
 
-    # Wait until the job is playable. A manual deploy job stays in
-    # 'created' while earlier stages (validate/preflight) are still
-    # running; playing it then returns 400 "Unplayable Job". Only
-    # 'manual' status means it can be triggered.
-    local JOB_STATUS=""
-    for i in $(seq 1 24); do
+    # Trigger the job. A manual deploy job reports status 'manual' from
+    # the moment the pipeline is created — even while earlier stages are
+    # still running — so the status field can't tell us when it's ready.
+    # Playing too early returns 400 "Unplayable Job". So we just retry
+    # /play until it succeeds (or an earlier stage fails the job).
+    local PLAY_RESULT="" PLAYED=0
+    for i in $(seq 1 20); do
+      # Stop early if an earlier stage failed and skipped this job.
+      local JOB_STATUS
       JOB_STATUS=$(curl -sf "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}" \
         -H "PRIVATE-TOKEN: ${TOKEN}" \
         | python3 -c "import sys,json;print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
       case "${JOB_STATUS}" in
-        manual)
-          break ;;
         failed|canceled|skipped)
           echo "ERROR: ${JOB_NAME} not playable (status: ${JOB_STATUS}) — an earlier stage likely failed"
           break ;;
+        pending|running|success)
+          PLAYED=1; break ;;
       esac
-      sleep 5
+
+      PLAY_RESULT=$(curl -s -X POST "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}/play" \
+        -H "PRIVATE-TOKEN: ${TOKEN}" \
+        | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('status') or d.get('message') or '')" 2>/dev/null)
+      case "${PLAY_RESULT}" in
+        pending|running|created)
+          PLAYED=1; break ;;
+      esac
+      sleep 3
     done
 
-    if [[ "${JOB_STATUS}" != "manual" ]]; then
-      echo "ERROR: ${JOB_NAME} did not reach a playable state (last status: ${JOB_STATUS:-unknown})"
-      continue
+    if [[ "${PLAYED}" -eq 1 ]]; then
+      echo "Triggered ${JOB_NAME} (job #${JOB_ID})"
+      echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}"
+    else
+      echo "ERROR: Failed to trigger ${JOB_NAME} (job #${JOB_ID}) — last result: ${PLAY_RESULT:-${JOB_STATUS:-unknown}}"
+      echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}"
     fi
-
-    # Play the job and verify the response actually moved it out of 'manual'.
-    local PLAY_STATUS
-    PLAY_STATUS=$(curl -sf -X POST "${GL_URL}/api/v4/projects/${GL_PROJECT}/jobs/${JOB_ID}/play" \
-      -H "PRIVATE-TOKEN: ${TOKEN}" \
-      | python3 -c "import sys,json;print(json.load(sys.stdin).get('status',''))" 2>/dev/null)
-    case "${PLAY_STATUS}" in
-      pending|running|created)
-        echo "Triggered ${JOB_NAME} (job #${JOB_ID}) — status: ${PLAY_STATUS}"
-        echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}" ;;
-      *)
-        echo "ERROR: Failed to trigger ${JOB_NAME} (job #${JOB_ID}) — play returned status: ${PLAY_STATUS:-none}"
-        echo "  ${GL_URL}/ecloaiza/tutorials/-/jobs/${JOB_ID}" ;;
-    esac
   done
 }
 

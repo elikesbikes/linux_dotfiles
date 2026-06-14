@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_NAME="install_neovim.sh"
+# ==================================================
+# Script: install_fastfetch.sh
+# Version: 1.1.0
+#
+# Versioning:
+# 1.1.0 - FIX: Script previously installed neovim due to
+#         copy/paste of SCRIPT_NAME and package. Now correctly
+#         installs fastfetch.
+# 1.0.0 - Initial implementation.
+# ==================================================
+
+SCRIPT_NAME="$(basename "$0")"
+SCRIPT_VERSION="1.1.0"
+
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
-LOG_FILE="$LOG_DIR/install_neovim.log"
+LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
 
 mkdir -p "$LOG_DIR"
 
@@ -22,27 +35,28 @@ run() {
 }
 
 log "=================================================="
+log "[$SCRIPT_NAME] Version: $SCRIPT_VERSION"
 log "[$SCRIPT_NAME] Starting at: $(ts)"
 log "Log: $LOG_FILE"
 log "=================================================="
 
-if command -v nvim >/dev/null 2>&1; then
-  log "Neovim already installed:"
-  run "nvim --version | head -n 2"
+if command -v fastfetch >/dev/null 2>&1; then
+  log "fastfetch already installed:"
+  run "fastfetch --version"
   log "Nothing to do."
   exit 0
 fi
 
-log "Installing Neovim (Ubuntu package)..."
+log "Installing fastfetch (Ubuntu package)..."
 
 # Install via apt
-run "sudo apt-get install -y neovim"
+run "sudo apt-get install -y fastfetch"
 
-if command -v nvim >/dev/null 2>&1; then
-  log "SUCCESS: Neovim installed:"
-  run "nvim --version | head -n 2"
+if command -v fastfetch >/dev/null 2>&1; then
+  log "SUCCESS: fastfetch installed:"
+  run "fastfetch --version"
 else
-  log "FAIL: Neovim not found after install"
+  log "FAIL: fastfetch not found after install"
   exit 1
 fi
 

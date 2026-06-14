@@ -11,6 +11,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | `install_ssh.sh` | OpenSSH client | apt |
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
 | `install_kitty.sh` | Kitty terminal + `kitty-terminfo` | apt |
+| `install_default_editor.sh` | Sets system default `editor` alternative to nvim | `update-alternatives` |
 | `install_node.sh` | Node.js + npm | apt |
 
 ## 2. Responsibilities
@@ -26,6 +27,8 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 - Ensure the OpenSSH client is present
 - Install Flatpak and configure the Flathub remote
 - Install the Kitty terminal emulator and its terminfo entry
+- Set the system default editor to nvim via the Debian `editor` alternative
+  (fresh installs default to nano); requires nvim (`cli/install_neovim.sh`)
 - Install Node.js and npm
 
 ## 3. Notes

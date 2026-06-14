@@ -5,6 +5,10 @@
 # Source base configuration (Must be first. MUST NOT produce output.)
 source ~/.local/share/omakub/defaults/bash/rc
 
+# Re-enable command hashing: omakub's defaults run `set +h`, which makes nvm's
+# `hash -r` (nvm.sh) emit "bash: hash: hashing disabled" on shell startup.
+set -h
+
 # CRITICAL FIX: Exit immediately if the shell is NOT interactive (e.g., scp, sftp).
 # This prevents all output-generating code (like fastfetch) from running.
 [[ $- != *i* ]] && return

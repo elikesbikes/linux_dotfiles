@@ -36,6 +36,16 @@ check_file() {
 }
 
 check_cmd "sudo"    sudo
+
+# Enforce the TARS baseline: classic sudo, never sudo-rs.
+echo -n "• sudo is classic (not sudo-rs) : "
+if command -v sudo >/dev/null 2>&1 && sudo --version 2>&1 | head -n1 | grep -qi 'sudo-rs'; then
+  echo "FAIL (sudo-rs active)"
+  FAIL=$((FAIL+1))
+else
+  echo "OK"
+fi
+
 check_cmd "ssh"     ssh
 check_cmd "flatpak" flatpak
 check_cmd "kitty"   kitty

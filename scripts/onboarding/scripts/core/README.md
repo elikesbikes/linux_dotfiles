@@ -6,7 +6,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 
 | Script | Installs | Source |
 |--------|----------|--------|
-| `install_sudo.sh` | `sudo` (ensures present; reports `sudo -V`) | apt |
+| `install_sudo.sh` | Traditional `sudo` (TARS baseline; switches away from `sudo-rs`) | apt |
 | `install_sudoers.sh` | Deploys sudoers drop-ins to `/etc/sudoers.d` (the `syncs` alias) | `sync-sudoers.sh` |
 | `install_ssh.sh` | OpenSSH client | apt |
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
@@ -16,7 +16,11 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 ## 2. Responsibilities
 
 - Run `apt update` (Core is the **only** category allowed to refresh apt repositories)
-- Ensure `sudo` is installed and report its version/plugin details
+- Ensure **traditional `sudo`** is the active implementation and report its version/plugin
+  details. Ubuntu 25.10+ ships `sudo-rs` by default; `install_sudo.sh` detects it and
+  switches the host back to classic sudo (via apt + the Debian alternatives system) because
+  `sudo-rs` rejects directives our sudoers fragments use (`log_output`, `iolog_dir`,
+  per-command `Defaults!`). TARS is the baseline.
 - Deploy sudoers drop-in files to `/etc/sudoers.d` via `sync-sudoers.sh` (the `syncs` alias);
   requires `unison` (see `cli/install_unison.sh`) and the `~/.unison/sudoers.prf` profile from dotfiles
 - Ensure the OpenSSH client is present

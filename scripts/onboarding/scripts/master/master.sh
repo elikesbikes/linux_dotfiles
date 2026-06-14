@@ -33,6 +33,17 @@ INSTALLED_DIR="$STATE_DIR/installed"
 mkdir -p "$LOG_DIR" "$INSTALLED_DIR"
 
 # --------------------------------------------------
+# Terminfo guard
+# --------------------------------------------------
+# When connecting from a Kitty terminal (TERM=xterm-kitty) to a host that
+# lacks the kitty terminfo entry, gum/clear/tput fail with
+# "unknown terminal type". Fall back to a universally available TERM.
+if ! infocmp "${TERM:-}" >/dev/null 2>&1; then
+  echo "WARN: terminfo for '${TERM:-unset}' not found; falling back to xterm-256color"
+  export TERM=xterm-256color
+fi
+
+# --------------------------------------------------
 # Utilities
 # --------------------------------------------------
 pause() {

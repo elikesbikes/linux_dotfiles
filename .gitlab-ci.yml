@@ -36,11 +36,10 @@ deploy_dotfiles:
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)" \
         || echo "⚠️  gargantua offline, skipping deployment"
 
-      # Deploy to ranger1 (skip if offline)
-      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 ecloaiza@192.168.5.35 \
+      # Deploy to ranger1
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.35 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
-        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)" \
-        || echo "⚠️  ranger1 offline, skipping deployment"
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)"
 
       # Deploy to trainerroad2 (skip if offline)
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 ecloaiza@192.168.5.176 \

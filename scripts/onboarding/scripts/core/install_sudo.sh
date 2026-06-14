@@ -6,6 +6,12 @@ set -euo pipefail
 # Version: 2.0.0
 #
 # Versioning:
+# 2.1.0 - Make live state authoritative over the state marker. A marker
+#         written while sudo-rs was still active (e.g. by an older revision,
+#         or a run that exited before switching) must NOT short-circuit the
+#         switch — otherwise the host stays on sudo-rs forever. The desired
+#         end state (classic sudo) is directly verifiable, so we check that
+#         first and only trust/refresh the marker when it is actually true.
 # 2.0.0 - Enforce the TARS baseline: traditional sudo, never sudo-rs.
 #         - Ubuntu 25.10 ships sudo-rs as the default `sudo`. sudo-rs does
 #           not implement directives our sudoers fragments use (log_output,
@@ -91,17 +97,10 @@ ensure_classic_sudo() {
 }
 
 # --------------------------------------------------
-# State-based idempotency check (authoritative)
-# --------------------------------------------------
-if [[ -f "$STATE_FILE" ]]; then
-  echo "STATE: sudo already marked as configured ($STATE_FILE)"
-  report_version
-  echo "Nothing to do. Exiting."
-  exit 0
-fi
-
-# --------------------------------------------------
-# Fast path: already on the TARS baseline (classic sudo present)
+# Idempotency via LIVE state (authoritative), not just the marker.
+# The desired end state — classic sudo — is directly verifiable, so trust it
+# over the marker. A marker left behind while sudo-rs is still active is stale
+# and must not block the switch.
 # --------------------------------------------------
 if command -v sudo >/dev/null 2>&1 && ! is_sudo_rs; then
   echo "Traditional sudo already active: $(command -v sudo)"
@@ -109,6 +108,12 @@ if command -v sudo >/dev/null 2>&1 && ! is_sudo_rs; then
   echo "Matches TARS baseline. Marking as configured."
   touch "$STATE_FILE"
   exit 0
+fi
+
+if [[ -f "$STATE_FILE" ]]; then
+  echo "NOTE: state marker present but sudo-rs is still the active sudo."
+  echo "Marker is stale — removing it and proceeding with the switch."
+  rm -f "$STATE_FILE"
 fi
 
 # --------------------------------------------------

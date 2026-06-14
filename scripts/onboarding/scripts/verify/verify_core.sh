@@ -28,6 +28,7 @@ check_cmd "sudo"    sudo
 check_cmd "ssh"     ssh
 check_cmd "flatpak" flatpak
 check_cmd "kitty"   kitty
+check_cmd "node"    node
 
 echo
 if [[ "$FAIL" -eq 0 ]]; then

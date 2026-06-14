@@ -7,6 +7,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | Script | Installs | Source |
 |--------|----------|--------|
 | `install_sudo.sh` | `sudo` (ensures present; reports `sudo -V`) | apt |
+| `install_sudoers.sh` | Deploys sudoers drop-ins to `/etc/sudoers.d` (the `syncs` alias) | `sync-sudoers.sh` |
 | `install_ssh.sh` | OpenSSH client | apt |
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
 | `install_kitty.sh` | Kitty terminal + `kitty-terminfo` | apt |
@@ -16,6 +17,8 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 
 - Run `apt update` (Core is the **only** category allowed to refresh apt repositories)
 - Ensure `sudo` is installed and report its version/plugin details
+- Deploy sudoers drop-in files to `/etc/sudoers.d` via `sync-sudoers.sh` (the `syncs` alias);
+  requires `unison` (see `cli/install_unison.sh`) and the `~/.unison/sudoers.prf` profile from dotfiles
 - Ensure the OpenSSH client is present
 - Install Flatpak and configure the Flathub remote
 - Install the Kitty terminal emulator and its terminfo entry

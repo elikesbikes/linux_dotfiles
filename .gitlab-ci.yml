@@ -19,27 +19,25 @@ deploy_dotfiles:
         SUDOERS_CHANGED="true"
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
-      export SUDOERS_CHANGED
 
-    - |
-      # Deploy function: git pull + conditional sync
-      deploy_to_host() {
-        local host=$1
-        local sudoers_changed=$2
-        ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no "ecloaiza@$host" bash -s "$sudoers_changed" << 'EOF'
-          SUDOERS_CHANGED=$1
+      # Deploy to each host
+      for host in 192.168.5.30 192.168.5.16 192.168.5.127; do
+        ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no "ecloaiza@$host" bash -s << 'SSH_SCRIPT'
           cd ~/devops/github/linux_dotfiles || exit 1
           git fetch origin && git reset --hard origin/main || exit 1
+
+          # Check if sudoers changed in this commit
+          if git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
+            SUDOERS_CHANGED="false"
+          else
+            SUDOERS_CHANGED="true"
+          fi
 
           if [ "$SUDOERS_CHANGED" = "true" ]; then
             echo "ℹ️  Syncing sudoers on $(hostname)..."
             bash scripts/sync-sudoers-ci.sh || exit 1
           fi
-        EOF
-      }
-
-    - deploy_to_host "192.168.5.30" "$SUDOERS_CHANGED"
-    - deploy_to_host "192.168.5.16" "$SUDOERS_CHANGED"
-    - deploy_to_host "192.168.5.127" "$SUDOERS_CHANGED"
+        SSH_SCRIPT
+      done
   only:
     - main

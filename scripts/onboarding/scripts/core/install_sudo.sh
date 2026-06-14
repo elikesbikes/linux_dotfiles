@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ==================================================
 # Script: install_sudo.sh
-# Version: 2.0.0
+# Version: 2.1.0
 #
 # Versioning:
 # 2.1.0 - Make live state authoritative over the state marker. A marker
@@ -27,7 +27,7 @@ set -euo pipefail
 # ==================================================
 
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_VERSION="2.0.0"
+SCRIPT_VERSION="2.1.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"

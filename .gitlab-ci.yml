@@ -20,6 +20,11 @@ deploy_dotfiles:
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
 
+      # Deploy to docker-prod-1
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.24 \
+        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)"
+
       # Deploy to endurance
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.30 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \

@@ -23,12 +23,13 @@ Symlinks pick up the changes instantly (no restart needed)
 
 | Machine   | IP             |
 |-----------|----------------|
-| endurance    | 192.168.5.30   |
-| gargantua    | 192.168.5.110  |
-| ranger0      | 192.168.5.16   |
-| ranger1      | 192.168.5.35   |
-| tars         | 192.168.5.127  |
-| trainerroad2 | 192.168.5.176  |
+| docker-prod-1 | 192.168.5.24   |
+| endurance     | 192.168.5.30   |
+| gargantua     | 192.168.5.110  |
+| ranger0       | 192.168.5.16   |
+| ranger1       | 192.168.5.35   |
+| tars          | 192.168.5.127  |
+| trainerroad2  | 192.168.5.176  |
 
 ## What happens if you push FROM one of those machines
 

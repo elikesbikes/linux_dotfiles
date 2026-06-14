@@ -13,6 +13,7 @@ cd "$HOME"
 
 TARGET_DIR="$HOME/devops/github/linux_dotfiles"
 REPO_URL="https://github.com/elikesbikes/linux_dotfiles"
+GITLAB_URL="https://gitlab.home.elikesbikes.com/ecloaiza/linux_dotfiles.git"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding"
 LOG_DIR="$STATE_DIR/logs"
@@ -52,6 +53,16 @@ fi
 echo
 echo "Cloning dotfiles repository..."
 git clone "$REPO_URL" "$TARGET_DIR"
+
+# --------------------------------------------------
+# Configure dual-remote push (GitHub + GitLab)
+# --------------------------------------------------
+# A fresh clone only sets origin -> GitHub. Add GitLab as a second push URL
+# so commits (e.g. via gacp_dotfiles) reach both remotes and the GitLab CI
+# pipeline triggers. fetch stays on GitHub only.
+echo "Configuring dual-remote push (GitHub + GitLab)..."
+git -C "$TARGET_DIR" remote set-url --add --push origin "$REPO_URL"
+git -C "$TARGET_DIR" remote set-url --add --push origin "$GITLAB_URL"
 
 # --------------------------------------------------
 # Pre-stow conflict cleanup

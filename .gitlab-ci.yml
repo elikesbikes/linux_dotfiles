@@ -20,24 +20,19 @@ deploy_dotfiles:
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
 
-      # Deploy to each host
-      for host in 192.168.5.30 192.168.5.16 192.168.5.127; do
-        ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no "ecloaiza@$host" bash -s << 'SSH_SCRIPT'
-          cd ~/devops/github/linux_dotfiles || exit 1
-          git fetch origin && git reset --hard origin/main || exit 1
+      # Deploy to endurance
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.30 \
+        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)"
 
-          # Check if sudoers changed in this commit
-          if git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
-            SUDOERS_CHANGED="false"
-          else
-            SUDOERS_CHANGED="true"
-          fi
+      # Deploy to ranger0
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.16 \
+        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)"
 
-          if [ "$SUDOERS_CHANGED" = "true" ]; then
-            echo "ℹ️  Syncing sudoers on $(hostname)..."
-            bash scripts/sync-sudoers-ci.sh || exit 1
-          fi
-        SSH_SCRIPT
-      done
+      # Deploy to tars
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.127 \
+        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)"
   only:
     - main

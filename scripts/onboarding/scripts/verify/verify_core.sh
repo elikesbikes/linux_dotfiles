@@ -24,11 +24,23 @@ check_cmd() {
   fi
 }
 
+check_file() {
+  local label="$1" path="$2"
+  echo -n "• $label : "
+  if [[ -e "$path" ]]; then
+    echo "OK ($path)"
+  else
+    echo "MISSING ($path)"
+    FAIL=$((FAIL+1))
+  fi
+}
+
 check_cmd "sudo"    sudo
 check_cmd "ssh"     ssh
 check_cmd "flatpak" flatpak
 check_cmd "kitty"   kitty
 check_cmd "node"    node
+check_file "sudoers deployed" /etc/sudoers.d/ecloaiza-nopasswd
 
 echo
 if [[ "$FAIL" -eq 0 ]]; then

@@ -36,6 +36,12 @@ deploy_dotfiles:
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)" \
         || echo "⚠️  ranger1 offline, skipping deployment"
 
+      # Deploy to trainerroad2 (skip if offline)
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 ecloaiza@192.168.5.176 \
+        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
+        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || bash scripts/sync-sudoers-ci.sh)" \
+        || echo "⚠️  trainerroad2 offline, skipping deployment"
+
       # Deploy to tars
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.127 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \

@@ -376,6 +376,11 @@ gacp_tutorials_wcopy() {
     --exclude="backup/" \
     --exclude="*.conf" \
     --exclude="docker-compose.override.yml" \
+    --exclude="certs/" \
+    --exclude="acme.json" \
+    --exclude="dashboard.yaml" \
+    --exclude="secrets/" \
+    --exclude="*.htpasswd" \
     --include="*/" \
     --include="*.yml" \
     --include="*.yaml" \
@@ -428,11 +433,13 @@ _gitlab_deploy_tutorials() {
 
   local JOB_NAMES=()
   case "${HOST}" in
-    ranger0)   JOB_NAMES=("deploy:ranger0") ;;
-    endurance) JOB_NAMES=("deploy:endurance") ;;
-    all)       JOB_NAMES=("deploy:ranger0" "deploy:endurance") ;;
+    ranger0)       JOB_NAMES=("deploy:ranger0") ;;
+    endurance)     JOB_NAMES=("deploy:endurance") ;;
+    docker-prod-1) JOB_NAMES=("deploy:docker-prod-1") ;;
+    ranger1)       JOB_NAMES=("deploy:ranger1") ;;
+    all)           JOB_NAMES=("deploy:ranger0" "deploy:endurance" "deploy:docker-prod-1" "deploy:ranger1") ;;
     *)
-      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, or all"
+      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, docker-prod-1, ranger1, or all"
       return 1
       ;;
   esac

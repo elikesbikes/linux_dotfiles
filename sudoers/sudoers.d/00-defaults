@@ -1,12 +1,6 @@
 # Global sudo defaults
 Defaults env_keep += "TERMINFO"
 
-# Dedicated sudo I/O logging for approved scripts
-Defaults log_output
-Defaults!/home/ecloaiza/scripts/linux/install-sudoers.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/restic-backup.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/truenas-repl-ntfy.sh log_output
-Defaults!/home/ecloaiza/scripts/linux/monitor-idrive-by-filename.sh log_output
-
-# Log file location
-Defaults iolog_dir="/var/log/sudo-io"
+# NOTE: I/O logging (log_output / iolog_dir) removed — unsupported by sudo-rs,
+# which is the default sudo on this system. Restore these only if switching
+# back to classic sudo.

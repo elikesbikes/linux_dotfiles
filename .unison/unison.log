@@ -4842,3 +4842,155 @@ Roots:
   ssh://ranger0//home/ecloaiza/.claude/skills
 
 Fatal error: Lost connection with the server
+
+Unison 2.53.8 (ocaml 5.3.0) log started at 2026-06-26 at 16:46:33
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+66 items will be synced, 2 skipped
+94.4 KiB to be synced from devops/github to IT/github
+7.3 KiB to be synced from IT/github to devops/github
+Unison 2.53.8 (ocaml 5.3.0) started propagating changes at 16:46:33.36 on 26 Jun 2026
+[BGN] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md
+[BGN] Updating file homelab/projects/groceries/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file homelab/projects/groceries/CLAUDE.md
+[BGN] Copying properties for homelab/projects/groceries/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/README.md
+[BGN] Updating file linux_dotfiles/PIPELINE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/PIPELINE.md
+[BGN] Updating file linux_dotfiles/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/README.md
+[BGN] Copying linux_dotfiles/scripts/linux/AppleHealth from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/scripts/linux/AppleHealth
+[BGN] Copying linux_dotfiles/scripts/linux/Garmin from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/scripts/linux/Garmin
+[BGN] Copying linux_dotfiles/scripts/restic from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/scripts/restic
+[BGN] Copying linux_dotfiles/sudoers/40-scripts from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/40-scripts
+[BGN] Updating file tutorials/docker-compose/restic/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/restic/CLAUDE.md
+[BGN] Updating file tutorials/docker-compose/restic/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/restic/README.md
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying homelab/projects/AI-Ollama/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying homelab/projects/AI-Ollama/CLAUDE.md
+[BGN] Copying homelab/projects/AI-Ollama/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying homelab/projects/AI-Ollama/README.md
+[BGN] Copying properties for linux_dotfiles/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/exports/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/exports/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README2.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/exports/README2.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md
+[BGN] Copying linux_dotfiles/scripts/onboarding/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying linux_dotfiles/scripts/onboarding/CLAUDE.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/cli/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/cli/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/core/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/core/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/desktop/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/desktop/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/dotfiles/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/dotfiles/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md
+[BGN] Copying linux_dotfiles/scripts/onboarding/scripts/extensions/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying linux_dotfiles/scripts/onboarding/scripts/extensions/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/master/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/master/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/security/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/security/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/themes/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/themes/README.md
+[BGN] Copying linux_dotfiles/scripts/onboarding/scripts/verify/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying linux_dotfiles/scripts/onboarding/scripts/verify/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/proxmox/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/proxmox/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/README.md
+[BGN] Copying properties for linux_dotfiles/sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/README.md
+[BGN] Copying tutorials/docker-compose/AI-Ollama/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/AI-Ollama/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/AI-Ollama/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/AI-Ollama/README.md
+[BGN] Copying tutorials/docker-compose/AI-Ollama/openwebui_data/cache/embedding/models/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/AI-Ollama/openwebui_data/cache/embedding/models/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md
+[BGN] Copying tutorials/docker-compose/AI-Ollama/openwebui_data/cache/embedding/models/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/AI-Ollama/openwebui_data/cache/embedding/models/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md
+[BGN] Copying tutorials/docker-compose/socket-proxy/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/socket-proxy/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/socket-proxy/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/socket-proxy/README.md
+[BGN] Copying tutorials/docker-compose/traefik/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/traefik/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/README.md
+[BGN] Copying tutorials/docker-compose/wazuh/ranger1-agent/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/wazuh/ranger1-agent/README.md
+[BGN] Copying tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf
+[BGN] Deleting homelab/AI from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/AI
+[BGN] Deleting homelab/Home Assistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/Home Assistant
+[BGN] Deleting linux_dotfiles/sudoers/00-defaults from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/sudoers/00-defaults
+[BGN] Deleting linux_dotfiles/sudoers/10-admin from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/sudoers/10-admin
+[BGN] Deleting linux_dotfiles/sudoers/20-diagnostics from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/sudoers/20-diagnostics
+[BGN] Deleting linux_dotfiles/sudoers/30-filesystem from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/sudoers/30-filesystem
+[BGN] Deleting linux_dotfiles/sudoers/ecloaiza-nopasswd from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/sudoers/ecloaiza-nopasswd
+Unison 2.53.8 (ocaml 5.3.0) finished propagating changes at 16:46:33.38 on 26 Jun 2026, 0.021 s
+Synchronization complete at 16:46:33  (66 items transferred, 2 skipped, 0 failed)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)

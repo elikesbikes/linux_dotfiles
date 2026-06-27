@@ -82,3 +82,9 @@ export PATH="$HOME/.local/go/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Re-init zoxide LAST so its prompt hook lands in $PROMPT_COMMAND after
+# starship/direnv (omakub's defaults/bash/init runs `zoxide init` too early,
+# which starship then hides in $STARSHIP_PROMPT_COMMAND -> doctor warning).
+# zoxide's hook is dedup-safe, so this just moves the hook into place.
+command -v zoxide &>/dev/null && eval "$(zoxide init bash)"

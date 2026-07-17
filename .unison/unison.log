@@ -4994,3 +4994,551 @@ Unison 2.53.8 (ocaml 5.3.0) finished propagating changes at 16:46:33.38 on 26 Ju
 Synchronization complete at 16:46:33  (66 items transferred, 2 skipped, 0 failed)
   skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
   skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.53.8 (ocaml 5.3.0) log started at 2026-07-03 at 11:45:50
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+172 items will be synced, 2 skipped
+1.3 MiB to be synced from devops/github to IT/github
+38.9 KiB to be synced from IT/github to devops/github
+Unison 2.53.8 (ocaml 5.3.0) started propagating changes at 11:45:50.51 on 03 Jul 2026
+[BGN] Updating file archive/linux/flyio/manual/quick_setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file archive/linux/flyio/manual/quick_setup.md
+[BGN] Updating file archive/linux/flyio/manual/setup_flyio.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file archive/linux/flyio/manual/setup_flyio.md
+[BGN] Updating file archive/linux/flyio/quick/quick_setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file archive/linux/flyio/quick/quick_setup.md
+[BGN] Updating file archive/linux/flyio/quick/setup_flyio.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file archive/linux/flyio/quick/setup_flyio.md
+[BGN] Updating file linux_dotfiles/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/README.md
+[BGN] Copying linux_dotfiles/sudoers/40-scripts from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/40-scripts
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/CreditMigrate/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/CreditMigrate/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/WebCamServer/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/WebCamServer/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI_FS/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI_FS/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acelements.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acelements.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/achandling.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/achandling.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acinteract.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acinteract.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acintro.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acintro.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acjson.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acjson.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acupload.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acupload.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adauthentication.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adauthentication.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adconnection.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adconnection.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcpcontrol.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcpcontrol.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcredential.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcredential.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adexterior.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adexterior.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adnetwork.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adnetwork.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adothers.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adothers.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/advancedusage.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/advancedusage.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/api.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/api.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiaux.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiaux.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiconfig.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiconfig.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apielements.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apielements.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiextra.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiextra.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiupdate.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiupdate.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/basicusage.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/basicusage.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelabel.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelabel.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelog.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelog.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/colorized.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/colorized.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/credit.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/credit.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/datatips.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/datatips.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/esp32cam.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/esp32cam.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/faq.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/faq.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/filesystem.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/filesystem.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/gettingstarted.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/gettingstarted.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/howtoembed.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/howtoembed.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/index.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/index.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/license.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/license.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/lsbegin.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/lsbegin.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menu.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menu.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menuize.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menuize.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otabrowser.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otabrowser.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaserver.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaserver.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaupdate.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaupdate.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/wojson.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/wojson.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/src/updateserver/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/src/updateserver/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/updateserver/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/updateserver/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/README.md
+[BGN] Copying archive/esp32-arduino/boards_manager.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/boards_manager.md
+[BGN] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/LICENSE
+[BGN] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/CONTRIBUTING.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/CONTRIBUTING.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/SUPPORT.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/SUPPORT.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/Makefile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/Makefile
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/false from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/false
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixarray from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixarray
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_negative from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_negative
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_positive from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_positive
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixmap from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixmap
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixstr from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixstr
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/nil from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/nil
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/true from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/true
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/Testing/TAG from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/Testing/TAG
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/LICENSE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/LICENSE.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/README.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/docs/Doxyfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/docs/Doxyfile
+[BGN] Copying archive/esp32-arduino/libraries/EspMQTTClient/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/EspMQTTClient/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/EspMQTTClient/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/EspMQTTClient/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Bluetooth 5 features.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Bluetooth 5 features.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Command_line_config.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Command_line_config.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Doxyfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Doxyfile
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Improvements_and_updates.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Improvements_and_updates.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Migration_guide.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Migration_guide.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/New_user_guide.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/New_user_guide.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Usage_tips.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Usage_tips.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/index.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/index.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneTLM_Beacon/BLE_EddystoneTLM_Beacon.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneTLM_Beacon/BLE_EddystoneTLM_Beacon.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneURL_Beacon/BLE_EddystoneURL_Beacon.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneURL_Beacon/BLE_EddystoneURL_Beacon.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/CODING_STANDARDS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/CODING_STANDARDS.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/NOTICE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/NOTICE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/RELEASE_NOTES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/RELEASE_NOTES.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/AUTHORS from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/AUTHORS
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/README from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/README
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/VERSION from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/VERSION
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/README.md
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/tests/Makefile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/tests/Makefile
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/tests/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/tests/README.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md
+[BGN] Copying properties for linux_dotfiles/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/PIPELINE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/PIPELINE.md
+[BGN] Copying properties for linux_dotfiles/exports/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/exports/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README2.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/exports/README2.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md
+[BGN] Copying properties for linux_dotfiles/scripts/proxmox/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/proxmox/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/README.md
+[BGN] Copying linux_dotfiles/sudoers/00-defaults from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/00-defaults
+[BGN] Copying linux_dotfiles/sudoers/10-admin from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/10-admin
+[BGN] Copying linux_dotfiles/sudoers/20-diagnostics from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/20-diagnostics
+[BGN] Copying linux_dotfiles/sudoers/30-filesystem from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/30-filesystem
+[BGN] Copying properties for linux_dotfiles/sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/README.md
+[BGN] Copying linux_dotfiles/sudoers/ecloaiza-nopasswd from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/sudoers/ecloaiza-nopasswd
+[BGN] Copying properties for tutorials/PIPELINE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/PIPELINE.md
+[BGN] Copying tutorials/docker-compose/authelia/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/authelia/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/authelia/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/authelia/README.md
+[BGN] Updating file tutorials/docker-compose/traefik/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/traefik/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/traefik/DOCKER.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/DOCKER.md
+[BGN] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/README.md
+[BGN] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md
+[BGN] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md
+[BGN] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md
+[BGN] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md
+[BGN] Deleting tutorials/docker-compose/wyl from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting tutorials/docker-compose/wyl
+Unison 2.53.8 (ocaml 5.3.0) finished propagating changes at 11:45:50.59 on 03 Jul 2026, 0.074 s
+Synchronization complete at 11:45:50  (172 items transferred, 2 skipped, 0 failed)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.53.8 (ocaml 5.3.0) log started at 2026-07-03 at 11:46:26
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 172 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 11:46:26  (0 items transferred, 172 skipped, 0 failed)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/AI/README.md.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/Obsidian/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/Obsidian/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/CreditMigrate/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/WebCamServer/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI_FS/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acelements.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/achandling.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acinteract.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acintro.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acjson.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acupload.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adauthentication.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adconnection.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcpcontrol.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcredential.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adexterior.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adnetwork.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adothers.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/advancedusage.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/api.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiaux.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiconfig.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apielements.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiextra.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiupdate.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/basicusage.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelabel.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelog.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/colorized.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/credit.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/datatips.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/esp32cam.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/faq.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/filesystem.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/gettingstarted.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/howtoembed.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/index.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/license.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/lsbegin.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menu.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menuize.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otabrowser.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaserver.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaupdate.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/wojson.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/src/updateserver/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/updateserver/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/boards_manager.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/CHANGELOG.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/CONTRIBUTING.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/SUPPORT.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/Makefile (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array16 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/false (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixarray (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_negative (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_positive (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixmap (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixstr (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float64 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int16 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int64 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int8 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map16 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/nil (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str16 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str8 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/true (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint16 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint32 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint64 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint8 (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoQueue/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoQueue/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/ArduinoQueue/Testing/TAG (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/CRC32/CHANGELOG.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/CRC32/LICENSE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/CRC32/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/CRC32/docs/Doxyfile (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/EspMQTTClient/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/EspMQTTClient/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/CHANGELOG.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Bluetooth 5 features.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Command_line_config.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Doxyfile (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Improvements_and_updates.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Migration_guide.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/New_user_guide.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Usage_tips.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/docs/index.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneTLM_Beacon/BLE_EddystoneTLM_Beacon.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneURL_Beacon/BLE_EddystoneURL_Beacon.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/CODING_STANDARDS.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/NOTICE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/RELEASE_NOTES.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/AUTHORS (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/README (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/VERSION (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/PubSubClient/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/PubSubClient/tests/Makefile (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/esp32-arduino/libraries/PubSubClient/tests/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linode/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linode/Uptime Kuma/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linode/Uptime Kuma/SSL/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linode/nextcloud/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/LetsEncrypt/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/LetsEncrypt/letsEncrypt.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/Self-Signed Cets/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/bash/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/exa/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/filesystem/addi-file-system-md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/flyio/manual/quick_setup.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/flyio/manual/setup_flyio.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/flyio/manual/setup_own_server.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/flyio/quick/quick_setup.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/flyio/quick/setup_flyio.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/grep/grep.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/netstat/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/proxmox/cert-cluster.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/proxmox/clustering.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/sed/sed.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/starship/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/linux/yadm/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/ciscoISR/initial-config (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/ciscoISR/running-config (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/multicast/Dockerfile (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/multicast/LICENSE (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/multicast/README-OpenWRT.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/multicast/README-ZeroShell.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/multicast/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/pfsense/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/pfsense/configs (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/pfsense/emivmpfsense.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/tailscale/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/tailscale/UDM/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/tailscale/linux/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/network/zero-tp/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/nextcloud/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/windows/Active Directory/Centos/readme.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/windows/Active Directory/proxmox.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/windows/server init config/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/windows/wsl/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: archive/windows/wsl/WL2-SSH/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)

@@ -9,7 +9,7 @@ alias ll="eza -lgho --sort=modified --icons --git --git-repos"
 alias pp="ping -c 3 google.com"
 alias space="sudo du -h --max-depth=1 -t 1G"
 alias dot="yadm pull"
-alias docker-restart="docker restart $(docker ps -a -q)"
+alias docker-restart='docker restart $(docker ps -a -q)'
 alias dockerrun="sudo docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}'"
 alias dockerlogs="sudo docker compose logs -f"
 alias takeover="sudo chown -R ecloaiza:ecloaiza *"

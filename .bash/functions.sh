@@ -340,11 +340,11 @@ gpull_tutorials() {
 # Usage:
 #   gacp_tutorials_wcopy <project> "Commit message" [host]
 #
-#   host: ranger0 | endurance | all   (omit to push only)
+#   host: ranger0 | endurance | docker-prod-1 | ranger1 | hailmary | all   (omit to push only)
 #
 # Examples:
 #   gacp_tutorials_wcopy restic "update config"
-#   gacp_tutorials_wcopy restic "update config" ranger0
+#   gacp_tutorials_wcopy restic "update config" hailmary
 #   gacp_tutorials_wcopy restic "update config" all
 # ------------------------------------------------------------
 gacp_tutorials_wcopy() {
@@ -437,9 +437,10 @@ _gitlab_deploy_tutorials() {
     endurance)     JOB_NAMES=("deploy:endurance") ;;
     docker-prod-1) JOB_NAMES=("deploy:docker-prod-1") ;;
     ranger1)       JOB_NAMES=("deploy:ranger1") ;;
-    all)           JOB_NAMES=("deploy:ranger0" "deploy:endurance" "deploy:docker-prod-1" "deploy:ranger1") ;;
+    hailmary)      JOB_NAMES=("deploy:hailmary") ;;
+    all)           JOB_NAMES=("deploy:ranger0" "deploy:endurance" "deploy:docker-prod-1" "deploy:ranger1" "deploy:hailmary") ;;
     *)
-      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, docker-prod-1, ranger1, or all"
+      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, docker-prod-1, ranger1, hailmary, or all"
       return 1
       ;;
   esac

@@ -33,6 +33,12 @@ eval "$(starship init bash)"
 eval "$(direnv hook bash)"
 
 # Run output commands last
+# fastfetch's kitty-image detection checks TERM_PROGRAM/KITTY_PID to confirm
+# a local kitty process -- kitty's ssh kitten deliberately doesn't forward
+# these (they'd be stale over SSH), even though it does forward everything
+# the graphics protocol itself needs. Force it so the tiger logo renders
+# over `sshe`/kitty-ssh sessions too, not just local kitty windows.
+[[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
 fastfetch
 
 # ==============================================================================

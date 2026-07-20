@@ -17,7 +17,12 @@ STATE_FILE="${CONFIG_DIR}/.tailscale-ddns.state"
 LOCK_FILE="/tmp/${SCRIPT_NAME}.lock"
 
 # Cloudflare DNS Configuration
-DNS_RECORD_NAME="ranger0.home.elikesbikes.com"
+# Host-specific: each machine updates its own <hostname>.home.elikesbikes.com
+# record, using the zone/record IDs in its own ENV_FILE (not synced between
+# hosts). This used to be hardcoded to "ranger0" -- fixed 2026-07-20 during
+# the ranger0 -> hailmary migration since this script is shared via the
+# linux_dotfiles repo across hosts.
+DNS_RECORD_NAME="$(hostname).home.elikesbikes.com"
 DNS_RECORD_TYPE="A"
 
 # Tailscale interface (default, but can be overridden)

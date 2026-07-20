@@ -340,12 +340,14 @@ gpull_tutorials() {
 # Usage:
 #   gacp_tutorials_wcopy <project> "Commit message" [host]
 #
-#   host: ranger0 | endurance | docker-prod-1 | ranger1 | hailmary | all   (omit to push only)
+#   host: hailmary   (omit to push only)
+#   Historically also supported ranger0/endurance/docker-prod-1/ranger1 —
+#   all four are retired/decommissioned (Project Exodus, 2026-07); hailmary
+#   is now the sole deploy target in .gitlab-ci.yml.
 #
 # Examples:
 #   gacp_tutorials_wcopy restic "update config"
 #   gacp_tutorials_wcopy restic "update config" hailmary
-#   gacp_tutorials_wcopy restic "update config" all
 # ------------------------------------------------------------
 gacp_tutorials_wcopy() {
   local PROJECT_NAME="$1"
@@ -433,14 +435,10 @@ _gitlab_deploy_tutorials() {
 
   local JOB_NAMES=()
   case "${HOST}" in
-    ranger0)       JOB_NAMES=("deploy:ranger0") ;;
-    endurance)     JOB_NAMES=("deploy:endurance") ;;
-    docker-prod-1) JOB_NAMES=("deploy:docker-prod-1") ;;
-    ranger1)       JOB_NAMES=("deploy:ranger1") ;;
-    hailmary)      JOB_NAMES=("deploy:hailmary") ;;
-    all)           JOB_NAMES=("deploy:ranger0" "deploy:endurance" "deploy:docker-prod-1" "deploy:ranger1" "deploy:hailmary") ;;
+    hailmary) JOB_NAMES=("deploy:hailmary") ;;
+    all)      JOB_NAMES=("deploy:hailmary") ;;
     *)
-      echo "ERROR: Unknown host '${HOST}'. Use ranger0, endurance, docker-prod-1, ranger1, hailmary, or all"
+      echo "ERROR: Unknown host '${HOST}'. Use hailmary (ranger0/endurance/docker-prod-1/ranger1 retired)"
       return 1
       ;;
   esac

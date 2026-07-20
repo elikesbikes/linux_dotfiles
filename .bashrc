@@ -3,7 +3,8 @@
 # ==============================================================================
 
 # Source base configuration (Must be first. MUST NOT produce output.)
-source ~/.local/share/omakub/defaults/bash/rc
+# Guarded: Omakub isn't installed on every host (e.g. lean servers like hailmary).
+[ -f ~/.local/share/omakub/defaults/bash/rc ] && source ~/.local/share/omakub/defaults/bash/rc
 
 # Re-enable command hashing: omakub's defaults run `set +h`, which makes nvm's
 # `hash -r` (nvm.sh) emit "bash: hash: hashing disabled" on shell startup.
@@ -27,10 +28,10 @@ set -h
 [[ -f ~/.bash/misc.sh ]] && source ~/.bash/misc.sh
 
 # Load Starship
-eval "$(starship init bash)"
+command -v starship &>/dev/null && eval "$(starship init bash)"
 
 # Load direnv hook
-eval "$(direnv hook bash)"
+command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 
 # Run output commands last
 # fastfetch's kitty-image detection checks TERM_PROGRAM/KITTY_PID to confirm
@@ -39,7 +40,7 @@ eval "$(direnv hook bash)"
 # the graphics protocol itself needs. Force it so the tiger logo renders
 # over `sshe`/kitty-ssh sessions too, not just local kitty windows.
 [[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
-fastfetch
+command -v fastfetch &>/dev/null && fastfetch
 
 # ==============================================================================
 # 3. Environment Variables (Order-independent)
@@ -76,8 +77,8 @@ if [ -n "$PS1" ]; then
   bind 'set enable-bracketed-paste on'
 fi
 
-# Input
-bind -f ~/.inputrc
+# Input (guarded: ~/.inputrc may not exist on every host)
+[ -r ~/.inputrc ] && bind -f ~/.inputrc
 #. "/home/ecloaiza/.deno/env"
 #source /home/ecloaiza/.local/share/bash-completion/completions/deno.bash
 #export PATH=$PATH:/home/ecloaiza/.spicetify

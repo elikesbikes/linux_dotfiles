@@ -21,15 +21,16 @@ Symlinks pick up the changes instantly (no restart needed)
 
 ## Machines that get updated
 
-| Machine   | IP             |
-|-----------|----------------|
-| docker-prod-1 | 192.168.5.24   |
-| endurance     | 192.168.5.30   |
-| gargantua     | 192.168.5.110  |
-| ranger0       | 192.168.5.16   |
-| ranger1       | 192.168.5.35   |
-| tars          | 192.168.5.127  |
-| trainerroad2  | 192.168.5.176  |
+| Machine   | IP             | Notes                     |
+|-----------|----------------|---------------------------|
+| hailmary      | 192.168.5.25   | primary target            |
+| tars          | 192.168.5.127  | source of truth (dev box) |
+| gargantua     | 192.168.5.110  | skipped if offline        |
+| trainerroad2  | 192.168.5.176  | skipped if offline        |
+
+Retired in Project Exodus (2026-07), removed from the pipeline:
+docker-prod-1 (192.168.5.24), endurance (192.168.5.30),
+ranger0 (192.168.5.16), ranger1 (192.168.5.35).
 
 ## What happens if you push FROM one of those machines
 

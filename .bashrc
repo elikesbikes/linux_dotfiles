@@ -93,5 +93,9 @@ export NVM_DIR="$HOME/.nvm"
 # Re-init zoxide LAST so its prompt hook lands in $PROMPT_COMMAND after
 # starship/direnv (omakub's defaults/bash/init runs `zoxide init` too early,
 # which starship then hides in $STARSHIP_PROMPT_COMMAND -> doctor warning).
-# zoxide's hook is dedup-safe, so this just moves the hook into place.
+# Clear the guard omakub's early init set, so this re-init registers the
+# hook fresh (into the post-starship PROMPT_COMMAND) instead of tripping the
+# doctor over the hook starship relocated to $STARSHIP_PROMPT_COMMAND.
+unset __zoxide_hooked
 command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
+alias idrive='/opt/IDriveForLinux/bin/idrive'

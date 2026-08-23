@@ -1,0 +1,4 @@
+# Default startup session: open new kitty windows in ~/Downloads
+new_tab
+cd /home/ecloaiza/Downloads
+launch

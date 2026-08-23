@@ -1,10 +1,12 @@
 # BEGIN_KITTY_THEME
-# Birds Of Paradise
+# Catppuccin-Macchiato
 include current-theme.conf
 # END_KITTY_THEME
 #
-
-
+hide_window_decorations yes
+cursor_trail_decay  0.1 0.4
+cursor_trail_start_threshold 2
+scrollback_lines	5000
 # BEGIN_KITTY_FONTS
 font_family      family="MesloLGL Nerd Font"
 #font_family      family="3270 Nerd Font Mono"
@@ -22,14 +24,26 @@ map ctrl+shift+v paste_from_clipboard
 # Paste the primary selection buffer
 map ctrl+shift+insert paste_from_primary
 
+# Do NOT remember last window size (important for GNOME)
+remember_window_size no
+
+# Initial size in *pixels*
+initial_window_width  1500
+initial_window_height 650
+
+# Center window
+initial_window_position center
+
 
 
 # Set the style of the tab bar.
+#
+tab_powerline_style     round
 tab_bar_style           powerline
 tab_bar_edge            bottom
 tab_bar_min_tabs        1
-tab_powerline_style     slanted
-tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{title}"
+#tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{title}"
+tab_title_template "{index} [{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}] {fmt.fg.green}{tab.current.user}@{tab.current.host}:{fmt.fg.tab}{cwd} {title}"
 active_tab_font_style   bold
 inactive_tab_font_style normal
 map ctrl+t new_tab
@@ -49,3 +63,5 @@ copy_on_select yes
 focus_follows_mouse yes
 pointer_shape_when_grabbed arrow
 mouse_map left click copy_to_clipboard
+mouse_map middle release ungrabbed paste_from_selection
+mouse_map middle click paste_from_clipboard

@@ -99,3 +99,10 @@ export NVM_DIR="$HOME/.nvm"
 unset __zoxide_hooked
 command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
 alias idrive='/opt/IDriveForLinux/bin/idrive'
+
+
+
+# ==============================================================================
+# 5. Input Configuration
+# ==============================================================================
+export SSH_AUTH_SOCK=/home/ecloaiza/.ssh/proton-pass-ssh-agent.sock

@@ -38,7 +38,8 @@ Reorganizes the repo into Stow packages (`bash`, `config`, `tmux`, `scripts`, `s
 ## 4. create-managed-symlinks.sh
 
 Recreates the intentional symlinks currently used by this host: `.bash`,
-`.bashrc`, `scripts`, `sudoers`, and the directly linked `.config` entries.
+`.bashrc`, `scripts`, `sudoers`, and the directly linked `.config` entries,
+including Hyprland configuration at `.config/hypr`.
 It excludes transient links from caches, browsers, package managers, and
 systemd. It is idempotent and never overwrites an existing conflicting path.
 

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "ecloaiza.zone",
+  "name": "Zone",
+  "version": "1.0.0",
+  "author": "ecloaiza",
+  "description": "World clock bar widget (Tokyo), inspired by sindresorhus.com/zone-bar",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Zone",
+    "description": "World clock bar widget (Tokyo)",
+    "category": "Time",
+    "allowMultiple": false
+  }
+}

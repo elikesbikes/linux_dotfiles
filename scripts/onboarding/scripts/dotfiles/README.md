@@ -34,3 +34,16 @@ Reorganizes the repo into Stow packages (`bash`, `config`, `tmux`, `scripts`, `s
 
 - Logs are written under `~/.local/state/onboarding/logs/`
 - Both scripts are intended to run on a Debian/Ubuntu host with `apt`
+
+## 4. create-managed-symlinks.sh
+
+Recreates the intentional symlinks currently used by this host: `.bash`,
+`.bashrc`, `scripts`, `sudoers`, and the directly linked `.config` entries.
+It excludes transient links from caches, browsers, package managers, and
+systemd. It is idempotent and never overwrites an existing conflicting path.
+
+```bash
+bash scripts/onboarding/scripts/dotfiles/create-managed-symlinks.sh
+```
+
+Set `DOTFILES_REPO_DIR` to use a checkout outside the default location.

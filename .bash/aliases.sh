@@ -20,6 +20,7 @@ alias syncn='rsync -a --exclude=".git" --include="*/" --exclude="*" /home/ecloai
 alias syncs='/home/ecloaiza/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
 claudepower() { cd /home/ecloaiza/devops/ubuntu && claude --enable-auto-mode --dangerously-skip-permissions "$@"; }
+codexpower() { cd /home/ecloaiza/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 alias claudemddocker='rm -f CLAUDE.md && ln -s "/home/ecloaiza/Documents/Obsidian/Loaiza/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
 alias cleanupdotfiles='rm -rf /home/ecloaiza/devops/github/linux_dotfiles/ && cd /home/ecloaiza/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
 alias upgraderustdesk='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o '\''https://[^"]*x86_64\.deb'\'' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'

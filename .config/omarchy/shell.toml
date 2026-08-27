@@ -1,0 +1,7 @@
+[font]
+base-size = 12
+
+[bar]
+# scale-with-font multiplies this by base-size/12 (14/12 = 1.167), so 26
+# lands back on the 30px bar height. Theme default is 26.
+size-horizontal = 26

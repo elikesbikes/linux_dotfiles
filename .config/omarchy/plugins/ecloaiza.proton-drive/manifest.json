@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "ecloaiza.proton-drive",
+  "name": "Proton Drive",
+  "version": "1.0.0",
+  "author": "ecloaiza",
+  "description": "Quick actions for the Proton Drive CLI",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Proton Drive",
+    "description": "Quick actions for the Proton Drive CLI",
+    "category": "Status",
+    "allowMultiple": false
+  }
+}

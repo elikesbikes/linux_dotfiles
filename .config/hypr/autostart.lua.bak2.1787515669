@@ -1,0 +1,5 @@
+-- Extra autostart processes.
+-- o.launch_on_start("my-service")
+
+-- Syncthing tray icon (the syncthing daemon itself runs as a systemd user service)
+o.launch_on_start("syncthingtray-qt6")

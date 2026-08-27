@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "ecloaiza.pomodoro",
+  "name": "Pomodoro",
+  "version": "1.0.0",
+  "author": "ecloaiza",
+  "description": "Pomodoro countdown in the bar",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Pomodoro",
+    "description": "Pomodoro countdown in the bar",
+    "category": "Time",
+    "allowMultiple": false
+  }
+}

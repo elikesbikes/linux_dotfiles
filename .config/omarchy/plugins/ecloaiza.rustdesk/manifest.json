@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "ecloaiza.rustdesk",
+  "name": "RustDesk",
+  "version": "1.0.0",
+  "author": "ecloaiza",
+  "description": "RustDesk icon in the bar (RustDesk's Flutter Linux build has no tray icon of its own)",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "RustDesk",
+    "description": "Click to open/focus RustDesk; middle or right click closes its window",
+    "category": "Apps",
+    "allowMultiple": false
+  }
+}

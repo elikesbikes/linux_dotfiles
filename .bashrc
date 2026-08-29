@@ -97,7 +97,7 @@ export NVM_DIR="$HOME/.nvm"
 # hook fresh (into the post-starship PROMPT_COMMAND) instead of tripping the
 # doctor over the hook starship relocated to $STARSHIP_PROMPT_COMMAND.
 unset __zoxide_hooked
-command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
+command -v zoxide &>/dev/null && eval "$(zoxide init bash --cmd cd)"
 alias idrive='/opt/IDriveForLinux/bin/idrive'
 
 

@@ -5,14 +5,16 @@ import qs.Ui
 
 // Pomodoro countdown for the bar.
 //
-// Left click starts or pauses, right click skips to the next phase, middle
-// click resets. Colour comes from the bar's own tokens rather than fixed
-// hexes, so the widget follows whatever theme is active.
+// Left click starts or pauses, right click cycles focus duration presets
+// (shown briefly in the bar), middle click skips to next phase, middle
+// click while idle resets.
 BarWidget {
   id: root
   moduleName: "ecloaiza.pomodoro"
 
-  readonly property int lapLength: setting("lapLength", 25)
+  readonly property var focusPresets: [5, 10, 15, 20, 25, 30, 45, 50, 60, 90]
+  property int focusIndex: Math.max(0, focusPresets.indexOf(setting("lapLength", 25)))
+  property int lapLength: focusPresets[focusIndex]
   readonly property int shortBreak: setting("shortBreak", 5)
   readonly property int longBreak: setting("longBreak", 15)
   readonly property int lapsUntilLong: Math.max(1, setting("lapsUntilLong", 4))
@@ -22,6 +24,7 @@ BarWidget {
   property bool running: false
   property int remaining: root.lapLength * 60
   property real deadline: 0
+  property bool showingPreset: false
 
   readonly property bool onBreak: phase === "short" || phase === "long"
 
@@ -37,7 +40,14 @@ BarWidget {
     return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
   }
 
-  readonly property string displayText: (root.onBreak ? "Break " : "") + root.clockText
+  readonly property string displayText: {
+    if (root.showingPreset) return root.lapLength + "m"
+    return (root.onBreak ? "Break " : "") + root.clockText
+  }
+
+  function playAlert() {
+    Quickshell.execDetached(["bash", "-lc", "paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"])
+  }
 
   function start() {
     if (root.phase === "idle") {
@@ -45,7 +55,6 @@ BarWidget {
       root.remaining = root.minutesFor("work") * 60
     }
     root.running = true
-    // Anchor to a wall-clock deadline so the countdown cannot drift.
     root.deadline = Date.now() / 1000 + root.remaining
   }
 
@@ -67,6 +76,16 @@ BarWidget {
     root.remaining = root.minutesFor(next) * 60
     if (root.running)
       root.deadline = Date.now() / 1000 + root.remaining
+    root.playAlert()
+  }
+
+  function cycleFocusPreset() {
+    root.focusIndex = (root.focusIndex + 1) % root.focusPresets.length
+    root.lapLength = root.focusPresets[root.focusIndex]
+    if (root.phase === "idle")
+      root.remaining = root.lapLength * 60
+    root.showingPreset = true
+    presetTimer.restart()
   }
 
   function reset() {
@@ -93,6 +112,12 @@ BarWidget {
     onTriggered: root.tick()
   }
 
+  Timer {
+    id: presetTimer
+    interval: 2000
+    onTriggered: root.showingPreset = false
+  }
+
   WidgetButton {
     id: button
     anchors.fill: parent
@@ -108,8 +133,8 @@ BarWidget {
     dimmed: !root.running
 
     onPressed: function(b) {
-      if (b === Qt.RightButton) root.advance()
-      else if (b === Qt.MiddleButton) root.reset()
+      if (b === Qt.RightButton) root.cycleFocusPreset()
+      else if (b === Qt.MiddleButton) root.phase === "idle" ? root.reset() : root.advance()
       else root.running ? root.pause() : root.start()
     }
   }

@@ -13,22 +13,22 @@
           "verticalFormat": "HH\n—\nmm"
         },
         {
-          "id": "ecloaiza.pomodoro"
-        },
-        {
           "id": "omarchy.keyboard-layout"
         },
         {
           "id": "omarchy.weather"
         },
         {
-          "id": "omarchy.system-update"
+          "id": "ecloaiza.zone"
         },
         {
           "id": "ecloaiza.proton-drive"
         },
         {
-          "id": "ecloaiza.zone"
+          "id": "omarchy.system-update"
+        },
+        {
+          "id": "ecloaiza.pomodoro"
         }
       ],
       "left": [
@@ -40,9 +40,6 @@
         }
       ],
       "right": [
-        {
-          "id": "ecloaiza.rustdesk"
-        },
         {
           "id": "ecloaiza.tray"
         },
@@ -70,7 +67,7 @@
       ]
     },
     "position": "top",
-    "transparent": true
+    "transparent": false
   },
   "idle": {
     "lock": 300,

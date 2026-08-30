@@ -19,8 +19,8 @@ set -h
 # ==============================================================================
 
 ## Sourcing Custom Scripts
-[[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant
-[[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma
+load_hass() { [[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant && echo "Home Assistant vars loaded"; }
+load_uptime() { [[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma && echo "Uptime Kuma vars loaded"; }
 [[ -f ~/.secrets/gitlab ]] && source ~/.secrets/gitlab
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh

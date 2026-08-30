@@ -6780,3 +6780,19 @@ Roots:
   /home/ecloaiza/devops/github
   /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
 
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:48:21
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 0 skipped
+4.4 KiB to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:48:21.34 on 29 Aug 2026
+[BGN] Updating file adastra/network/Security/Unifi Certs.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file adastra/network/Security/Unifi Certs.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:48:21.34 on 29 Aug 2026, 0.001 s
+Synchronization complete at 20:48:21  (1 item transferred, 0 skipped, 0 failed)

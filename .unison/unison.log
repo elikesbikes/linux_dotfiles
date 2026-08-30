@@ -5542,3 +5542,1196 @@ Synchronization complete at 11:46:26  (0 items transferred, 172 skipped, 0 faile
   skipped: archive/windows/wsl/README.md (would delete a file with nodeletion or nodeletionpartial set)
   skipped: archive/windows/wsl/WL2-SSH/README.md (would delete a file with nodeletion or nodeletionpartial set)
   skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 19:25:53
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+397 items will be synced, 1 skipped
+1.5 MiB to be synced from devops/github to IT/github
+55.8 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 19:25:53.05 on 29 Aug 2026
+[BGN] Copying CLAUDE-devops.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying CLAUDE-devops.md
+[BGN] Copying archive/AI/README.md.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/AI/README.md.md
+[BGN] Copying archive/Obsidian/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/Obsidian/LICENSE
+[BGN] Copying archive/Obsidian/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/Obsidian/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/CreditMigrate/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/CreditMigrate/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/FSBrowser32/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/WebCamServer/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/WebCamServer/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI_FS/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/examples/mqttRSSI_FS/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acelements.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acelements.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/achandling.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/achandling.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acinteract.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acinteract.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acintro.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acintro.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acjson.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acjson.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acupload.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/acupload.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adauthentication.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adauthentication.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adconnection.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adconnection.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcpcontrol.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcpcontrol.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcredential.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adcredential.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adexterior.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adexterior.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adnetwork.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adnetwork.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adothers.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/adothers.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/advancedusage.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/advancedusage.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/api.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/api.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiaux.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiaux.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiconfig.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiconfig.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apielements.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apielements.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiextra.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiextra.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiupdate.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/apiupdate.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/basicusage.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/basicusage.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelabel.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelabel.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelog.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/changelog.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/colorized.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/colorized.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/credit.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/credit.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/datatips.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/datatips.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/esp32cam.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/esp32cam.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/faq.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/faq.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/filesystem.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/filesystem.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/gettingstarted.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/gettingstarted.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/howtoembed.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/howtoembed.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/index.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/index.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/license.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/license.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/lsbegin.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/lsbegin.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menu.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menu.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menuize.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/menuize.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otabrowser.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otabrowser.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaserver.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaserver.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaupdate.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/otaupdate.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/wojson.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/mkdocs/wojson.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/src/updateserver/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/AutoConnect-master/src/updateserver/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/updateserver/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/ESP32_RTSP_Cam/updateserver/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/README.md
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/LICENSE
+[BGN] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/ESP32_RTSP/ESP32_RTSP_Cam/lib/README.md
+[BGN] Copying archive/esp32-arduino/boards_manager.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/boards_manager.md
+[BGN] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/LICENSE
+[BGN] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/esp32-cam/ESP32-CAM_MJPEG2SD/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/CONTRIBUTING.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/CONTRIBUTING.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/SUPPORT.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/SUPPORT.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/Makefile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/Makefile
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/array32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/false from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/false
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixarray from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixarray
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_negative from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_negative
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_positive from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixint_positive
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixmap from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixmap
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixstr from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/fixstr
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/float64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/int8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/map32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/nil from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/nil
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/str8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/true from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/true
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint16 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint16
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint32 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint32
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint64 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint64
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint8 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoJson/extras/fuzzing/msgpack_seed_corpus/uint8
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/README.md
+[BGN] Copying archive/esp32-arduino/libraries/ArduinoQueue/Testing/TAG from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/ArduinoQueue/Testing/TAG
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/LICENSE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/LICENSE.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/README.md
+[BGN] Copying archive/esp32-arduino/libraries/CRC32/docs/Doxyfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/CRC32/docs/Doxyfile
+[BGN] Copying archive/esp32-arduino/libraries/EspMQTTClient/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/EspMQTTClient/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/EspMQTTClient/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/EspMQTTClient/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/CHANGELOG.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Bluetooth 5 features.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Bluetooth 5 features.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Command_line_config.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Command_line_config.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Doxyfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Doxyfile
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Improvements_and_updates.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Improvements_and_updates.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Migration_guide.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Migration_guide.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/New_user_guide.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/New_user_guide.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Usage_tips.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/Usage_tips.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/index.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/docs/index.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_Beacon_Scanner/BLE_Beacon_Scanner.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneTLM_Beacon/BLE_EddystoneTLM_Beacon.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneTLM_Beacon/BLE_EddystoneTLM_Beacon.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneURL_Beacon/BLE_EddystoneURL_Beacon.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/examples/BLE_EddystoneURL_Beacon/BLE_EddystoneURL_Beacon.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/CODING_STANDARDS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/CODING_STANDARDS.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/NOTICE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/NOTICE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/README.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/RELEASE_NOTES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/RELEASE_NOTES.md
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/AUTHORS from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/AUTHORS
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/LICENSE
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/README from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/README
+[BGN] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/VERSION from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/NimBLE-Arduino/src/nimble/ext/tinycrypt/VERSION
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/README.md
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/tests/Makefile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/tests/Makefile
+[BGN] Copying archive/esp32-arduino/libraries/PubSubClient/tests/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/esp32-arduino/libraries/PubSubClient/tests/README.md
+[BGN] Copying archive/linode/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linode/README.md
+[BGN] Copying archive/linode/Uptime Kuma/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linode/Uptime Kuma/README.md
+[BGN] Copying archive/linode/Uptime Kuma/SSL/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linode/Uptime Kuma/SSL/README.md
+[BGN] Copying archive/linode/nextcloud/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linode/nextcloud/README.md
+[BGN] Copying archive/linux/LetsEncrypt/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/LetsEncrypt/README.md
+[BGN] Copying archive/linux/LetsEncrypt/letsEncrypt.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/LetsEncrypt/letsEncrypt.md
+[BGN] Copying archive/linux/Self-Signed Cets/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/Self-Signed Cets/README.md
+[BGN] Copying archive/linux/bash/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/bash/README.md
+[BGN] Copying archive/linux/exa/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/exa/README.md
+[BGN] Copying archive/linux/filesystem/addi-file-system-md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/filesystem/addi-file-system-md
+[BGN] Copying archive/linux/flyio/manual/quick_setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/flyio/manual/quick_setup.md
+[BGN] Copying archive/linux/flyio/manual/setup_flyio.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/flyio/manual/setup_flyio.md
+[BGN] Copying archive/linux/flyio/manual/setup_own_server.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/flyio/manual/setup_own_server.md
+[BGN] Copying archive/linux/flyio/quick/quick_setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/flyio/quick/quick_setup.md
+[BGN] Copying archive/linux/flyio/quick/setup_flyio.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/flyio/quick/setup_flyio.md
+[BGN] Copying archive/linux/grep/grep.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/grep/grep.md
+[BGN] Copying archive/linux/netstat/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/netstat/README.md
+[BGN] Copying archive/linux/proxmox/cert-cluster.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/proxmox/cert-cluster.md
+[BGN] Copying archive/linux/proxmox/clustering.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/proxmox/clustering.md
+[BGN] Copying archive/linux/sed/sed.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/sed/sed.md
+[BGN] Copying archive/linux/starship/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/starship/README.md
+[BGN] Copying archive/linux/yadm/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/linux/yadm/README.md
+[BGN] Copying archive/network/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/README.md
+[BGN] Copying archive/network/ciscoISR/initial-config from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/ciscoISR/initial-config
+[BGN] Copying archive/network/ciscoISR/running-config from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/ciscoISR/running-config
+[BGN] Copying archive/network/multicast/Dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/multicast/Dockerfile
+[BGN] Copying archive/network/multicast/LICENSE from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/multicast/LICENSE
+[BGN] Copying archive/network/multicast/README-OpenWRT.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/multicast/README-OpenWRT.md
+[BGN] Copying archive/network/multicast/README-ZeroShell.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/multicast/README-ZeroShell.md
+[BGN] Copying archive/network/multicast/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/multicast/README.md
+[BGN] Copying archive/network/pfsense/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/pfsense/README.md
+[BGN] Copying archive/network/pfsense/configs from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/pfsense/configs
+[BGN] Copying archive/network/pfsense/emivmpfsense.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/pfsense/emivmpfsense.md
+[BGN] Copying archive/network/tailscale/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/tailscale/README.md
+[BGN] Copying archive/network/tailscale/UDM/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/tailscale/UDM/README.md
+[BGN] Copying archive/network/tailscale/linux/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/tailscale/linux/README.md
+[BGN] Copying archive/network/zero-tp/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/network/zero-tp/README.md
+[BGN] Copying archive/nextcloud/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/nextcloud/README.md
+[BGN] Copying archive/windows/Active Directory/Centos/readme.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/windows/Active Directory/Centos/readme.md
+[BGN] Copying archive/windows/Active Directory/proxmox.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/windows/Active Directory/proxmox.md
+[BGN] Copying archive/windows/server init config/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/windows/server init config/README.md
+[BGN] Copying archive/windows/wsl/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/windows/wsl/README.md
+[BGN] Copying archive/windows/wsl/WL2-SSH/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying archive/windows/wsl/WL2-SSH/README.md
+[BGN] Copying properties for CLAUDE-agentic .md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for CLAUDE-agentic .md
+[BGN] Copying CLAUDE-docker.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying CLAUDE-docker.md
+[BGN] Copying properties for Linux/AutoASPM/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for Linux/AutoASPM/README.md
+[BGN] Copying properties for Linux/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for Linux/README.md
+[BGN] Copying properties for REAL_TEST_NOTE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for REAL_TEST_NOTE.md
+[BGN] Copying properties for elikesbikes/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for elikesbikes/README.md
+[BGN] Copying homelab/AI from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/AI
+[BGN] Copying properties for homelab/HUGO/HUGO.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HUGO/HUGO.md
+[BGN] Copying properties for homelab/HUGO/setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HUGO/setup.md
+[BGN] Copying homelab/Home Assistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/Home Assistant
+[BGN] Copying properties for homelab/HomeAssistant/Claude/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HomeAssistant/Claude/CLAUDE.md
+[BGN] Copying properties for homelab/HomeAssistant/Claude/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HomeAssistant/Claude/README.md
+[BGN] Copying properties for homelab/HomeAssistant/Claude/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HomeAssistant/Claude/SKILL.md
+[BGN] Copying properties for homelab/HomeAssistant/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HomeAssistant/README.md
+[BGN] Copying properties for homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md
+[BGN] Copying properties for homelab/Monitoring/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/Monitoring/README.md
+[BGN] Copying properties for homelab/Monitoring/UptimeKuma/Claude/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/Monitoring/UptimeKuma/Claude/CLAUDE.md
+[BGN] Copying properties for homelab/UPS/Nut Setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/UPS/Nut Setup.md
+[BGN] Copying properties for homelab/UPS/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/UPS/README.md
+[BGN] Copying properties for homelab/ansible/DESIGN.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/ansible/DESIGN.md
+[BGN] Copying properties for homelab/ansible/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/ansible/README.md
+[BGN] Copying properties for homelab/linux/unison/README.md.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/linux/unison/README.md.md
+[BGN] Copying properties for homelab/network/Design/Homelab Network.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/network/Design/Homelab Network.md
+[BGN] Copying properties for homelab/network/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/network/README.md
+[BGN] Copying properties for homelab/network/Security/Unifi Certs.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/network/Security/Unifi Certs.md
+[BGN] Copying properties for homelab/network/WLAN/Optimization.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/network/WLAN/Optimization.md
+[BGN] Copying properties for homelab/projects/AI Prompt for Coding.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI Prompt for Coding.md
+[BGN] Copying properties for homelab/projects/AI-Ollama/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI-Ollama/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI-Ollama/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI-Ollama/README.md
+[BGN] Copying properties for homelab/projects/AI/AI Prompt for Coding.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/AI Prompt for Coding.md
+[BGN] Copying properties for homelab/projects/AI/JobReferences/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobReferences/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/JobReferences/workflows/scrape_linkedin_people.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobReferences/workflows/scrape_linkedin_people.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobSearch/README.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/workflows/scrape_linkedin_jobs.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/JobSearch/workflows/scrape_linkedin_jobs.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/README.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/workflows/scrape_trainerroad_activities.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/workflows/scrape_trainerroad_activities.md
+[BGN] Copying properties for homelab/projects/JobReferences/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/JobReferences/CLAUDE.md
+[BGN] Copying properties for homelab/projects/JobReferences/workflows/scrape_linkedin_people.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/JobReferences/workflows/scrape_linkedin_people.md
+[BGN] Copying properties for homelab/projects/JobSearch/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/JobSearch/CLAUDE.md
+[BGN] Copying properties for homelab/projects/JobSearch/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/JobSearch/README.md
+[BGN] Copying properties for homelab/projects/JobSearch/workflows/scrape_linkedin_jobs.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/JobSearch/workflows/scrape_linkedin_jobs.md
+[BGN] Copying properties for homelab/projects/Trainerroad/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/Trainerroad/CLAUDE.md
+[BGN] Copying properties for homelab/projects/Trainerroad/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/Trainerroad/README.md
+[BGN] Copying properties for homelab/projects/Trainerroad/workflows/scrape_trainerroad_activities.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/Trainerroad/workflows/scrape_trainerroad_activities.md
+[BGN] Copying properties for homelab/projects/groceries/APP.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/APP.md
+[BGN] Copying properties for homelab/projects/groceries/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/CLAUDE.md
+[BGN] Copying properties for homelab/projects/groceries/Dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/Dockerfile
+[BGN] Copying properties for homelab/projects/groceries/INSTALL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/INSTALL.md
+[BGN] Copying properties for homelab/projects/groceries/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/README.md
+[BGN] Copying properties for homelab/projects/groceries/app/Dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/app/Dockerfile
+[BGN] Copying properties for homelab/projects/groceries/app/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/app/README.md
+[BGN] Copying properties for homelab/projects/groceries/proxy/Dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/projects/groceries/proxy/Dockerfile
+[BGN] Copying properties for homelab/proxmox/2-Enable Notifications/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/2-Enable Notifications/README.md
+[BGN] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/Promox.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/Promox.md
+[BGN] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/Unifi.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/Unifi.md
+[BGN] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/iDrac.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/3-Trusted TLS Certificates/iDrac.md
+[BGN] Copying properties for homelab/proxmox/MyBestPractices.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/MyBestPractices.md
+[BGN] Copying properties for homelab/proxmox/MySpecifications.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/MySpecifications.md
+[BGN] Copying properties for homelab/proxmox/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for homelab/proxmox/README.md
+[BGN] Copying properties for linux_dotfiles/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/CHANGELOG.md
+[BGN] Updating file linux_dotfiles/PIPELINE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/PIPELINE.md
+[BGN] Copying properties for linux_dotfiles/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/exports/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README2.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/exports/README2.md
+[BGN] Copying linux_dotfiles/scripts/certbot/config/live/README from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying linux_dotfiles/scripts/certbot/config/live/README
+[BGN] Copying properties for linux_dotfiles/scripts/linux/AppleHealth/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/AppleHealth/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/Garmin/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/Garmin/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/CLAUDE.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/cli/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/cli/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/core/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/core/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/desktop/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/desktop/README.md
+[BGN] Updating file linux_dotfiles/scripts/onboarding/scripts/dotfiles/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/onboarding/scripts/dotfiles/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/master/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/master/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/security/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/security/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/themes/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/themes/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/verify/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/verify/README.md
+[BGN] Copying linux_dotfiles/scripts/proton-pass/git-credential-protonpass from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying linux_dotfiles/scripts/proton-pass/git-credential-protonpass
+[BGN] Copying properties for linux_dotfiles/scripts/proxmox/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/proxmox/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/restic/backups/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/restic/backups/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/README.md
+[BGN] Copying properties for linux_dotfiles/sudoers/00-defaults from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/00-defaults
+[BGN] Copying properties for linux_dotfiles/sudoers/10-admin from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/10-admin
+[BGN] Copying properties for linux_dotfiles/sudoers/20-diagnostics from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/20-diagnostics
+[BGN] Copying properties for linux_dotfiles/sudoers/30-filesystem from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/30-filesystem
+[BGN] Copying properties for linux_dotfiles/sudoers/40-scripts from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/40-scripts
+[BGN] Copying properties for linux_dotfiles/sudoers/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/sudoers/ecloaiza-nopasswd from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for linux_dotfiles/sudoers/ecloaiza-nopasswd
+[BGN] Copying properties for tutorials/PIPELINE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/PIPELINE.md
+[BGN] Copying properties for tutorials/docker-compose/AI-Ollama/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/AI-Ollama/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/AI-Ollama/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/AI-Ollama/README.md
+[BGN] Copying tutorials/docker-compose/Frigate/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/Frigate/README.md
+[BGN] Copying properties for tutorials/docker-compose/Frigate/nursfly@router-prodmx-2 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/Frigate/nursfly@router-prodmx-2
+[BGN] Copying properties for tutorials/docker-compose/ansible/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/ansible/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/ansible/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/ansible/README.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/authelia/CLAUDE.md
+[BGN] Updating file tutorials/docker-compose/authelia/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/authelia/README.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/config/password_gen.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/authelia/config/password_gen.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/app-ansible.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/app-ansible.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/app_dash.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/app_dash.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/nginx.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/nginx.md
+[BGN] Copying tutorials/docker-compose/authentik/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/authentik/README.md
+[BGN] Copying properties for tutorials/docker-compose/bind9/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/bind9/README.md
+[BGN] Copying properties for tutorials/docker-compose/checkmk/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/checkmk/README.md
+[BGN] Copying tutorials/docker-compose/dashy/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/dashy/README.md
+[BGN] Copying tutorials/docker-compose/dozzle/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/dozzle/README.md
+[BGN] Copying tutorials/docker-compose/dupliciti/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/dupliciti/README.md
+[BGN] Copying properties for tutorials/docker-compose/dupliciti/docker-compose-yaml from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/dupliciti/docker-compose-yaml
+[BGN] Copying properties for tutorials/docker-compose/fluentd/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/fluentd/README.md
+[BGN] Copying properties for tutorials/docker-compose/fluentd/dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/fluentd/dockerfile
+[BGN] Copying properties for tutorials/docker-compose/fluentd/script from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/fluentd/script
+[BGN] Copying tutorials/docker-compose/fluentd2/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/fluentd2/README.md
+[BGN] Copying properties for tutorials/docker-compose/fluentd2/dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/fluentd2/dockerfile
+[BGN] Copying tutorials/docker-compose/freshrss/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/freshrss/README.md
+[BGN] Copying tutorials/docker-compose/gafana/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/gafana/README.md
+[BGN] Copying properties for tutorials/docker-compose/gitlab/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/gitlab/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/gitlab/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/gitlab/README.md
+[BGN] Copying properties for tutorials/docker-compose/graylog/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/graylog/CLAUDE.md
+[BGN] Updating file tutorials/docker-compose/graylog/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/graylog/README.md
+[BGN] Copying properties for tutorials/docker-compose/grocery-forecast/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/grocery-forecast/CLAUDE.md
+[BGN] Copying tutorials/docker-compose/grocery-forecast/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/grocery-forecast/README.md
+[BGN] Copying properties for tutorials/docker-compose/guaca/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/guaca/README.md
+[BGN] Copying tutorials/docker-compose/homebridge/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/homebridge/README.md
+[BGN] Copying tutorials/docker-compose/homer/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/homer/README.md
+[BGN] Copying properties for tutorials/docker-compose/iDrive/DockerFile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/iDrive/DockerFile
+[BGN] Copying tutorials/docker-compose/iDrive/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/iDrive/README.md
+[BGN] Copying tutorials/docker-compose/immich/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/immich/README.md
+[BGN] Copying tutorials/docker-compose/influxdb/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/influxdb/README.md
+[BGN] Copying tutorials/docker-compose/ipscanner/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/ipscanner/README.md
+[BGN] Copying tutorials/docker-compose/jellyfin/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/jellyfin/README.md
+[BGN] Copying tutorials/docker-compose/joplin/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/joplin/README.md
+[BGN] Copying tutorials/docker-compose/kastra/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/kastra/README.md
+[BGN] Copying properties for tutorials/docker-compose/kastra/docker-compose-yml from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/kastra/docker-compose-yml
+[BGN] Copying properties for tutorials/docker-compose/n8n/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/garmin.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/garmin.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Graylog/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Graylog/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA_ZHA_Monitor.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA_ZHA_Monitor.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Proxmox/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Proxmox/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Unifi/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Unifi/README.md
+[BGN] Copying tutorials/docker-compose/nextcloud/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/nextcloud/README.md
+[BGN] Copying tutorials/docker-compose/nginx/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/nginx/README.md
+[BGN] Copying tutorials/docker-compose/npm/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/npm/README.md
+[BGN] Copying properties for tutorials/docker-compose/npm/docker-compose-yml from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/npm/docker-compose-yml
+[BGN] Copying properties for tutorials/docker-compose/npm/nginx from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/npm/nginx
+[BGN] Copying tutorials/docker-compose/ntfy/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/ntfy/README.md
+[BGN] Copying tutorials/docker-compose/openldap/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/openldap/README.md
+[BGN] Copying tutorials/docker-compose/pialert/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/pialert/README.md
+[BGN] Copying properties for tutorials/docker-compose/portainer/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/portainer/README.md
+[BGN] Copying properties for tutorials/docker-compose/powerdns/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/powerdns/README.md
+[BGN] Copying tutorials/docker-compose/prometheus/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/prometheus/README.md
+[BGN] Copying properties for tutorials/docker-compose/prometheus/nodeexporter/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/prometheus/nodeexporter/README.md
+[BGN] Copying properties for tutorials/docker-compose/rancid/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/rancid/README.md
+[BGN] Copying properties for tutorials/docker-compose/restic/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/restic/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/restic/Dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/restic/Dockerfile
+[BGN] Copying properties for tutorials/docker-compose/restic/INSTALL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/restic/INSTALL.md
+[BGN] Updating file tutorials/docker-compose/restic/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/restic/README.md
+[BGN] Copying properties for tutorials/docker-compose/socket-proxy/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/socket-proxy/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/socket-proxy/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/socket-proxy/README.md
+[BGN] Copying tutorials/docker-compose/syncthing-health/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/syncthing-health/README.md
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/dockerfile from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/dockerfile
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_change from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_change
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_reason from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_reason
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_status from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_status
+[BGN] Copying properties for tutorials/docker-compose/teleport/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/teleport/README.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/cert/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/teleport/cert/README.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/cert/letverify.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/teleport/cert/letverify.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/windows/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/teleport/windows/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/CLAUDE.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/DOCKER.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/DOCKER.md
+[BGN] Updating file tutorials/docker-compose/traefik/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file tutorials/docker-compose/traefik/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md
+[BGN] Copying tutorials/docker-compose/uptimekuma/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/uptimekuma/README.md
+[BGN] Copying tutorials/docker-compose/watchyourlan/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/watchyourlan/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/wazuh/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf
+[BGN] Copying tutorials/docker-compose/wordpress/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying tutorials/docker-compose/wordpress/README.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/README.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/Unifi-UDM/READM.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/Unifi-UDM/READM.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/client/install-agent-docker-plugin.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/client/install-agent-docker-plugin.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_PASSWORD from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_ROOT_PASSWORD from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_ROOT_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_USER from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_USER
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_PASSWORD from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_USER from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_USER
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_agent from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_agent
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql_proxy from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql_proxy
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_pgsql from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_pgsql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_java from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_java
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_mysql from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_mysql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_sqlite3 from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_sqlite3
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_srv from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_srv
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service (1) from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service (1)
+[BGN] Copying properties for tutorials/docker-compose/zabbix/proxmox/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for tutorials/docker-compose/zabbix/proxmox/README.md
+[BGN] Deleting CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting CLAUDE.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 19:25:53.14 on 29 Aug 2026, 0.091 s
+Synchronization complete at 19:25:53  (397 items transferred, 1 skipped, 0 failed)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:27:39
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+2 items will be synced, 26 skipped
+0 B to be synced from devops/github to IT/github
+126 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:27:39.59 on 29 Aug 2026
+[CONFLICT] Skipping CLAUDE-agentic .md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-docker.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping REAL_TEST_NOTE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying adastra from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra
+[CONFLICT] Skipping homelab/AI/AI Prompt for Coding.md
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Copying homelab/AI/templates from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/AI/templates
+[CONFLICT] Skipping homelab/Home Assistant/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/CLAUDE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/SKILL.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/UPS/Nut Setup.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/UPS/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/linux/unison/README.md.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/Design/Homelab Network.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/Security/Unifi Certs.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/WLAN/Optimization.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/2-Enable Notifications/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/3-Trusted TLS Certificates/Promox.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/3-Trusted TLS Certificates/Unifi.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/3-Trusted TLS Certificates/iDrac.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/MyBestPractices.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/MySpecifications.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/proxmox/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:27:39.60 on 29 Aug 2026, 0.006 s
+Synchronization complete at 20:27:39  (2 items transferred, 26 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/Home Assistant/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/CLAUDE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/SKILL.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/UPS/Nut Setup.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/UPS/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/linux/unison/README.md.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/Design/Homelab Network.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/Security/Unifi Certs.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/WLAN/Optimization.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/2-Enable Notifications/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/3-Trusted TLS Certificates/Promox.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/3-Trusted TLS Certificates/Unifi.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/3-Trusted TLS Certificates/iDrac.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/MyBestPractices.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/MySpecifications.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/proxmox/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:28:40
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 19 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:28:40.25 on 29 Aug 2026
+[BGN] Copying homelab/proxmox from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/proxmox
+[CONFLICT] Skipping CLAUDE-agentic .md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-docker.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping REAL_TEST_NOTE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/AI/AI Prompt for Coding.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/Home Assistant/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/CLAUDE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/Claude/SKILL.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/UPS/Nut Setup.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/UPS/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/linux/unison/README.md.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/Design/Homelab Network.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/README.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/Security/Unifi Certs.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/network/WLAN/Optimization.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:28:40.25 on 29 Aug 2026, 0.000 s
+Synchronization complete at 20:28:40  (1 item transferred, 19 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/Home Assistant/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/CLAUDE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/Claude/SKILL.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/HomeAssistant/ZHA/Troubleshooting_ZHA.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/UPS/Nut Setup.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/UPS/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/linux/unison/README.md.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/Design/Homelab Network.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/README.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/Security/Unifi Certs.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/network/WLAN/Optimization.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:28:57
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+4 items will be synced, 7 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:28:57.12 on 29 Aug 2026
+[BGN] Copying homelab/Home Assistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/Home Assistant
+[BGN] Copying homelab/HomeAssistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/HomeAssistant
+[BGN] Copying homelab/UPS from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/UPS
+[BGN] Copying homelab/network from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/network
+[CONFLICT] Skipping CLAUDE-agentic .md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-docker.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping REAL_TEST_NOTE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/AI/AI Prompt for Coding.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/linux/unison/README.md.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:28:57.12 on 29 Aug 2026, 0.001 s
+Synchronization complete at 20:28:57  (4 items transferred, 7 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/linux/unison/README.md.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:31:02
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+6 items will be synced, 6 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:31:02.98 on 29 Aug 2026
+[CONFLICT] Skipping CLAUDE-agentic .md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-docker.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping REAL_TEST_NOTE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping homelab/linux/unison/README.md.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+[BGN] Deleting homelab/AI/templates from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/AI/templates
+[BGN] Deleting homelab/Home Assistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/Home Assistant
+[BGN] Deleting homelab/HomeAssistant from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/HomeAssistant
+[BGN] Deleting homelab/UPS from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/UPS
+[BGN] Deleting homelab/network from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/network
+[BGN] Deleting homelab/proxmox from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/proxmox
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:31:02.98 on 29 Aug 2026, 0.002 s
+Synchronization complete at 20:31:02  (6 items transferred, 6 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: homelab/linux/unison/README.md.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:32:18
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 5 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:32:18.49 on 29 Aug 2026
+[BGN] Copying homelab/linux from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying homelab/linux
+[CONFLICT] Skipping CLAUDE-agentic .md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-devops.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping CLAUDE-docker.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping REAL_TEST_NOTE.md
+  would delete a file with nodeletion or nodeletionpartial set
+[CONFLICT] Skipping linux_dotfiles/scripts/linux/keybindings/backups/latest
+  would delete a file with nodeletion or nodeletionpartial set
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:32:18.49 on 29 Aug 2026, 0.000 s
+Synchronization complete at 20:32:18  (1 item transferred, 5 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:33:39
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 6 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:33:39  (0 items transferred, 6 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: adastra/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:33:46
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 6 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:33:46  (0 items transferred, 6 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: adastra/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:33:52
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 6 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:33:52  (0 items transferred, 6 skipped, 0 failed)
+  skipped: CLAUDE-agentic .md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-devops.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: CLAUDE-docker.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: REAL_TEST_NOTE.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: adastra/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:37:42
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 2 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:37:42  (0 items transferred, 2 skipped, 0 failed)
+  skipped: adastra/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:39:32
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 2 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:39:32  (0 items transferred, 2 skipped, 0 failed)
+  skipped: adastra/AI/AI Prompt for Coding.md (would delete a file with nodeletion or nodeletionpartial set)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:40:45
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+0 items will be synced, 1 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Synchronization complete at 20:40:45  (0 items transferred, 1 skipped, 0 failed)
+  skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)

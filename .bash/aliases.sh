@@ -17,7 +17,7 @@ alias takeover="sudo chown -R ecloaiza:ecloaiza *"
 alias fixperm="sudo chmod -R 775 *"
 alias idrive="/opt/IDriveForLinux/bin/idrive"
 alias sudoers="/home/ecloaiza/scripts/linux/install-sudoers.sh"
-alias syncn='rsync -a --exclude=".git" --include="*/" --exclude="*" /home/ecloaiza/devops/github/ /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github/ && unison obsidian_sync && find /home/ecloaiza/devops/github -mindepth 1 -depth -type d -empty -delete'
+# syncn moved to functions.sh (aliases don't expand inside functions)
 alias syncs='/home/ecloaiza/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
 claudepower() { cd /home/ecloaiza/devops/ubuntu && claude --enable-auto-mode --dangerously-skip-permissions "$@"; }

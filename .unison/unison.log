@@ -6796,3 +6796,820 @@ Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:48:21.34 on 29 Aug
 [END] Updating file adastra/network/Security/Unifi Certs.md
 Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:48:21.34 on 29 Aug 2026, 0.001 s
 Synchronization complete at 20:48:21  (1 item transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:27:50
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+188 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 10:27:50.91 on 30 Aug 2026
+[BGN] Copying properties for Linux/AutoASPM/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for Linux/AutoASPM/README.md
+[BGN] Copying properties for Linux/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for Linux/README.md
+[BGN] Copying properties for adastra/AI/prompts/CLAUDE-agentic .md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/prompts/CLAUDE-agentic .md
+[BGN] Copying properties for adastra/AI/prompts/CLAUDE-docker.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/prompts/CLAUDE-docker.md
+[BGN] Copying properties for adastra/AI/templates/CLAUDE-docker.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/templates/CLAUDE-docker.md
+[BGN] Copying properties for adastra/AI/templates/Git Rules.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/templates/Git Rules.md
+[BGN] Copying properties for adastra/AI/templates/Homelab Hosts & Layout.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/templates/Homelab Hosts & Layout.md
+[BGN] Copying properties for adastra/AI/templates/homelab-shared-config-deploy-rules.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/AI/templates/homelab-shared-config-deploy-rules.md
+[BGN] Copying properties for adastra/HomeAssistant/Claude/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/HomeAssistant/Claude/CLAUDE.md
+[BGN] Copying properties for adastra/HomeAssistant/Claude/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/HomeAssistant/Claude/README.md
+[BGN] Copying properties for adastra/HomeAssistant/Claude/SKILL.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/HomeAssistant/Claude/SKILL.md
+[BGN] Copying properties for adastra/HomeAssistant/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/HomeAssistant/README.md
+[BGN] Copying properties for adastra/HomeAssistant/ZHA/Troubleshooting_ZHA.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/HomeAssistant/ZHA/Troubleshooting_ZHA.md
+[BGN] Copying properties for adastra/UPS/Nut Setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/UPS/Nut Setup.md
+[BGN] Copying properties for adastra/UPS/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/UPS/README.md
+[BGN] Copying properties for adastra/linux/unison/README.md.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/linux/unison/README.md.md
+[BGN] Copying properties for adastra/network/Design/Homelab Network.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/network/Design/Homelab Network.md
+[BGN] Copying properties for adastra/network/WLAN/Optimization.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/network/WLAN/Optimization.md
+[BGN] Copying properties for adastra/proxmox/2-Enable Notifications/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/2-Enable Notifications/README.md
+[BGN] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/Promox.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/Promox.md
+[BGN] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/Unifi.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/Unifi.md
+[BGN] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/iDrac.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/3-Trusted TLS Certificates/iDrac.md
+[BGN] Copying properties for adastra/proxmox/MyBestPractices.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/MyBestPractices.md
+[BGN] Copying properties for adastra/proxmox/MySpecifications.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/MySpecifications.md
+[BGN] Copying properties for adastra/proxmox/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for adastra/proxmox/README.md
+[BGN] Copying properties for archive/linode/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for archive/linode/README.md
+[BGN] Copying properties for archive/linode/Uptime Kuma/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for archive/linode/Uptime Kuma/README.md
+[BGN] Copying properties for archive/network/tailscale/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for archive/network/tailscale/README.md
+[BGN] Copying properties for elikesbikes/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for elikesbikes/README.md
+[BGN] Copying properties for homelab/HUGO/HUGO.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/HUGO/HUGO.md
+[BGN] Copying properties for homelab/HUGO/setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/HUGO/setup.md
+[BGN] Copying properties for homelab/Monitoring/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/Monitoring/README.md
+[BGN] Copying properties for homelab/Monitoring/UptimeKuma/Claude/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/Monitoring/UptimeKuma/Claude/CLAUDE.md
+[BGN] Copying properties for homelab/ansible/DESIGN.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/ansible/DESIGN.md
+[BGN] Copying properties for homelab/ansible/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/ansible/README.md
+[BGN] Copying properties for homelab/projects/AI Prompt for Coding.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI Prompt for Coding.md
+[BGN] Copying properties for homelab/projects/AI-Ollama/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI-Ollama/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI-Ollama/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI-Ollama/README.md
+[BGN] Copying properties for homelab/projects/AI/AI Prompt for Coding.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/AI Prompt for Coding.md
+[BGN] Copying properties for homelab/projects/AI/JobReferences/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobReferences/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/JobReferences/workflows/scrape_linkedin_people.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobReferences/workflows/scrape_linkedin_people.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobSearch/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobSearch/README.md
+[BGN] Copying properties for homelab/projects/AI/JobSearch/workflows/scrape_linkedin_jobs.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/JobSearch/workflows/scrape_linkedin_jobs.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/CLAUDE.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/README.md
+[BGN] Copying properties for homelab/projects/AI/Trainerroad/workflows/scrape_trainerroad_activities.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/AI/Trainerroad/workflows/scrape_trainerroad_activities.md
+[BGN] Copying properties for homelab/projects/JobReferences/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/JobReferences/CLAUDE.md
+[BGN] Copying properties for homelab/projects/JobReferences/workflows/scrape_linkedin_people.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/JobReferences/workflows/scrape_linkedin_people.md
+[BGN] Copying properties for homelab/projects/JobSearch/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/JobSearch/CLAUDE.md
+[BGN] Copying properties for homelab/projects/JobSearch/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/JobSearch/README.md
+[BGN] Copying properties for homelab/projects/JobSearch/workflows/scrape_linkedin_jobs.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/JobSearch/workflows/scrape_linkedin_jobs.md
+[BGN] Copying properties for homelab/projects/Trainerroad/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/Trainerroad/CLAUDE.md
+[BGN] Copying properties for homelab/projects/Trainerroad/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/Trainerroad/README.md
+[BGN] Copying properties for homelab/projects/Trainerroad/workflows/scrape_trainerroad_activities.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/Trainerroad/workflows/scrape_trainerroad_activities.md
+[BGN] Copying properties for homelab/projects/groceries/APP.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/APP.md
+[BGN] Copying properties for homelab/projects/groceries/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/CLAUDE.md
+[BGN] Copying properties for homelab/projects/groceries/Dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/Dockerfile
+[BGN] Copying properties for homelab/projects/groceries/INSTALL.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/INSTALL.md
+[BGN] Copying properties for homelab/projects/groceries/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/README.md
+[BGN] Copying properties for homelab/projects/groceries/app/Dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/app/Dockerfile
+[BGN] Copying properties for homelab/projects/groceries/app/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/app/README.md
+[BGN] Copying properties for homelab/projects/groceries/proxy/Dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for homelab/projects/groceries/proxy/Dockerfile
+[BGN] Copying properties for linux_dotfiles/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/exports/README.md
+[BGN] Copying properties for linux_dotfiles/exports/README2.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/exports/README2.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/AppleHealth/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/AppleHealth/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/DEPLOYMENT.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/DDNS/tailscale/STATUS.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/Garmin/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/Garmin/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/firewall-external/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/idrive-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/keybindings/archive/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/Install-sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/linux/sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/CLAUDE.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/cli/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/cli/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/core/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/core/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/desktop/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/desktop/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/CHANGELOG.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/DISCLAMER.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/extensions/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/master/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/master/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/security/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/security/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/themes/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/themes/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/onboarding/scripts/verify/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/onboarding/scripts/verify/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/proxmox/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/proxmox/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/restic/backups/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/restic/backups/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/truenas/replication-monitor/README.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/Install-NON-LVM2.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_create_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/NON-LVM/dattobd_remove_snapshot_xfs
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/Pre-Req/Install-Pre-REq.md
+[BGN] Copying properties for linux_dotfiles/scripts/urbackup/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/scripts/urbackup/README.md
+[BGN] Copying properties for linux_dotfiles/sudoers/00-defaults from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/00-defaults
+[BGN] Copying properties for linux_dotfiles/sudoers/10-admin from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/10-admin
+[BGN] Copying properties for linux_dotfiles/sudoers/20-diagnostics from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/20-diagnostics
+[BGN] Copying properties for linux_dotfiles/sudoers/30-filesystem from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/30-filesystem
+[BGN] Copying properties for linux_dotfiles/sudoers/40-scripts from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/40-scripts
+[BGN] Copying properties for linux_dotfiles/sudoers/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/README.md
+[BGN] Copying properties for linux_dotfiles/sudoers/ecloaiza-nopasswd from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for linux_dotfiles/sudoers/ecloaiza-nopasswd
+[BGN] Copying properties for tutorials/PIPELINE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/PIPELINE.md
+[BGN] Copying properties for tutorials/docker-compose/AI-Ollama/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/AI-Ollama/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/AI-Ollama/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/AI-Ollama/README.md
+[BGN] Copying properties for tutorials/docker-compose/Frigate/nursfly@router-prodmx-2 from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/Frigate/nursfly@router-prodmx-2
+[BGN] Copying properties for tutorials/docker-compose/ansible/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/ansible/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/authelia/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/config/password_gen.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/authelia/config/password_gen.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/app-ansible.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/app-ansible.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/app_dash.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/app_dash.md
+[BGN] Copying properties for tutorials/docker-compose/authelia/nginx/nginx.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/authelia/nginx/nginx.md
+[BGN] Copying properties for tutorials/docker-compose/bind9/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/bind9/README.md
+[BGN] Copying properties for tutorials/docker-compose/checkmk/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/checkmk/README.md
+[BGN] Copying properties for tutorials/docker-compose/dupliciti/docker-compose-yaml from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/dupliciti/docker-compose-yaml
+[BGN] Copying properties for tutorials/docker-compose/fluentd/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/fluentd/README.md
+[BGN] Copying properties for tutorials/docker-compose/fluentd/dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/fluentd/dockerfile
+[BGN] Copying properties for tutorials/docker-compose/fluentd/script from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/fluentd/script
+[BGN] Copying properties for tutorials/docker-compose/fluentd2/dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/fluentd2/dockerfile
+[BGN] Copying properties for tutorials/docker-compose/gitlab/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/gitlab/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/graylog/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/graylog/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/grocery-forecast/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/grocery-forecast/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/guaca/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/guaca/README.md
+[BGN] Copying properties for tutorials/docker-compose/iDrive/DockerFile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/iDrive/DockerFile
+[BGN] Copying properties for tutorials/docker-compose/kastra/docker-compose-yml from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/kastra/docker-compose-yml
+[BGN] Copying properties for tutorials/docker-compose/n8n/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/garmin.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Garmin/garmin.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Graylog/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Graylog/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA_ZHA_Monitor.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/HomeAssistant/HA_ZHA_Monitor.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Proxmox/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Proxmox/README.md
+[BGN] Copying properties for tutorials/docker-compose/n8n/workflows/Unifi/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/n8n/workflows/Unifi/README.md
+[BGN] Copying properties for tutorials/docker-compose/npm/docker-compose-yml from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/npm/docker-compose-yml
+[BGN] Copying properties for tutorials/docker-compose/npm/nginx from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/npm/nginx
+[BGN] Copying properties for tutorials/docker-compose/portainer/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/portainer/README.md
+[BGN] Copying properties for tutorials/docker-compose/powerdns/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/powerdns/README.md
+[BGN] Copying properties for tutorials/docker-compose/prometheus/nodeexporter/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/prometheus/nodeexporter/README.md
+[BGN] Copying properties for tutorials/docker-compose/rancid/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/rancid/README.md
+[BGN] Copying properties for tutorials/docker-compose/restic/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/restic/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/restic/Dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/restic/Dockerfile
+[BGN] Copying properties for tutorials/docker-compose/restic/INSTALL.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/restic/INSTALL.md
+[BGN] Copying properties for tutorials/docker-compose/socket-proxy/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/socket-proxy/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/socket-proxy/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/socket-proxy/README.md
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/dockerfile from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/dockerfile
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_change from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_change
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_reason from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_reason
+[BGN] Copying properties for tutorials/docker-compose/syncthing-health/state/last_status from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/syncthing-health/state/last_status
+[BGN] Copying properties for tutorials/docker-compose/teleport/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/teleport/README.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/cert/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/teleport/cert/README.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/cert/letverify.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/teleport/cert/letverify.md
+[BGN] Copying properties for tutorials/docker-compose/teleport/windows/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/teleport/windows/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/CLAUDE.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/CLAUDE.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/DOCKER.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/DOCKER.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/docker-prod-1/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger0/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/ranger1/README.md
+[BGN] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/traefik/config/dynamic-hosts/tars/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/wazuh/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/README.md
+[BGN] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/wazuh/ranger1-agent/config/wazuh-agent-conf
+[BGN] Copying properties for tutorials/docker-compose/zabbix/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/README.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/Unifi-UDM/READM.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/Unifi-UDM/READM.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/client/install-agent-docker-plugin.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/client/install-agent-docker-plugin.md
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_PASSWORD from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_ROOT_PASSWORD from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_ROOT_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_USER from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/MYSQL_USER
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_PASSWORD from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_PASSWORD
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_USER from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/POSTGRES_USER
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_agent from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_agent
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql_proxy from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_mysql_proxy
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_pgsql from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_db_pgsql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_java from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_java
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_mysql from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_mysql
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_sqlite3 from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_prx_sqlite3
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_srv from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_srv
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service
+[BGN] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service (1) from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/env_vars/env_web_service (1)
+[BGN] Copying properties for tutorials/docker-compose/zabbix/proxmox/README.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying properties for tutorials/docker-compose/zabbix/proxmox/README.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 10:27:50.92 on 30 Aug 2026, 0.010 s
+Synchronization complete at 10:27:50  (188 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:27:52
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:32:18
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+90 items will be synced, 0 skipped
+712 KiB to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 10:32:18.51 on 30 Aug 2026
+[BGN] Copying adastra/claude-skills/add-keybind/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/add-keybind/SKILL.md
+[BGN] Copying adastra/claude-skills/ansible/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/ansible/SKILL.md
+[BGN] Copying adastra/claude-skills/authelia-add-host/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/authelia-add-host/SKILL.md
+[BGN] Copying adastra/claude-skills/diagnose-crash from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/diagnose-crash
+[BGN] Copying adastra/claude-skills/elikesbikes-website/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/elikesbikes-website/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-agent/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-agent/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-interact/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-interact/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-onboarding/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-onboarding/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-onboarding/references/auth-flow.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-onboarding/references/auth-flow.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-onboarding/references/project-setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-onboarding/references/project-setup.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-onboarding/references/sdk-installation.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-onboarding/references/sdk-installation.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-scrape/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-scrape/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-build-search/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-build-search/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-crawl/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-crawl/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-download/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-download/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-interact/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-interact/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-map/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-map/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-scrape/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-scrape/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl-search/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl-search/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl/SKILL.md
+[BGN] Copying adastra/claude-skills/firecrawl/rules/install.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl/rules/install.md
+[BGN] Copying adastra/claude-skills/firecrawl/rules/security.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/firecrawl/rules/security.md
+[BGN] Copying adastra/claude-skills/gitlab-ci-deploy/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/gitlab-ci-deploy/SKILL.md
+[BGN] Copying adastra/claude-skills/gitlab-ci-deploy/references/gotchas.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/gitlab-ci-deploy/references/gotchas.md
+[BGN] Copying adastra/claude-skills/home-assistant-manager/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/home-assistant-manager/SKILL.md
+[BGN] Copying adastra/claude-skills/homelab-publish/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/homelab-publish/SKILL.md
+[BGN] Copying adastra/claude-skills/homelab-service-inventory/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/homelab-service-inventory/SKILL.md
+[BGN] Copying adastra/claude-skills/homelab-service-inventory/references/base-template.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/homelab-service-inventory/references/base-template.md
+[BGN] Copying adastra/claude-skills/inspire/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/inspire/SKILL.md
+[BGN] Copying adastra/claude-skills/install-wazuh-agent/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/install-wazuh-agent/SKILL.md
+[BGN] Copying adastra/claude-skills/install-webapp/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/install-webapp/SKILL.md
+[BGN] Copying adastra/claude-skills/mcc-monitor-add-component/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/mcc-monitor-add-component/SKILL.md
+[BGN] Copying adastra/claude-skills/mcc-n8n-workflow/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/mcc-n8n-workflow/SKILL.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/BUILTIN_FUNCTIONS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/BUILTIN_FUNCTIONS.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/COMMON_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/COMMON_PATTERNS.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/DATA_ACCESS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/DATA_ACCESS.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/ERROR_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/ERROR_PATTERNS.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/README.md
+[BGN] Copying adastra/claude-skills/n8n-code-javascript/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-javascript/SKILL.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/COMMON_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/COMMON_PATTERNS.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/DATA_ACCESS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/DATA_ACCESS.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/ERROR_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/ERROR_PATTERNS.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/README.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/SKILL.md
+[BGN] Copying adastra/claude-skills/n8n-code-python/STANDARD_LIBRARY.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-code-python/STANDARD_LIBRARY.md
+[BGN] Copying adastra/claude-skills/n8n-expression-syntax/COMMON_MISTAKES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-expression-syntax/COMMON_MISTAKES.md
+[BGN] Copying adastra/claude-skills/n8n-expression-syntax/EXAMPLES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-expression-syntax/EXAMPLES.md
+[BGN] Copying adastra/claude-skills/n8n-expression-syntax/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-expression-syntax/README.md
+[BGN] Copying adastra/claude-skills/n8n-expression-syntax/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-expression-syntax/SKILL.md
+[BGN] Copying adastra/claude-skills/n8n-validation-expert/ERROR_CATALOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-validation-expert/ERROR_CATALOG.md
+[BGN] Copying adastra/claude-skills/n8n-validation-expert/FALSE_POSITIVES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-validation-expert/FALSE_POSITIVES.md
+[BGN] Copying adastra/claude-skills/n8n-validation-expert/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-validation-expert/README.md
+[BGN] Copying adastra/claude-skills/n8n-validation-expert/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/n8n-validation-expert/SKILL.md
+[BGN] Copying adastra/claude-skills/npm-proxy-host/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/npm-proxy-host/SKILL.md
+[BGN] Copying adastra/claude-skills/obsidian-todoist-sync/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/obsidian-todoist-sync/SKILL.md
+[BGN] Copying adastra/claude-skills/obsidian-vault-note/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/obsidian-vault-note/SKILL.md
+[BGN] Copying adastra/claude-skills/omarchy from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/omarchy
+[BGN] Copying adastra/claude-skills/project-replicate/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/project-replicate/SKILL.md
+[BGN] Copying adastra/claude-skills/project-sync/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/project-sync/SKILL.md
+[BGN] Copying adastra/claude-skills/project-sync/scripts/project-sync from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/project-sync/scripts/project-sync
+[BGN] Copying adastra/claude-skills/proton-pass-ssh/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/proton-pass-ssh/SKILL.md
+[BGN] Copying adastra/claude-skills/readme-generator/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/readme-generator/SKILL.md
+[BGN] Copying adastra/claude-skills/skill-creator/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/skill-creator/SKILL.md
+[BGN] Copying adastra/claude-skills/skill-creator/agents/analyzer.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/skill-creator/agents/analyzer.md
+[BGN] Copying adastra/claude-skills/skill-creator/agents/comparator.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/skill-creator/agents/comparator.md
+[BGN] Copying adastra/claude-skills/skill-creator/agents/grader.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/skill-creator/agents/grader.md
+[BGN] Copying adastra/claude-skills/skill-creator/references/schemas.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/skill-creator/references/schemas.md
+[BGN] Copying adastra/claude-skills/stt-fix/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/stt-fix/SKILL.md
+[BGN] Copying adastra/claude-skills/sync-claude-skills/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/sync-claude-skills/SKILL.md
+[BGN] Copying adastra/claude-skills/tech-writer/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/tech-writer/SKILL.md
+[BGN] Copying adastra/claude-skills/traefik-host-bootstrap/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/traefik-host-bootstrap/SKILL.md
+[BGN] Copying adastra/claude-skills/trainerroad-insights/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/trainerroad-insights/SKILL.md
+[BGN] Copying adastra/claude-skills/unifi-dns/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-dns/SKILL.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/ap-health-check/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/ap-health-check/old_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/ap-health-check/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/ap-health-check/with_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/benchmark.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/benchmark.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/connected-clients-listing/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/connected-clients-listing/old_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/connected-clients-listing/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/connected-clients-listing/with_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-0/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-0/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-0/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-0/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-1/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-1/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-1/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-1/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-2/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-2/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-2/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/eval-2/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/wifi-drops-investigation/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/wifi-drops-investigation/old_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/iteration-1/wifi-drops-investigation/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/iteration-1/wifi-drops-investigation/with_skill/outputs/response.md
+[BGN] Copying adastra/claude-skills/unifi-workspace/skill-snapshot/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi-workspace/skill-snapshot/SKILL.md
+[BGN] Copying adastra/claude-skills/unifi/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unifi/SKILL.md
+[BGN] Copying adastra/claude-skills/unison/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/unison/SKILL.md
+[BGN] Copying adastra/claude-skills/uptimekuma/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/claude-skills/uptimekuma/SKILL.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 10:32:18.55 on 30 Aug 2026, 0.037 s
+Synchronization complete at 10:32:18  (90 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:33:09
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:35:39
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:35:41
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:40:24
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+92 items will be synced, 0 skipped
+718 KiB to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 10:40:24.45 on 30 Aug 2026
+[BGN] Copying adastra/AI/skills/add-keybind/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/add-keybind/SKILL.md
+[BGN] Copying adastra/AI/skills/ansible/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/ansible/SKILL.md
+[BGN] Copying adastra/AI/skills/authelia-add-host/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/authelia-add-host/SKILL.md
+[BGN] Copying adastra/AI/skills/diagnose-crash from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/diagnose-crash
+[BGN] Copying adastra/AI/skills/elikesbikes-website/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/elikesbikes-website/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-agent/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-agent/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-interact/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-interact/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-onboarding/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-onboarding/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-onboarding/references/auth-flow.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-onboarding/references/auth-flow.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-onboarding/references/project-setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-onboarding/references/project-setup.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-onboarding/references/sdk-installation.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-onboarding/references/sdk-installation.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-scrape/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-scrape/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-build-search/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-build-search/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-crawl/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-crawl/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-download/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-download/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-interact/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-interact/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-map/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-map/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-scrape/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-scrape/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl-search/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl-search/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl/SKILL.md
+[BGN] Copying adastra/AI/skills/firecrawl/rules/install.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl/rules/install.md
+[BGN] Copying adastra/AI/skills/firecrawl/rules/security.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/firecrawl/rules/security.md
+[BGN] Copying adastra/AI/skills/gitlab-ci-deploy/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/gitlab-ci-deploy/SKILL.md
+[BGN] Copying adastra/AI/skills/gitlab-ci-deploy/references/gotchas.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/gitlab-ci-deploy/references/gotchas.md
+[BGN] Copying adastra/AI/skills/home-assistant-manager/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/home-assistant-manager/SKILL.md
+[BGN] Copying adastra/AI/skills/homelab-publish/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/homelab-publish/SKILL.md
+[BGN] Copying adastra/AI/skills/homelab-service-inventory/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/homelab-service-inventory/SKILL.md
+[BGN] Copying adastra/AI/skills/homelab-service-inventory/references/base-template.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/homelab-service-inventory/references/base-template.md
+[BGN] Copying adastra/AI/skills/inspire/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/inspire/SKILL.md
+[BGN] Copying adastra/AI/skills/install-wazuh-agent/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/install-wazuh-agent/SKILL.md
+[BGN] Copying adastra/AI/skills/install-webapp/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/install-webapp/SKILL.md
+[BGN] Copying adastra/AI/skills/mcc-monitor-add-component/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/mcc-monitor-add-component/SKILL.md
+[BGN] Copying adastra/AI/skills/mcc-n8n-workflow/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/mcc-n8n-workflow/SKILL.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/BUILTIN_FUNCTIONS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/BUILTIN_FUNCTIONS.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/COMMON_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/COMMON_PATTERNS.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/DATA_ACCESS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/DATA_ACCESS.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/ERROR_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/ERROR_PATTERNS.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/README.md
+[BGN] Copying adastra/AI/skills/n8n-code-javascript/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-javascript/SKILL.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/COMMON_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/COMMON_PATTERNS.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/DATA_ACCESS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/DATA_ACCESS.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/ERROR_PATTERNS.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/ERROR_PATTERNS.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/README.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/SKILL.md
+[BGN] Copying adastra/AI/skills/n8n-code-python/STANDARD_LIBRARY.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-code-python/STANDARD_LIBRARY.md
+[BGN] Copying adastra/AI/skills/n8n-expression-syntax/COMMON_MISTAKES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-expression-syntax/COMMON_MISTAKES.md
+[BGN] Copying adastra/AI/skills/n8n-expression-syntax/EXAMPLES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-expression-syntax/EXAMPLES.md
+[BGN] Copying adastra/AI/skills/n8n-expression-syntax/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-expression-syntax/README.md
+[BGN] Copying adastra/AI/skills/n8n-expression-syntax/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-expression-syntax/SKILL.md
+[BGN] Copying adastra/AI/skills/n8n-validation-expert/ERROR_CATALOG.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-validation-expert/ERROR_CATALOG.md
+[BGN] Copying adastra/AI/skills/n8n-validation-expert/FALSE_POSITIVES.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-validation-expert/FALSE_POSITIVES.md
+[BGN] Copying adastra/AI/skills/n8n-validation-expert/README.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-validation-expert/README.md
+[BGN] Copying adastra/AI/skills/n8n-validation-expert/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/n8n-validation-expert/SKILL.md
+[BGN] Copying adastra/AI/skills/npm-proxy-host/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/npm-proxy-host/SKILL.md
+[BGN] Copying adastra/AI/skills/obsidian-todoist-sync/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/obsidian-todoist-sync/SKILL.md
+[BGN] Copying adastra/AI/skills/obsidian-vault-note/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/obsidian-vault-note/SKILL.md
+[BGN] Copying adastra/AI/skills/omarchy from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/omarchy
+[BGN] Copying adastra/AI/skills/project-replicate/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/project-replicate/SKILL.md
+[BGN] Copying adastra/AI/skills/project-sync/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/project-sync/SKILL.md
+[BGN] Copying adastra/AI/skills/project-sync/scripts/project-sync from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/project-sync/scripts/project-sync
+[BGN] Copying adastra/AI/skills/proton-pass-cli/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/proton-pass-cli/SKILL.md
+[BGN] Copying adastra/AI/skills/proton-pass-ssh/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/proton-pass-ssh/SKILL.md
+[BGN] Copying adastra/AI/skills/readme-generator/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/readme-generator/SKILL.md
+[BGN] Copying adastra/AI/skills/skill-creator/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/skill-creator/SKILL.md
+[BGN] Copying adastra/AI/skills/skill-creator/agents/analyzer.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/skill-creator/agents/analyzer.md
+[BGN] Copying adastra/AI/skills/skill-creator/agents/comparator.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/skill-creator/agents/comparator.md
+[BGN] Copying adastra/AI/skills/skill-creator/agents/grader.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/skill-creator/agents/grader.md
+[BGN] Copying adastra/AI/skills/skill-creator/references/schemas.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/skill-creator/references/schemas.md
+[BGN] Copying adastra/AI/skills/stt-fix/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/stt-fix/SKILL.md
+[BGN] Copying adastra/AI/skills/sync-claude-skills/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/sync-claude-skills/SKILL.md
+[BGN] Copying adastra/AI/skills/tech-writer/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/tech-writer/SKILL.md
+[BGN] Copying adastra/AI/skills/traefik-host-bootstrap/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/traefik-host-bootstrap/SKILL.md
+[BGN] Copying adastra/AI/skills/trainerroad-insights/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/trainerroad-insights/SKILL.md
+[BGN] Copying adastra/AI/skills/unifi-dns/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-dns/SKILL.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/ap-health-check/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/ap-health-check/old_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/ap-health-check/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/ap-health-check/with_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/benchmark.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/benchmark.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/connected-clients-listing/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/connected-clients-listing/old_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/connected-clients-listing/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/connected-clients-listing/with_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-0/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-0/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-0/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-0/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-1/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-1/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-1/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-1/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-2/old_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-2/old_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-2/with_skill/run-1/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/eval-2/with_skill/run-1/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/wifi-drops-investigation/old_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/wifi-drops-investigation/old_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/iteration-1/wifi-drops-investigation/with_skill/outputs/response.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/iteration-1/wifi-drops-investigation/with_skill/outputs/response.md
+[BGN] Copying adastra/AI/skills/unifi-workspace/skill-snapshot/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi-workspace/skill-snapshot/SKILL.md
+[BGN] Copying adastra/AI/skills/unifi/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unifi/SKILL.md
+[BGN] Copying adastra/AI/skills/unison/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/unison/SKILL.md
+[BGN] Copying adastra/AI/skills/uptimekuma/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/uptimekuma/SKILL.md
+[BGN] Deleting adastra/claude-skills from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting adastra/claude-skills
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 10:40:24.50 on 30 Aug 2026, 0.045 s
+Synchronization complete at 10:40:24  (92 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-30 at 10:40:26
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+

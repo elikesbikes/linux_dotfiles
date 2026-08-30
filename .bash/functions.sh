@@ -162,6 +162,38 @@ gacp_tutorials() {
 
 
 # ------------------------------------------------------------
+# syncn
+# ------------------------------------------------------------
+# Syncs devops/github directory structure to Obsidian, runs
+# unison obsidian_sync, and cleans up empty directories.
+# ------------------------------------------------------------
+syncn() {
+  rsync -a --exclude=".git" --include="*/" --exclude="*" \
+    /home/ecloaiza/devops/github/ \
+    /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github/ \
+  && unison obsidian_sync \
+  && find /home/ecloaiza/devops/github -mindepth 1 -depth -type d -empty -delete
+}
+
+
+# ------------------------------------------------------------
+# gacp_adastra
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the adastra repository,
+# then syncs markdown to Obsidian via syncn.
+#
+# Usage:
+#   gacp_adastra "Commit message"
+# ------------------------------------------------------------
+gacp_adastra() {
+  pushd /home/ecloaiza/devops/github/adastra > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+  syncn
+}
+
+
+# ------------------------------------------------------------
 # gacp_dotfiles
 # ------------------------------------------------------------
 # Runs the gacp workflow inside the linux_dotfiles repository.

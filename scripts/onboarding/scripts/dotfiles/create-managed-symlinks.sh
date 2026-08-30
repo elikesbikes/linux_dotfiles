@@ -43,6 +43,17 @@ ensure_link() {
   printf 'linked  %s -> %s\n' "$destination" "$source"
 }
 
+mkdir -p "$REPO_DIR/.bash"
+mkdir -p "$REPO_DIR/.config/VeraCrypt"
+mkdir -p "$REPO_DIR/.config/eza"
+mkdir -p "$REPO_DIR/.config/fastfetch"
+mkdir -p "$REPO_DIR/.config/hypr"
+mkdir -p "$REPO_DIR/.config/kitty"
+mkdir -p "$REPO_DIR/.config/neofetch"
+mkdir -p "$REPO_DIR/.config/omarchy/extensions"
+mkdir -p "$REPO_DIR/.config/omarchy/hooks"
+mkdir -p "$REPO_DIR/.config/omarchy/plugins"
+
 ensure_link "$HOME_DIR/.bash" "$REPO_DIR/.bash"
 ensure_link "$HOME_DIR/.bashrc" "$REPO_DIR/.bashrc"
 ensure_link "$HOME_DIR/scripts" "$REPO_DIR/scripts"

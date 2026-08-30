@@ -6735,3 +6735,48 @@ Roots:
 0 B to be synced from IT/github to devops/github
 Synchronization complete at 20:40:45  (0 items transferred, 1 skipped, 0 failed)
   skipped: linux_dotfiles/scripts/linux/keybindings/backups/latest (would delete a file with nodeletion or nodeletionpartial set)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:41:56
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:41:56.10 on 29 Aug 2026
+[BGN] Copying linux_dotfiles/scripts/linux/keybindings/backups/latest from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying linux_dotfiles/scripts/linux/keybindings/backups/latest
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:41:56.10 on 29 Aug 2026, 0.000 s
+Synchronization complete at 20:41:56  (1 item transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:42:03
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+4 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 20:42:03.13 on 29 Aug 2026
+[BGN] Deleting homelab/linux from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting homelab/linux
+[BGN] Deleting linux_dotfiles/scripts/certbot/config/renewal-hooks from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/scripts/certbot/config/renewal-hooks
+[BGN] Deleting linux_dotfiles/scripts/certbot/work from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/scripts/certbot/work
+[BGN] Deleting linux_dotfiles/scripts/linux/keybindings/backups from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/scripts/linux/keybindings/backups
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 20:42:03.13 on 29 Aug 2026, 0.002 s
+Synchronization complete at 20:42:03  (4 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-29 at 20:42:10
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+

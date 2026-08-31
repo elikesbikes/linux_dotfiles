@@ -1,5 +1,5 @@
 [font]
-base-size = 12
+base-size = 15
 
 [bar]
 # scale-with-font multiplies this by base-size/12 (14/12 = 1.167), so 26

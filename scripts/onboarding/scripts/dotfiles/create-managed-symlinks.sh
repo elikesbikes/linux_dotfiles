@@ -11,6 +11,7 @@ set -euo pipefail
 
 HOME_DIR="${HOME:-/home/ecloaiza}"
 REPO_DIR="${DOTFILES_REPO_DIR:-$HOME_DIR/devops/github/linux_dotfiles}"
+BACKUP_DIR="$HOME_DIR/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 if [[ ! -d "$REPO_DIR" ]]; then
   printf 'Dotfiles repository not found: %s\n' "$REPO_DIR" >&2
@@ -61,8 +62,11 @@ ensure_link() {
   fi
 
   if [[ -e "$destination" ]]; then
-    printf 'conflict %s already exists and is not a symlink\n' "$destination" >&2
-    return 1
+    mkdir -p "$BACKUP_DIR"
+    local backup_path="$BACKUP_DIR/$(basename "$destination")"
+    cp -a -- "$destination" "$backup_path"
+    printf 'backup  %s -> %s\n' "$destination" "$backup_path"
+    rm -rf -- "$destination"
   fi
 
   ln -s -- "$source" "$destination"

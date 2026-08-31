@@ -7613,3 +7613,122 @@ Roots:
   /home/ecloaiza/devops/github
   /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
 
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:15:32
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+3 items will be synced, 0 skipped
+1.2 KiB to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 11:15:32.75 on 31 Aug 2026
+[BGN] Updating file linux_dotfiles/scripts/proton-pass/git-credential-protonpass from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/scripts/proton-pass/git-credential-protonpass
+[BGN] Deleting linux_dotfiles/scripts/certbot/logs from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting linux_dotfiles/scripts/certbot/logs
+[BGN] Deleting tutorials/docker-compose/authelia/config/password_gen.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting tutorials/docker-compose/authelia/config/password_gen.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 11:15:32.75 on 31 Aug 2026, 0.001 s
+Synchronization complete at 11:15:32  (3 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:15:52
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:16:17
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:17:50
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:20:50
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+5 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+542 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 11:20:50.56 on 31 Aug 2026
+[BGN] Copying adastra/Homelab/archive from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra/Homelab/archive
+[BGN] Copying adastra/Homelab/infra from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra/Homelab/infra
+[BGN] Copying adastra/Homelab/ipam from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra/Homelab/ipam
+[BGN] Copying adastra/Homelab/kanban from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra/Homelab/kanban
+[BGN] Copying adastra/Homelab/services from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Copying adastra/Homelab/services
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 11:20:50.57 on 31 Aug 2026, 0.013 s
+Synchronization complete at 11:20:50  (5 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 11:21:07
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+3 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 11:21:07.84 on 31 Aug 2026
+[BGN] Deleting adastra/Homelab/archive/Linux/Apps/Restic from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting adastra/Homelab/archive/Linux/Apps/Restic
+[BGN] Deleting adastra/Homelab/archive/Linux/Apps/Spotify from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting adastra/Homelab/archive/Linux/Apps/Spotify
+[BGN] Deleting adastra/Homelab/archive/Networking from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Deleting adastra/Homelab/archive/Networking
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 11:21:07.84 on 31 Aug 2026, 0.001 s
+Synchronization complete at 11:21:07  (3 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 12:13:52
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+2 items will be synced, 0 skipped
+3.6 KiB to be synced from devops/github to IT/github
+2.4 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 12:13:52.54 on 31 Aug 2026
+[BGN] Copying adastra/AI/skills/garmin-backend/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/garmin-backend/SKILL.md
+[BGN] Updating file adastra/Homelab/kanban/Homelab-backlog.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file adastra/Homelab/kanban/Homelab-backlog.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 12:13:52.54 on 31 Aug 2026, 0.001 s
+Synchronization complete at 12:13:52  (2 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-08-31 at 14:31:30
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+2.4 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 14:31:30.58 on 31 Aug 2026
+[BGN] Updating file adastra/Homelab/kanban/Homelab-backlog.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file adastra/Homelab/kanban/Homelab-backlog.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 14:31:30.58 on 31 Aug 2026, 0.000 s
+Synchronization complete at 14:31:30  (1 item transferred, 0 skipped, 0 failed)

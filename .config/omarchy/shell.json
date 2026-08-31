@@ -47,6 +47,24 @@
           "id": "ecloaiza.tray"
         },
         {
+          "id": "ecloaiza.blueiris",
+          "url": "https://security.home.elikesbikes.com",
+          "username": "ecloaiza",
+          "refreshSeconds": 5,
+          "aspectRatio": "16:9"
+        },
+        {
+          "id": "io.github.p145085.uptime-kuma",
+          "baseUrl": "https://uptime.home.elikesbikes.com",
+          "slug": "omarchy"
+        },
+        {
+          "id": "io.github.paulpitchford.garmin-insights"
+        },
+        {
+          "id": "slcode777.omagotchi"
+        },
+        {
           "id": "omarchy.tailscale"
         },
         {

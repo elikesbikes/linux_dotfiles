@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "ecloaiza.blueiris",
+  "name": "omaBlueIris",
+  "version": "1.0.0",
+  "author": "ecloaiza",
+  "license": "MIT",
+  "description": "Blue Iris cameras in the Omarchy bar. Latest stills and live MJPEG view.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "omaBlueIris",
+    "description": "Camera stills and live MJPEG view from Blue Iris",
+    "category": "Info",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

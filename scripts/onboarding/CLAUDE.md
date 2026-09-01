@@ -7,7 +7,9 @@ conventions every script here follows. Match them when editing or adding scripts
 
 An idempotent onboarding system for fresh Debian/Ubuntu GNOME hosts. A `gum` menu
 (`scripts/master/master.sh`) orchestrates per-category `install_*.sh` scripts that
-install software and deploy dotfiles via GNU Stow. See `README.md` for the overview.
+install software. Dotfiles are deployed via `scripts/dotfiles/create-managed-symlinks.sh`,
+which clones/pulls the repo and creates direct symlinks (not Stow). See `README.md`
+for the overview.
 
 ## Layout
 
@@ -15,7 +17,8 @@ install software and deploy dotfiles via GNU Stow. See `README.md` for the overv
 - `scripts/verify/verify_<category>.sh` — audit-only checks (extensions verifies itself)
 - One `README.md` per directory describing that category
 
-Categories: `core`, `cli`, `desktop`, `security`, `extensions`, `themes`, `dotfiles`.
+Categories (menu-driven): `core`, `cli`, `desktop`, `security`, `extensions`, `themes`.
+Dotfiles are handled separately by `scripts/dotfiles/create-managed-symlinks.sh`.
 
 ## Hard rules
 
@@ -30,8 +33,9 @@ Categories: `core`, `cli`, `desktop`, `security`, `extensions`, `themes`, `dotfi
 4. **Official sources only.** Add third-party repos explicitly with modern signed-by
    GPG keyrings under `/etc/apt/keyrings`. No piping unknown scripts as root.
 5. **`gum` is UX only.** Never hide execution behind menu choices.
-6. **Configuration via dotfiles/Stow**, not installers. Installers install software;
-   they do not write user config.
+6. **Configuration via dotfiles/symlinks**, not installers. Installers install software;
+   they do not write user config. Symlinks are managed by
+   `scripts/dotfiles/create-managed-symlinks.sh`.
 7. **Logs.** Write to `${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs/<script>.log`,
    typically via `exec > >(tee -a "$LOG_FILE") 2>&1`.
 

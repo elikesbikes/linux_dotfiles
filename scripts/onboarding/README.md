@@ -19,19 +19,19 @@ The onboarding system turns a bare Linux install into a fully configured worksta
 
 ## 2. One-line Bootstrap
 
-Run on a new host to clone the repo and launch onboarding:
+Run on a new host to clone the repo and create managed symlinks:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/elikesbikes/linux_dotfiles/refs/heads/main/scripts/onboarding/scripts/dotfiles/install_dotfiles.sh | bash
+wget -qO- https://raw.githubusercontent.com/elikesbikes/linux_dotfiles/refs/heads/main/scripts/onboarding/scripts/dotfiles/create-managed-symlinks.sh | bash
 ```
 
 This will:
-- Force-clone the dotfiles repository to `~/devops/github/linux_dotfiles`
-- Install `git` and GNU `stow`
-- Re-add the GitLab push URL so commits reach both remotes (CI)
-- Remove known conflicting files (Omakub bash defaults, `~/.bashrc`)
-- Deploy dotfiles with `stow . -t ~`
-- Launch the interactive onboarding menu
+- Clone the dotfiles repository to `~/devops/github/linux_dotfiles` (or pull latest if it exists)
+- Configure dual-remote push (GitHub + GitLab) on fresh clones
+- Create managed symlinks from `$HOME` into the repo (OS-aware)
+- Back up any existing files before replacing them
+
+Then launch the onboarding menu: `bash ~/scripts/onboarding/scripts/master/master.sh`
 
 ## 3. Architecture
 

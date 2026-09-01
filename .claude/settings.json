@@ -1,0 +1,50 @@
+{
+  "model": "claude-opus-4-6",
+  "enabledPlugins": {},
+  "extraKnownMarketplaces": {},
+  "effortLevel": "xhigh",
+  "tui": "fullscreen",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "autoDreamEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": true,
+  "mcpServers": {
+    "unifi": {
+      "type": "sse",
+      "url": "http://192.168.5.30:5678/mcp/a65e26aa-0f3a-47d2-8cc0-5da81b8e9765/sse"
+    },
+    "graylog-wifi": {
+      "type": "sse",
+      "url": "http://192.168.5.30:5678/mcp/graylog-wifi-mcp/sse"
+    },
+    "uptime-kuma": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/ecloaiza/devops/mcp/uptime-kuma/server.js"
+      ]
+    },
+    "n8n-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "n8n-mcp"
+      ]
+    },
+    "ansible": {
+      "type": "sse",
+      "url": "https://ansible-mcp.home.elikesbikes.com/sse"
+    }
+  },
+  "modelSettings": {
+    "claude-opus-4-6": {
+      "effortLevel": "low"
+    }
+  }
+}

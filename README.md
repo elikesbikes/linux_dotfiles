@@ -101,10 +101,10 @@ For a **fresh host**, `scripts/onboarding/` turns a bare Ubuntu/Debian GNOME ins
 One-line bootstrap:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/elikesbikes/linux_dotfiles/refs/heads/main/scripts/onboarding/scripts/dotfiles/install_dotfiles.sh | bash
+wget -qO- https://raw.githubusercontent.com/elikesbikes/linux_dotfiles/refs/heads/main/scripts/onboarding/scripts/dotfiles/create-managed-symlinks.sh | bash
 ```
 
-This clones the repo, installs `git` + `stow`, removes conflicting defaults, deploys dotfiles via Stow, and launches an interactive `gum`-powered menu.
+This clones the repo (or pulls the latest if it already exists), creates managed symlinks from `$HOME` into the repo, and is OS-aware (skipping Omarchy-specific links on non-Omarchy hosts). Then launch the onboarding master menu with `bash ~/scripts/onboarding/scripts/master/master.sh`.
 
 Work is split into auto-discovered **categories**, each a directory of small `install_*.sh` scripts with matching verify/uninstall support:
 

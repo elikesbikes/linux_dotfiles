@@ -13,9 +13,20 @@ HOME_DIR="${HOME:-/home/ecloaiza}"
 REPO_DIR="${DOTFILES_REPO_DIR:-$HOME_DIR/devops/github/linux_dotfiles}"
 BACKUP_DIR="$HOME_DIR/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
+REPO_URL="https://github.com/elikesbikes/linux_dotfiles"
+GITLAB_URL="https://gitlab.home.elikesbikes.com/ecloaiza/linux_dotfiles.git"
+
 if [[ ! -d "$REPO_DIR" ]]; then
-  printf 'Dotfiles repository not found: %s\n' "$REPO_DIR" >&2
-  exit 1
+  printf 'Dotfiles repository not found at %s — cloning...\n' "$REPO_DIR"
+  mkdir -p "$(dirname "$REPO_DIR")"
+  git clone "$REPO_URL" "$REPO_DIR"
+  git -C "$REPO_DIR" remote set-url --add --push origin "$REPO_URL"
+  git -C "$REPO_DIR" remote set-url --add --push origin "$GITLAB_URL"
+else
+  printf 'Pulling latest changes...\n'
+  git -C "$REPO_DIR" pull --rebase || {
+    printf 'Warning: git pull failed — continuing with current checkout\n' >&2
+  }
 fi
 
 detect_distro() {
@@ -91,6 +102,24 @@ ensure_link "$HOME_DIR/.config/eza" "$REPO_DIR/.config/eza"
 ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch"
 ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch"
 ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml"
+
+ensure_link "$HOME_DIR/.unison" "$REPO_DIR/.unison"
+
+# --- Claude Code (skills from adastra repo) ---
+
+mkdir -p "$HOME_DIR/.claude"
+mkdir -p "$REPO_DIR/.claude"
+
+ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json"
+ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json"
+ensure_link "$HOME_DIR/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
+
+ADASTRA_SKILLS_DIR="$HOME_DIR/devops/github/adastra/AI/skills"
+if [[ -d "$ADASTRA_SKILLS_DIR" ]]; then
+  ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_SKILLS_DIR"
+else
+  printf 'Skipping .claude/skills — adastra repo not found at %s\n' "$ADASTRA_SKILLS_DIR"
+fi
 
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 

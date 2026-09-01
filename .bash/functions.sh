@@ -280,6 +280,30 @@ gcpp() {
 
 
 # ------------------------------------------------------------
+# replacerepo
+# ------------------------------------------------------------
+# Discards all local changes and untracked files, then pulls
+# the latest from remote. Use when you want a clean repo state
+# that matches the remote exactly.
+#
+# Usage:
+#   replacerepo
+# ------------------------------------------------------------
+replacerepo() {
+    echo "--> Running: git checkout -- ."
+    git checkout -- . || return 1
+
+    echo "--> Running: git clean -fd"
+    git clean -fd || return 1
+
+    echo "--> Running: git pull"
+    git pull || return 1
+
+    echo "SUCCESS: Repo reset to latest remote state."
+}
+
+
+# ------------------------------------------------------------
 # sshk
 # ------------------------------------------------------------
 # SSH helper that optionally runs a pre-command and then

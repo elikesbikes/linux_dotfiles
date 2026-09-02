@@ -1,6 +1,7 @@
 # Admin-capability commands (no password)
 ecloaiza ALL=(ALL) NOPASSWD: \
     /usr/bin/apt-get, \
+    /usr/bin/dpkg, \
     /usr/bin/docker, \
     /usr/bin/systemctl, \
     /usr/bin/chmod, \

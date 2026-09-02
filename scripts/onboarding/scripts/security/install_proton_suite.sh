@@ -95,7 +95,7 @@ install_proton_vpn() {
     "https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_1.0.8_all.deb" \
     "protonvpn-stable-release.deb")"; then
 
-    if install_deb "$repo_deb" && sudo apt-get install -y proton-vpn-gnome-desktop; then
+    if install_deb "$repo_deb" && sudo apt-get install -y proton-vpn-gtk-app; then
       mark_installed proton-vpn
       return 0
     fi

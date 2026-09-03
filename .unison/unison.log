@@ -7809,3 +7809,84 @@ Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 18:37:37.23 on 01 Sep
 [END] Copying adastra/Homelab/security/Proton Pass PAT Setup.md
 Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 18:37:37.23 on 01 Sep 2026, 0.001 s
 Synchronization complete at 18:37:37  (1 item transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-09-02 at 17:14:07
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+4 items will be synced, 0 skipped
+567 B to be synced from devops/github to IT/github
+8.4 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 17:14:07.04 on 02 Sep 2026
+[BGN] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md
+[BGN] Updating file linux_dotfiles/sudoers/00-defaults from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/sudoers/00-defaults
+[BGN] Updating file linux_dotfiles/sudoers/10-admin from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/sudoers/10-admin
+[BGN] Updating file linux_dotfiles/sudoers/40-scripts from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file linux_dotfiles/sudoers/40-scripts
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 17:14:07.04 on 02 Sep 2026, 0.001 s
+Synchronization complete at 17:14:07  (4 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-09-02 at 17:14:58
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+2 items will be synced, 0 skipped
+4.9 KiB to be synced from devops/github to IT/github
+0 B to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 17:14:58.66 on 02 Sep 2026
+[BGN] Copying adastra/AI/skills/obsidian-vault-couchdb/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying adastra/AI/skills/obsidian-vault-couchdb/SKILL.md
+[BGN] Copying properties for adastra/Homelab/security/Proton Pass PAT Setup.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Copying properties for adastra/Homelab/security/Proton Pass PAT Setup.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 17:14:58.66 on 02 Sep 2026, 0.001 s
+Synchronization complete at 17:14:58  (2 items transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-09-02 at 17:24:45
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+1 items will be synced, 0 skipped
+0 B to be synced from devops/github to IT/github
+9.4 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 17:24:45.58 on 02 Sep 2026
+[BGN] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 17:24:45.58 on 02 Sep 2026, 0.001 s
+Synchronization complete at 17:24:45  (1 item transferred, 0 skipped, 0 failed)
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-09-02 at 17:25:00
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+Unison 2.54.0 (ocaml 5.4.1) log started at 2026-09-02 at 17:30:59
+
+Roots:
+  /home/ecloaiza/devops/github
+  /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+
+
+2 items will be synced, 0 skipped
+5.7 KiB to be synced from devops/github to IT/github
+9.4 KiB to be synced from IT/github to devops/github
+Unison 2.54.0 (ocaml 5.4.1) started propagating changes at 17:30:59.19 on 02 Sep 2026
+[BGN] Updating file adastra/AI/skills/obsidian-vault-couchdb/SKILL.md from /home/ecloaiza/devops/github to /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
+[END] Updating file adastra/AI/skills/obsidian-vault-couchdb/SKILL.md
+[BGN] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md from /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github to /home/ecloaiza/devops/github
+[END] Updating file adastra/Homelab/security/Proton Pass PAT Setup.md
+Unison 2.54.0 (ocaml 5.4.1) finished propagating changes at 17:30:59.19 on 02 Sep 2026, 0.001 s
+Synchronization complete at 17:30:59  (2 items transferred, 0 skipped, 0 failed)

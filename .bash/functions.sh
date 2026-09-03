@@ -347,6 +347,24 @@ gpull_dotfiles() {
 
 
 # ------------------------------------------------------------
+# gpull_adastra
+# ------------------------------------------------------------
+# Pulls the latest changes in the adastra repository
+# while preserving the caller's current directory,
+# then syncs markdown to Obsidian via syncn.
+#
+# Usage:
+#   gpull_adastra
+# ------------------------------------------------------------
+gpull_adastra() {
+  pushd /home/ecloaiza/devops/github/adastra > /dev/null || return 1
+  gpull
+  popd > /dev/null
+  syncn
+}
+
+
+# ------------------------------------------------------------
 # sshe
 # ------------------------------------------------------------
 # SSH helper that always connects as user 'ecloaiza'.

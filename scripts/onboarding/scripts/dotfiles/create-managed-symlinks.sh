@@ -103,7 +103,13 @@ ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch"
 ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch"
 ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml"
 
-ensure_link "$HOME_DIR/.unison" "$REPO_DIR/.unison"
+# Unison: symlink only profile files, not the whole directory.
+# Runtime files (archives, fingerprints, logs) stay in the real ~/.unison/.
+mkdir -p "$HOME_DIR/.unison"
+for prf in "$REPO_DIR/.unison"/*.prf; do
+  [[ -f "$prf" ]] || continue
+  ensure_link "$HOME_DIR/.unison/$(basename "$prf")" "$prf"
+done
 
 # --- Claude Code (skills from adastra repo) ---
 

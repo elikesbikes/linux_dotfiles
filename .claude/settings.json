@@ -42,6 +42,20 @@
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
   },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bashrc && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && gacp_dotfiles \"$MSG\"; fi",
+            "timeout": 30,
+            "statusMessage": "Auto-committing dotfiles..."
+          }
+        ]
+      }
+    ]
+  },
   "modelSettings": {
     "claude-opus-4-6": {
       "effortLevel": "low"

@@ -127,10 +127,15 @@ else
   printf 'Skipping .claude/skills — adastra repo not found at %s\n' "$ADASTRA_SKILLS_DIR"
 fi
 
-# --- Devops ubuntu directory (Claude Code working directory) ---
+# --- Devops ubuntu directory (Claude Code working directory, lives in adastra) ---
 
-mkdir -p "$HOME_DIR/devops"
-ensure_link "$HOME_DIR/devops/ubuntu" "$REPO_DIR/devops/ubuntu"
+ADASTRA_DIR="$HOME_DIR/devops/github/adastra"
+if [[ -d "$ADASTRA_DIR/AI/ubuntu" ]]; then
+  mkdir -p "$HOME_DIR/devops"
+  ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu"
+else
+  printf 'Skipping devops/ubuntu — adastra repo not found at %s\n' "$ADASTRA_DIR"
+fi
 
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 

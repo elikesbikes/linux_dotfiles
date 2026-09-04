@@ -168,6 +168,7 @@ gacp_tutorials() {
 # unison obsidian_sync, and cleans up empty directories.
 # ------------------------------------------------------------
 syncn() {
+  cd ~ || return 1
   rsync -a --exclude=".git" --include="*/" --exclude="*" \
     /home/ecloaiza/devops/github/ \
     /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github/ \

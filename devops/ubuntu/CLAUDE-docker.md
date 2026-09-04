@@ -1,1 +1,0 @@
-/home/ecloaiza/Documents/Obsidian/Loaiza/IT/github/adastra/AI/prompts/CLAUDE-docker.md

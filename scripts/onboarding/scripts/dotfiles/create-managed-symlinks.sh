@@ -127,6 +127,11 @@ else
   printf 'Skipping .claude/skills — adastra repo not found at %s\n' "$ADASTRA_SKILLS_DIR"
 fi
 
+# --- Devops ubuntu directory (Claude Code working directory) ---
+
+mkdir -p "$HOME_DIR/devops"
+ensure_link "$HOME_DIR/devops/ubuntu" "$REPO_DIR/devops/ubuntu"
+
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 
 if is_omarchy; then

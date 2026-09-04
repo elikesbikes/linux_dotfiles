@@ -111,6 +111,22 @@ for prf in "$REPO_DIR/.unison"/*.prf; do
   ensure_link "$HOME_DIR/.unison/$(basename "$prf")" "$prf"
 done
 
+# --- Adastra repo (homelab docs, Claude skills, ubuntu working dir) ---
+
+ADASTRA_DIR="$HOME_DIR/devops/github/adastra"
+ADASTRA_URL="https://gitlab.home.elikesbikes.com/ecloaiza/adastra.git"
+
+if [[ ! -d "$ADASTRA_DIR" ]]; then
+  printf 'Adastra repository not found at %s — cloning...\n' "$ADASTRA_DIR"
+  mkdir -p "$(dirname "$ADASTRA_DIR")"
+  git clone "$ADASTRA_URL" "$ADASTRA_DIR"
+else
+  printf 'Pulling latest adastra changes...\n'
+  git -C "$ADASTRA_DIR" pull --rebase || {
+    printf 'Warning: adastra git pull failed — continuing with current checkout\n' >&2
+  }
+fi
+
 # --- Claude Code (skills from adastra repo) ---
 
 mkdir -p "$HOME_DIR/.claude"
@@ -119,23 +135,12 @@ mkdir -p "$REPO_DIR/.claude"
 ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json"
 ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json"
 ensure_link "$HOME_DIR/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
-
-ADASTRA_SKILLS_DIR="$HOME_DIR/devops/github/adastra/AI/skills"
-if [[ -d "$ADASTRA_SKILLS_DIR" ]]; then
-  ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_SKILLS_DIR"
-else
-  printf 'Skipping .claude/skills — adastra repo not found at %s\n' "$ADASTRA_SKILLS_DIR"
-fi
+ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_DIR/AI/skills"
 
 # --- Devops ubuntu directory (Claude Code working directory, lives in adastra) ---
 
-ADASTRA_DIR="$HOME_DIR/devops/github/adastra"
-if [[ -d "$ADASTRA_DIR/AI/ubuntu" ]]; then
-  mkdir -p "$HOME_DIR/devops"
-  ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu"
-else
-  printf 'Skipping devops/ubuntu — adastra repo not found at %s\n' "$ADASTRA_DIR"
-fi
+mkdir -p "$HOME_DIR/devops"
+ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu"
 
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 

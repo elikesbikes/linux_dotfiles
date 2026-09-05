@@ -43,6 +43,36 @@
     }
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); PATH_CHECK=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.content // \"\"'); if echo \"$PATH_CHECK\" | grep -q '/Documents/Obsidian/Loaiza/'; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Direct Obsidian vault access is not allowed. Use CouchDB instead: ssh hailmary \\\"cd /home/ecloaiza/devops/projects/mcc && python3 tools/vault_fetch.py --get|--put|--list <path>\\\"\"}'; exit 2; fi",
+            "timeout": 5,
+            "statusMessage": "Checking Obsidian vault guard..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE 'docker compose (down|rm)'; then ACTION=$(echo \"$CMD\" | grep -oE 'docker compose (down|rm)[^ ]*'); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"DOCKER_COMPOSE: $ACTION from claude session\"; fi",
+            "timeout": 5,
+            "statusMessage": "Logging Docker compose action..."
+          },
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '^\\s*git\\s+push'; then SECRETS=$(git diff --cached 2>/dev/null | grep -iE '(AKIA[0-9A-Z]{16}|api[_-]?key\\s*[:=]|token\\s*[:=]|password\\s*[:=]|secret\\s*[:=]|\\.secrets/)' || true); if [ -n \"$SECRETS\" ]; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Potential secrets detected in staged files. Review with git diff --cached before pushing.\"}'; exit 2; fi; fi",
+            "timeout": 10,
+            "statusMessage": "Scanning for secrets before push..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -51,6 +81,16 @@
             "command": "cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bashrc && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && gacp_dotfiles \"$MSG\"; fi",
             "timeout": 30,
             "statusMessage": "Auto-committing dotfiles..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bashrc && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && gacp_adastra \"$MSG\"; fi",
+            "timeout": 30,
+            "statusMessage": "Auto-committing adastra..."
           }
         ]
       }

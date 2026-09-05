@@ -2,7 +2,7 @@
   "model": "claude-opus-4-6",
   "enabledPlugins": {},
   "extraKnownMarketplaces": {},
-  "effortLevel": "xhigh",
+  "effortLevel": "low",
   "tui": "fullscreen",
   "voice": {
     "enabled": true,
@@ -69,6 +69,36 @@
             "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '^\\s*git\\s+push'; then SECRETS=$(git diff --cached 2>/dev/null | grep -iE '(AKIA[0-9A-Z]{16}|api[_-]?key\\s*[:=]|token\\s*[:=]|password\\s*[:=]|secret\\s*[:=]|\\.secrets/)' || true); if [ -n \"$SECRETS\" ]; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Potential secrets detected in staged files. Review with git diff --cached before pushing.\"}'; exit 2; fi; fi",
             "timeout": 10,
             "statusMessage": "Scanning for secrets before push..."
+          },
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '(^\\s*git\\s+commit|gacp_)'; then REPO=$(basename \"$(pwd)\"); MSG=$(echo \"$CMD\" | grep -oP '(?<=-m\\s[\\x27\"])[^\\x27\"]*' || echo \"$CMD\"); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=$REPO msg=$MSG from claude session\" 2>/dev/null || true; fi",
+            "timeout": 5,
+            "statusMessage": "Logging git commit to syslog..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/linux_dotfiles/'; then cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bashrc && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && gacp_dotfiles \"$MSG\"; fi; fi",
+            "timeout": 30,
+            "statusMessage": "Auto-committing dotfiles..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/adastra/'; then cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bashrc && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && gacp_adastra \"$MSG\"; fi; fi",
+            "timeout": 30,
+            "statusMessage": "Auto-committing adastra..."
           }
         ]
       }

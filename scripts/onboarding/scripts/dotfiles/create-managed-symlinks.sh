@@ -29,23 +29,34 @@ else
   }
 fi
 
-detect_distro() {
-  if [[ -f /etc/os-release ]]; then
-    . /etc/os-release
-    printf '%s' "${ID:-unknown}"
-  else
-    printf 'unknown'
-  fi
+detect_os() {
+  case "$(uname -s)" in
+    Darwin) printf 'macos' ;;
+    *)
+      if [[ -f /etc/os-release ]]; then
+        . /etc/os-release
+        printf '%s' "${ID:-unknown}"
+      else
+        printf 'unknown'
+      fi
+      ;;
+  esac
 }
 
 is_omarchy() {
   [[ -d /usr/share/omarchy ]] || [[ -d "$HOME_DIR/.config/omarchy" && ! -L "$HOME_DIR/.config/omarchy" ]]
 }
 
-DISTRO="$(detect_distro)"
-printf 'Detected distro: %s\n' "$DISTRO"
+is_macos() {
+  [[ "$OS" == "macos" ]]
+}
 
-if is_omarchy; then
+OS="$(detect_os)"
+printf 'Detected OS: %s\n' "$OS"
+
+if is_macos; then
+  printf 'macOS detected — including macOS-specific links\n'
+elif is_omarchy; then
   printf 'Omarchy detected — including Omarchy/Hyprland links\n'
 else
   printf 'Non-Omarchy host — skipping Omarchy/Hyprland links\n'
@@ -62,12 +73,14 @@ ensure_link() {
 
   mkdir -p "$(dirname "$destination")"
 
-  if [[ -L "$destination" ]]; then
-    if [[ "$(readlink -f -- "$destination")" == "$(readlink -f -- "$source")" ]]; then
-      printf 'ok      %s -> %s\n' "$destination" "$source"
-      return 0
-    fi
+  # If destination already resolves to the same real path as source (e.g.
+  # a parent directory is symlinked into the repo), no link is needed.
+  if [[ -e "$destination" && "$(readlink -f -- "$destination")" == "$(readlink -f -- "$source")" ]]; then
+    printf 'ok      %s (via parent) -> %s\n' "$destination" "$source"
+    return 0
+  fi
 
+  if [[ -L "$destination" ]]; then
     printf 'conflict %s already links to %s\n' "$destination" "$(readlink -- "$destination")" >&2
     return 1
   fi
@@ -84,23 +97,15 @@ ensure_link() {
   printf 'linked  %s -> %s\n' "$destination" "$source"
 }
 
-# --- Common links (all distros) ---
-
-mkdir -p "$REPO_DIR/.bash"
-mkdir -p "$REPO_DIR/.config/VeraCrypt"
-mkdir -p "$REPO_DIR/.config/eza"
-mkdir -p "$REPO_DIR/.config/fastfetch"
-mkdir -p "$REPO_DIR/.config/neofetch"
+# --- Common links (all platforms) ---
 
 ensure_link "$HOME_DIR/.bash" "$REPO_DIR/.bash"
 ensure_link "$HOME_DIR/.bashrc" "$REPO_DIR/.bashrc"
 ensure_link "$HOME_DIR/scripts" "$REPO_DIR/scripts"
-ensure_link "$HOME_DIR/sudoers" "$REPO_DIR/sudoers"
 
-ensure_link "$HOME_DIR/.config/VeraCrypt" "$REPO_DIR/.config/VeraCrypt"
 ensure_link "$HOME_DIR/.config/eza" "$REPO_DIR/.config/eza"
 ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch"
-ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch"
+ensure_link "$HOME_DIR/.config/git" "$REPO_DIR/.config/git"
 ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml"
 
 # Unison: symlink only profile files, not the whole directory.
@@ -110,6 +115,14 @@ for prf in "$REPO_DIR/.unison"/*.prf; do
   [[ -f "$prf" ]] || continue
   ensure_link "$HOME_DIR/.unison/$(basename "$prf")" "$prf"
 done
+
+# --- Linux-only common links ---
+
+if ! is_macos; then
+  ensure_link "$HOME_DIR/sudoers" "$REPO_DIR/sudoers"
+  ensure_link "$HOME_DIR/.config/VeraCrypt" "$REPO_DIR/.config/VeraCrypt"
+  ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch"
+fi
 
 # --- Adastra repo (homelab docs, Claude skills, ubuntu working dir) ---
 
@@ -130,7 +143,6 @@ fi
 # --- Claude Code (skills from adastra repo) ---
 
 mkdir -p "$HOME_DIR/.claude"
-mkdir -p "$REPO_DIR/.claude"
 
 ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json"
 ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json"
@@ -142,15 +154,16 @@ ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_DIR/AI/skills"
 mkdir -p "$HOME_DIR/devops"
 ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu"
 
+# --- macOS-only links ---
+
+if is_macos; then
+  ensure_link "$HOME_DIR/.config/iterm2" "$REPO_DIR/.config/iterm2"
+  ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty"
+fi
+
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 
-if is_omarchy; then
-  mkdir -p "$REPO_DIR/.config/hypr"
-  mkdir -p "$REPO_DIR/.config/kitty"
-  mkdir -p "$REPO_DIR/.config/omarchy/extensions"
-  mkdir -p "$REPO_DIR/.config/omarchy/hooks"
-  mkdir -p "$REPO_DIR/.config/omarchy/plugins"
-
+if ! is_macos && is_omarchy; then
   ensure_link "$HOME_DIR/.config/hypr" "$REPO_DIR/.config/hypr"
   ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty"
   ensure_link "$HOME_DIR/.config/omarchy/extensions" "$REPO_DIR/.config/omarchy/extensions"

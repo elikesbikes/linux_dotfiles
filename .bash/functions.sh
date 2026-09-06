@@ -195,6 +195,21 @@ gacp_adastra() {
 
 
 # ------------------------------------------------------------
+# gacp_reviere-ios
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the reviere-ios repository.
+#
+# Usage:
+#   gacp_reviere-ios "Commit message"
+# ------------------------------------------------------------
+gacp_reviere-ios() {
+  pushd $HOME/devops/projects/iOS/reviere > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
+
+# ------------------------------------------------------------
 # gacp_dotfiles
 # ------------------------------------------------------------
 # Runs the gacp workflow inside the linux_dotfiles repository.

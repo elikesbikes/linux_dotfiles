@@ -5,7 +5,11 @@ HISTSIZE=32768
 HISTFILESIZE="${HISTSIZE}"
 
 # Autocompletion
-source /usr/share/bash-completion/bash_completion
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  source /usr/share/bash-completion/bash_completion
+elif [ -f /opt/homebrew/etc/profile.d/bash_completion.sh ]; then
+  source /opt/homebrew/etc/profile.d/bash_completion.sh
+fi
 
 # Set complete path
 export PATH="./bin:$HOME/.local/bin:$HOME/.local/share/omakub/bin:$PATH"

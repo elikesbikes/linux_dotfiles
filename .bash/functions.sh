@@ -155,7 +155,7 @@ gcap() {
 #   gacp_tutorials "Commit message"
 # ------------------------------------------------------------
 gacp_tutorials() {
-  pushd /home/ecloaiza/devops/github/tutorials > /dev/null || return 1
+  pushd $HOME/devops/github/tutorials > /dev/null || return 1
   gacp "$@"
   popd > /dev/null
 }
@@ -170,10 +170,10 @@ gacp_tutorials() {
 syncn() {
   cd ~ || return 1
   rsync -a --exclude=".git" --include="*/" --exclude="*" \
-    /home/ecloaiza/devops/github/ \
-    /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github/ \
+    $HOME/devops/github/ \
+    $HOME/Documents/Obsidian/Loaiza/IT/github/ \
   && unison obsidian_sync \
-  && find /home/ecloaiza/devops/github -mindepth 1 -depth -type d -empty -delete
+  && find $HOME/devops/github -mindepth 1 -depth -type d -empty -delete
 }
 
 
@@ -187,7 +187,7 @@ syncn() {
 #   gacp_adastra "Commit message"
 # ------------------------------------------------------------
 gacp_adastra() {
-  pushd /home/ecloaiza/devops/github/adastra > /dev/null || return 1
+  pushd $HOME/devops/github/adastra > /dev/null || return 1
   gacp "$@"
   popd > /dev/null
   syncn
@@ -222,7 +222,7 @@ gacp_dotfiles() {
     return 1
   fi
 
-  if ! pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null; then
+  if ! pushd $HOME/devops/github/linux_dotfiles > /dev/null; then
     echo "Error: dotfiles repo path not found."
     return 1
   fi
@@ -341,7 +341,7 @@ sshk() {
 #   gpull_dotfiles
 # ------------------------------------------------------------
 gpull_dotfiles() {
-  pushd /home/ecloaiza/devops/github/linux_dotfiles > /dev/null || return 1
+  pushd $HOME/devops/github/linux_dotfiles > /dev/null || return 1
   gpull
   popd > /dev/null
 }
@@ -358,7 +358,7 @@ gpull_dotfiles() {
 #   gpull_adastra
 # ------------------------------------------------------------
 gpull_adastra() {
-  pushd /home/ecloaiza/devops/github/adastra > /dev/null || return 1
+  pushd $HOME/devops/github/adastra > /dev/null || return 1
   gpull
   popd > /dev/null
   syncn
@@ -401,7 +401,7 @@ sshe() {
 #   gpull_tutorials
 # ------------------------------------------------------------
 gpull_tutorials() {
-  pushd /home/ecloaiza/devops/github/tutorials > /dev/null || return 1
+  pushd $HOME/devops/github/tutorials > /dev/null || return 1
   gpull
   popd > /dev/null
 }
@@ -434,8 +434,8 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
-  local SRC_PATH="/home/ecloaiza/devops/docker/${PROJECT_NAME}"
-  local TUTORIALS_ROOT="/home/ecloaiza/devops/github/tutorials"
+  local SRC_PATH="$HOME/devops/docker/${PROJECT_NAME}"
+  local TUTORIALS_ROOT="$HOME/devops/github/tutorials"
   local DEST_PATH="${TUTORIALS_ROOT}/docker-compose/${PROJECT_NAME}"
 
   if [[ ! -d "${SRC_PATH}" ]]; then
@@ -607,7 +607,7 @@ print(match[0]['id'] if match else '')
 #   tutorials/docker-compose/<project>
 #
 # Destination:
-#   /home/ecloaiza/devops/docker/<project>
+#   $HOME/devops/docker/<project>
 #
 # Usage:
 #   gpull_tutorials_wcopy <project>
@@ -620,9 +620,9 @@ gpull_tutorials_wcopy() {
     return 1
   fi
 
-  local TUTORIALS_ROOT="/home/ecloaiza/devops/github/tutorials"
+  local TUTORIALS_ROOT="$HOME/devops/github/tutorials"
   local SRC_PATH="${TUTORIALS_ROOT}/docker-compose/${PROJECT_NAME}"
-  local DEST_PATH="/home/ecloaiza/devops/docker/${PROJECT_NAME}"
+  local DEST_PATH="$HOME/devops/docker/${PROJECT_NAME}"
 
   if [[ ! -d "${SRC_PATH}" ]]; then
     echo "ERROR: Source project does not exist: ${SRC_PATH}"
@@ -683,7 +683,7 @@ gacp_homelab() {
     fi
 
     # Navigate to the homelab directory
-    if ! pushd /home/ecloaiza/devops/github/homelab > /dev/null; then
+    if ! pushd $HOME/devops/github/homelab > /dev/null; then
         echo "Error: homelab repo path not found."
         return 1
     fi
@@ -707,7 +707,7 @@ gacp_homelab() {
     popd > /dev/null
 }
 clone_tutorials() {
-    local base_dir="/home/ecloaiza/devops/github"
+    local base_dir="$HOME/devops/github"
     local tutorials_dir="$base_dir/tutorials"
 
     # Check if tutorials directory exists and delete it

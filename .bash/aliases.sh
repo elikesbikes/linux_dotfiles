@@ -16,13 +16,13 @@ alias dockerlogs="sudo docker compose logs -f"
 alias takeover="sudo chown -R ecloaiza:ecloaiza *"
 alias fixperm="sudo chmod -R 775 *"
 alias idrive="/opt/IDriveForLinux/bin/idrive"
-alias sudoers="/home/ecloaiza/scripts/linux/install-sudoers.sh"
+alias sudoers="$HOME/scripts/linux/install-sudoers.sh"
 # syncn moved to functions.sh (aliases don't expand inside functions)
-alias syncs='/home/ecloaiza/scripts/linux/sudoers/sync-sudoers.sh'
+alias syncs='$HOME/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
-claudepower() { cd /home/ecloaiza/devops/ubuntu && claude --enable-auto-mode --dangerously-skip-permissions "$@"; }
-codexpower() { cd /home/ecloaiza/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
-alias claudemddocker='rm -f CLAUDE.md && ln -s "/home/ecloaiza/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
-alias claudedocker='rm -f CLAUDE-docker.md && ln -s "/home/ecloaiza/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'
-alias cleanupdotfiles='rm -rf /home/ecloaiza/devops/github/linux_dotfiles/ && cd /home/ecloaiza/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
+claudepower() { cd $HOME/devops/ubuntu && claude --enable-auto-mode --dangerously-skip-permissions "$@"; }
+codexpower() { cd $HOME/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
+alias claudemddocker='rm -f CLAUDE.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
+alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'
+alias cleanupdotfiles='rm -rf $HOME/devops/github/linux_dotfiles/ && cd $HOME/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
 alias upgraderustdesk='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o '\''https://[^"]*x86_64\.deb'\'' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'

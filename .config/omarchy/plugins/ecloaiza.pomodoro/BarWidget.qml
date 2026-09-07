@@ -14,7 +14,7 @@ BarWidget {
 
   readonly property var focusPresets: [5, 10, 15, 20, 25, 30, 45, 50, 60, 90]
   property int focusIndex: Math.max(0, focusPresets.indexOf(setting("lapLength", 25)))
-  property int lapLength: focusPresets[focusIndex]
+  property int lapLength: focusPresets[focusIndex] // re-evaluated when focusIndex changes
   readonly property int shortBreak: setting("shortBreak", 5)
   readonly property int longBreak: setting("longBreak", 15)
   readonly property int lapsUntilLong: Math.max(1, setting("lapsUntilLong", 4))

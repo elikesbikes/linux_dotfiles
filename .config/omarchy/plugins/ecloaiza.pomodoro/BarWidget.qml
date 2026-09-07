@@ -2,36 +2,50 @@ import QtQuick
 import Quickshell
 import qs.Commons
 import qs.Ui
+import "State.js" as S
 
-// Pomodoro countdown for the bar.
-//
-// Left click starts or pauses, right click cycles focus duration presets
-// (shown briefly in the bar), middle click skips to next phase, middle
-// click while idle resets.
 BarWidget {
   id: root
   moduleName: "ecloaiza.pomodoro"
 
-  readonly property var focusPresets: [5, 10, 15, 20, 25, 30, 45, 50, 60, 90]
-  property int focusIndex: Math.max(0, focusPresets.indexOf(setting("lapLength", 25)))
-  property int lapLength: focusPresets[focusIndex]
-  readonly property int shortBreak: setting("shortBreak", 5)
-  readonly property int longBreak: setting("longBreak", 15)
-  readonly property int lapsUntilLong: Math.max(1, setting("lapsUntilLong", 4))
+  readonly property var focusPresets: S.focusPresets
+  property int focusIndex: S.focusIndex
+  property int lapLength: S.lapLength
+  readonly property int shortBreak: S.shortBreak
+  readonly property int longBreak: S.longBreak
+  readonly property int lapsUntilLong: S.lapsUntilLong
 
-  property string phase: "idle"
-  property int completedLaps: 0
-  property bool running: false
-  property int remaining: root.lapLength * 60
-  property real deadline: 0
+  property string phase: S.phase
+  property int completedLaps: S.completedLaps
+  property bool running: S.running
+  property int remaining: S.remaining
+  property real deadline: S.deadline
   property bool showingPreset: false
 
   readonly property bool onBreak: phase === "short" || phase === "long"
 
-  function minutesFor(which) {
-    if (which === "short") return root.shortBreak
-    if (which === "long") return root.longBreak
-    return root.lapLength
+  Component.onCompleted: {
+    S.init({
+      lapLength: setting("lapLength", 25),
+      shortBreak: setting("shortBreak", 5),
+      longBreak: setting("longBreak", 15),
+      lapsUntilLong: setting("lapsUntilLong", 4)
+    })
+    pullState()
+  }
+
+  function pullState() {
+    root.focusIndex = S.focusIndex
+    root.lapLength = S.lapLength
+    root.phase = S.phase
+    root.completedLaps = S.completedLaps
+    root.running = S.running
+    root.remaining = S.remaining
+    root.deadline = S.deadline
+  }
+
+  function pushAndBroadcast() {
+    broadcast("pullState")
   }
 
   readonly property string clockText: {
@@ -50,56 +64,65 @@ BarWidget {
   }
 
   function start() {
-    if (root.phase === "idle") {
-      root.phase = "work"
-      root.remaining = root.minutesFor("work") * 60
+    if (S.phase === "idle") {
+      S.phase = "work"
+      S.remaining = S.minutesFor("work") * 60
     }
-    root.running = true
-    root.deadline = Date.now() / 1000 + root.remaining
+    S.running = true
+    S.deadline = Date.now() / 1000 + S.remaining
+    pushAndBroadcast()
   }
 
   function pause() {
-    if (root.running)
-      root.remaining = Math.max(0, Math.round(root.deadline - Date.now() / 1000))
-    root.running = false
+    if (S.running)
+      S.remaining = Math.max(0, Math.round(S.deadline - Date.now() / 1000))
+    S.running = false
+    pushAndBroadcast()
   }
 
   function advance() {
     var next
-    if (root.phase === "work") {
-      root.completedLaps += 1
-      next = (root.completedLaps % root.lapsUntilLong === 0) ? "long" : "short"
+    if (S.phase === "work") {
+      S.completedLaps += 1
+      next = (S.completedLaps % S.lapsUntilLong === 0) ? "long" : "short"
     } else {
       next = "work"
     }
-    root.phase = next
-    root.remaining = root.minutesFor(next) * 60
-    if (root.running)
-      root.deadline = Date.now() / 1000 + root.remaining
-    root.playAlert()
+    S.phase = next
+    S.remaining = S.minutesFor(next) * 60
+    if (S.running)
+      S.deadline = Date.now() / 1000 + S.remaining
+    pushAndBroadcast()
+    playAlert()
   }
 
   function cycleFocusPreset() {
-    root.focusIndex = (root.focusIndex + 1) % root.focusPresets.length
-    root.lapLength = root.focusPresets[root.focusIndex]
-    if (root.phase === "idle")
-      root.remaining = root.lapLength * 60
+    S.focusIndex = (S.focusIndex + 1) % S.focusPresets.length
+    S.lapLength = S.focusPresets[S.focusIndex]
+    if (S.phase === "idle")
+      S.remaining = S.lapLength * 60
+    pushAndBroadcast()
     root.showingPreset = true
     presetTimer.restart()
   }
 
   function reset() {
-    root.running = false
-    root.phase = "idle"
-    root.completedLaps = 0
-    root.remaining = root.minutesFor("work") * 60
+    S.running = false
+    S.phase = "idle"
+    S.completedLaps = 0
+    S.remaining = S.minutesFor("work") * 60
+    pushAndBroadcast()
   }
 
   function tick() {
-    if (!root.running) return
-    var rem = Math.max(0, Math.round(root.deadline - Date.now() / 1000))
-    root.remaining = rem
-    if (rem <= 0) root.advance()
+    if (!S.running) return
+    var rem = Math.max(0, Math.round(S.deadline - Date.now() / 1000))
+    S.remaining = rem
+    if (rem <= 0) {
+      advance()
+      return
+    }
+    pullState()
   }
 
   implicitWidth: button.implicitWidth
@@ -128,7 +151,6 @@ BarWidget {
     horizontalMargin: 8.75
     verticalPadding: 8.75
 
-    // Accent while focusing; dimmed whenever the clock is not counting down.
     active: root.running && !root.onBreak
     dimmed: !root.running
 

@@ -67,6 +67,18 @@ Registered in `~/.claude/settings.json` — check there for the current list and
 - **Sync:** Self-hosted LiveSync via CouchDB on hailmary
 - **Homelab views:** `IT/github/adastra/Homelab/` — IPAM, services, projects, infra databases
 
+## Adastra Repo — CouchDB Only
+
+Never edit files in `~/devops/github/adastra/` directly. All changes to adastra content must go through CouchDB using `vault_fetch.py --put` on hailmary. The Obsidian vault is the source of truth; local edits bypass sync and cause conflicts.
+
+**Documentation updates are mandatory.** When work changes infrastructure, services, or projects, update the corresponding markdown docs via CouchDB before considering the task complete. At minimum, keep these current:
+
+- `IT/github/adastra/Homelab/services/` — one doc per service (Docker container, app, or platform)
+- `IT/github/adastra/Homelab/projects/` — one doc per project (initiative, migration, buildout)
+- `IT/github/adastra/Homelab/infra/` — one doc per host or infrastructure device
+
+Read the existing doc first (`--get`) to match its frontmatter and structure, then `--put` the updated version. If no doc exists yet, create one following the conventions of its sibling files.
+
 ## Security / Secrets Management
 
 ### Proton Pass

@@ -1,5 +1,5 @@
 {
-  "model": "opus",
+  "model": "haiku",
   "hooks": {
     "PreToolUse": [
       {
@@ -86,7 +86,7 @@
   },
   "enabledPlugins": {},
   "extraKnownMarketplaces": {},
-  "effortLevel": "medium",
+  "effortLevel": "low",
   "modelSettings": {
     "claude-opus-4-6": {
       "effortLevel": "low"

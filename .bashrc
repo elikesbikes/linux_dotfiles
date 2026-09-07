@@ -106,3 +106,8 @@ alias idrive='/opt/IDriveForLinux/bin/idrive'
 # 5. Input Configuration
 # ==============================================================================
 export SSH_AUTH_SOCK=/home/ecloaiza/.ssh/proton-pass-agent.sock
+
+# ==============================================================================
+# 6. Host-Local Overrides (not in the repo)
+# ==============================================================================
+[[ -f ~/.bashrc_local ]] && source ~/.bashrc_local

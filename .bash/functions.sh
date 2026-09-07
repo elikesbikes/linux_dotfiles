@@ -59,6 +59,29 @@ function dockerents() {
 
 
 # ------------------------------------------------------------
+# _sync_repo_to_remotes
+# ------------------------------------------------------------
+# Pulls the latest changes for a given repo path on rocky and
+# hailmary via SSH. Warns but does not fail if a host is down.
+#
+# Usage:
+#   _sync_repo_to_remotes "/home/ecloaiza/devops/github/adastra"
+# ------------------------------------------------------------
+_sync_repo_to_remotes() {
+  local REPO_PATH="$1"
+  local REPO_NAME
+  REPO_NAME=$(basename "$REPO_PATH")
+
+  for HOST in rocky hailmary; do
+    echo "--> Syncing $REPO_NAME on $HOST..."
+    ssh -o ConnectTimeout=5 "$HOST" "cd $REPO_PATH && git pull --ff-only origin main" 2>&1 || {
+      echo "WARNING: Failed to sync $REPO_NAME on $HOST (host may be down)."
+    }
+  done
+}
+
+
+# ------------------------------------------------------------
 # gacp
 # ------------------------------------------------------------
 # Performs a standard Git workflow:
@@ -187,6 +210,21 @@ gacp_mcc() {
 
 
 # ------------------------------------------------------------
+# gacp_groceries
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the groceries project.
+#
+# Usage:
+#   gacp_groceries "Commit message"
+# ------------------------------------------------------------
+gacp_groceries() {
+  pushd $HOME/devops/projects/groceries > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
+
+# ------------------------------------------------------------
 # syncn
 # ------------------------------------------------------------
 # Syncs devops/github directory structure to Obsidian, runs
@@ -213,8 +251,9 @@ syncn() {
 # ------------------------------------------------------------
 gacp_adastra() {
   pushd $HOME/devops/github/adastra > /dev/null || return 1
-  gacp "$@"
+  gacp "$@" || { popd > /dev/null; return 1; }
   popd > /dev/null
+  _sync_repo_to_remotes "$HOME/devops/github/adastra"
   syncn
 }
 
@@ -271,6 +310,8 @@ gacp_dotfiles() {
     popd > /dev/null
     return 1
   }
+
+  _sync_repo_to_remotes "$HOME/devops/github/linux_dotfiles"
 
   if [ -n "$TAG" ]; then
     echo "--> Creating annotated tag: $TAG"

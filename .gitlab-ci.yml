@@ -20,25 +20,13 @@ deploy_dotfiles:
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
 
-      # Deploy to hailmary (primary target post-Project-Exodus, 2026-07)
-      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.25 \
+      # Deploy to rocky
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=10 ecloaiza@192.168.5.30 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
 
-      # Deploy to gargantua (skip if offline)
-      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 ecloaiza@192.168.5.110 \
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
-        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)" \
-        || echo "⚠️  gargantua offline, skipping deployment"
-
-      # Deploy to trainerroad2 (skip if offline)
-      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 ecloaiza@192.168.5.176 \
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
-        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)" \
-        || echo "⚠️  trainerroad2 offline, skipping deployment"
-
-      # Deploy to tars
-      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no ecloaiza@192.168.5.127 \
+      # Deploy to hailmary
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=10 ecloaiza@192.168.5.25 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
   only:

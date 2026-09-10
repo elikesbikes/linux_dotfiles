@@ -9,7 +9,6 @@ deploy_dotfiles:
   image: alpine:latest
   before_script:
     - apk add --no-cache openssh-client git
-    - chmod 600 "$SSH_PRIVATE_KEY"
   script:
     - |
       # Check if sudoers/ files changed in this commit

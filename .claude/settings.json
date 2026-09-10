@@ -54,7 +54,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/adastra/'; then cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session\" 2>/dev/null || true; gacp_adastra \"$MSG\"; fi; fi",
+                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/adastra/'; then cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session\" 2>/dev/null || true; gacp \"$MSG\" && syncn; fi; fi",
                         "timeout": 30,
                         "statusMessage": "Auto-committing adastra..."
                     }

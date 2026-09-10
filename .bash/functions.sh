@@ -274,6 +274,21 @@ gacp_reviere-ios() {
 
 
 # ------------------------------------------------------------
+# gacp_cooper
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the cooper-ios repository.
+#
+# Usage:
+#   gacp_cooper "Commit message"
+# ------------------------------------------------------------
+gacp_cooper() {
+  pushd $HOME/devops/projects/ios/cooper > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
+
+# ------------------------------------------------------------
 # gacp_dotfiles
 # ------------------------------------------------------------
 # Runs the gacp workflow inside the linux_dotfiles repository.

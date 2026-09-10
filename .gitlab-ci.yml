@@ -20,13 +20,15 @@ deploy_dotfiles:
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
 
-      # Deploy to rockysss
-      ssh -o StrictHostKeyChecking=no -o IdentityAgent=~/.ssh/proton-pass-agent.sock ecloaiza@rocky \
+      export SSH_AUTH_SOCK=/ssh-agent.sock
+
+      # Deploy to rocky
+      ssh -o StrictHostKeyChecking=no ecloaiza@rocky \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
 
       # Deploy to hailmary
-      ssh -o StrictHostKeyChecking=no -o IdentityAgent=~/.ssh/proton-pass-agent.sock ecloaiza@hailmary \
+      ssh -o StrictHostKeyChecking=no ecloaiza@hailmary \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
   only:

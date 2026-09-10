@@ -20,7 +20,7 @@ deploy_dotfiles:
       fi
       echo "Sudoers changed: $SUDOERS_CHANGED"
 
-      # Deploy to rocky
+      # Deploy to rockys
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=10 ecloaiza@192.168.5.28 \
         "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
         (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"

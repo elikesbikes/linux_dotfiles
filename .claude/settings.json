@@ -1,134 +1,145 @@
 {
-  "model": "claude-opus-4-6",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Read|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); PATH_CHECK=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.content // \"\"'); if echo \"$PATH_CHECK\" | grep -q '/Documents/Obsidian/Loaiza/'; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Direct Obsidian vault access is not allowed. Use CouchDB instead: ssh hailmary \\\"cd /home/ecloaiza/devops/projects/mcc && python3 tools/vault_fetch.py --get|--put|--list <path>\\\"\"}'; exit 2; fi",
-            "timeout": 5,
-            "statusMessage": "Checking Obsidian vault guard..."
-          }
+    "model": "claude-opus-4-6",
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Read|Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); PATH_CHECK=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.content // \"\"'); if echo \"$PATH_CHECK\" | grep -q '/Documents/Obsidian/Loaiza/'; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Direct Obsidian vault access is not allowed. Use CouchDB instead: ssh hailmary \\\"cd /home/ecloaiza/devops/projects/mcc && python3 tools/vault_fetch.py --get|--put|--list <path>\\\"\"}'; exit 2; fi",
+                        "timeout": 5,
+                        "statusMessage": "Checking Obsidian vault guard..."
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE 'docker compose (down|rm)'; then ACTION=$(echo \"$CMD\" | grep -oE 'docker compose (down|rm)[^ ]*'); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"DOCKER_COMPOSE: $ACTION from claude session\"; fi",
+                        "timeout": 5,
+                        "statusMessage": "Logging Docker compose action..."
+                    },
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '^\\s*git\\s+push'; then SECRETS=$(git diff --cached 2>/dev/null | grep -iE '(AKIA[0-9A-Z]{16}|api[_-]?key\\s*[:=]|token\\s*[:=]|password\\s*[:=]|secret\\s*[:=]|\\.secrets/)' || true); if [ -n \"$SECRETS\" ]; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Potential secrets detected in staged files. Review with git diff --cached before pushing.\"}'; exit 2; fi; fi",
+                        "timeout": 10,
+                        "statusMessage": "Scanning for secrets before push..."
+                    },
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '(^\\s*git\\s+commit|gacp_)'; then REPO=$(basename \"$(pwd)\"); MSG=$(echo \"$CMD\" | grep -oP '(?<=-m\\s[\\x27\"])[^\\x27\"]*' || echo \"$CMD\"); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=$REPO msg=$MSG from claude session\" 2>/dev/null || true; fi",
+                        "timeout": 5,
+                        "statusMessage": "Logging git commit to syslog..."
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/linux_dotfiles/'; then cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=linux_dotfiles msg=$MSG from claude session\" 2>/dev/null || true; gacp_dotfiles \"$MSG\"; fi; fi",
+                        "timeout": 30,
+                        "statusMessage": "Auto-committing dotfiles..."
+                    }
+                ]
+            },
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/adastra/'; then cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session\" 2>/dev/null || true; gacp_adastra \"$MSG\"; fi; fi",
+                        "timeout": 30,
+                        "statusMessage": "Auto-committing adastra..."
+                    }
+                ]
+            },
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/projects/ios/cooper/'; then cd /home/ecloaiza/devops/projects/ios/cooper && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ',' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=cooper-ios msg=$MSG from claude session\" 2>/dev/null || true; gacp_cooper \"$MSG\"; fi; fi",
+                        "timeout": 30,
+                        "statusMessage": "Auto-committing cooper-ios..."
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=linux_dotfiles msg=$MSG from claude session (stop)\" 2>/dev/null || true; gacp_dotfiles \"$MSG\"; fi",
+                        "timeout": 30,
+                        "statusMessage": "Auto-committing dotfiles..."
+                    }
+                ]
+            },
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session (stop)\" 2>/dev/null || true; gacp_adastra \"$MSG\"; fi",
+                        "timeout": 30,
+                        "statusMessage": "Auto-committing adastra..."
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE 'docker compose (down|rm)'; then ACTION=$(echo \"$CMD\" | grep -oE 'docker compose (down|rm)[^ ]*'); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"DOCKER_COMPOSE: $ACTION from claude session\"; fi",
-            "timeout": 5,
-            "statusMessage": "Logging Docker compose action..."
-          },
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '^\\s*git\\s+push'; then SECRETS=$(git diff --cached 2>/dev/null | grep -iE '(AKIA[0-9A-Z]{16}|api[_-]?key\\s*[:=]|token\\s*[:=]|password\\s*[:=]|secret\\s*[:=]|\\.secrets/)' || true); if [ -n \"$SECRETS\" ]; then echo '{\"decision\":\"block\",\"reason\":\"BLOCKED: Potential secrets detected in staged files. Review with git diff --cached before pushing.\"}'; exit 2; fi; fi",
-            "timeout": 10,
-            "statusMessage": "Scanning for secrets before push..."
-          },
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '(^\\s*git\\s+commit|gacp_)'; then REPO=$(basename \"$(pwd)\"); MSG=$(echo \"$CMD\" | grep -oP '(?<=-m\\s[\\x27\"])[^\\x27\"]*' || echo \"$CMD\"); logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=$REPO msg=$MSG from claude session\" 2>/dev/null || true; fi",
-            "timeout": 5,
-            "statusMessage": "Logging git commit to syslog..."
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/linux_dotfiles/'; then cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=linux_dotfiles msg=$MSG from claude session\" 2>/dev/null || true; gacp_dotfiles \"$MSG\"; fi; fi",
-            "timeout": 30,
-            "statusMessage": "Auto-committing dotfiles..."
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/adastra/'; then cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session\" 2>/dev/null || true; gacp_adastra \"$MSG\"; fi; fi",
-            "timeout": 30,
-            "statusMessage": "Auto-committing adastra..."
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=linux_dotfiles msg=$MSG from claude session (stop)\" 2>/dev/null || true; gacp_dotfiles \"$MSG\"; fi",
-            "timeout": 30,
-            "statusMessage": "Auto-committing dotfiles..."
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd /home/ecloaiza/devops/github/adastra && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=adastra msg=$MSG from claude session (stop)\" 2>/dev/null || true; gacp_adastra \"$MSG\"; fi",
-            "timeout": 30,
-            "statusMessage": "Auto-committing adastra..."
-          }
-        ]
-      }
-    ]
-  },
-  "enabledPlugins": {},
-  "extraKnownMarketplaces": {},
-  "effortLevel": "low",
-  "modelSettings": {
-    "claude-opus-4-6": {
-      "effortLevel": "low"
+    },
+    "enabledPlugins": {},
+    "extraKnownMarketplaces": {},
+    "effortLevel": "low",
+    "modelSettings": {
+        "claude-opus-4-6": {
+            "effortLevel": "low"
+        }
+    },
+    "tui": "fullscreen",
+    "voice": {
+        "enabled": true,
+        "mode": "hold"
+    },
+    "autoDreamEnabled": true,
+    "skipDangerousModePermissionPrompt": true,
+    "inputNeededNotifEnabled": true,
+    "agentPushNotifEnabled": true,
+    "voiceEnabled": true,
+    "mcpServers": {
+        "unifi": {
+            "type": "sse",
+            "url": "http://192.168.5.30:5678/mcp/a65e26aa-0f3a-47d2-8cc0-5da81b8e9765/sse"
+        },
+        "graylog-wifi": {
+            "type": "sse",
+            "url": "http://192.168.5.30:5678/mcp/graylog-wifi-mcp/sse"
+        },
+        "uptime-kuma": {
+            "type": "stdio",
+            "command": "node",
+            "args": [
+                "/home/ecloaiza/devops/mcp/uptime-kuma/server.js"
+            ]
+        },
+        "n8n-mcp": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "-y",
+                "n8n-mcp"
+            ]
+        },
+        "ansible": {
+            "type": "sse",
+            "url": "https://ansible-mcp.home.elikesbikes.com/sse"
+        }
     }
-  },
-  "tui": "fullscreen",
-  "voice": {
-    "enabled": true,
-    "mode": "hold"
-  },
-  "autoDreamEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "voiceEnabled": true,
-  "mcpServers": {
-    "unifi": {
-      "type": "sse",
-      "url": "http://192.168.5.30:5678/mcp/a65e26aa-0f3a-47d2-8cc0-5da81b8e9765/sse"
-    },
-    "graylog-wifi": {
-      "type": "sse",
-      "url": "http://192.168.5.30:5678/mcp/graylog-wifi-mcp/sse"
-    },
-    "uptime-kuma": {
-      "type": "stdio",
-      "command": "node",
-      "args": [
-        "/home/ecloaiza/devops/mcp/uptime-kuma/server.js"
-      ]
-    },
-    "n8n-mcp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "n8n-mcp"
-      ]
-    },
-    "ansible": {
-      "type": "sse",
-      "url": "https://ansible-mcp.home.elikesbikes.com/sse"
-    }
-  }
 }

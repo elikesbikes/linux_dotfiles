@@ -253,7 +253,6 @@ gacp_adastra() {
   pushd $HOME/devops/github/adastra > /dev/null || return 1
   gacp "$@" || { popd > /dev/null; return 1; }
   popd > /dev/null
-  _sync_repo_to_remotes "$HOME/devops/github/adastra"
   syncn
 }
 

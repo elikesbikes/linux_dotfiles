@@ -43,7 +43,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // \"\"'); if echo \"$FILE\" | grep -q '/devops/github/linux_dotfiles/'; then cd /home/ecloaiza/devops/github/linux_dotfiles && if [ -n \"$(git status --porcelain)\" ]; then source ~/.bash/functions.sh && FILES=$(git diff --name-only HEAD 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) && MSG=\"claude: update $(echo \"$FILES\" | sort -u | head -5 | tr '\\n' ', ' | sed 's/,$//' | sed 's/,/, /g')\" && logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info \"GIT_COMMIT: repo=linux_dotfiles msg=$MSG from claude session\" 2>/dev/null || true; gacp_dotfiles \"$MSG\"; fi; fi",
+                        "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/github/linux_dotfiles gacp_dotfiles --stdin",
                         "timeout": 30,
                         "statusMessage": "Auto-committing dotfiles..."
                     }

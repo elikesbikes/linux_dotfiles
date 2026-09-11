@@ -231,6 +231,8 @@ gacp_groceries() {
 # unison obsidian_sync, and cleans up empty directories.
 # ------------------------------------------------------------
 syncn() {
+  # Only runs on hosts with a local Obsidian vault (tars)
+  [ -d "$HOME/Documents/Obsidian/Loaiza" ] || return 0
   cd ~ || return 1
   rsync -a --exclude=".git" --include="*/" --exclude="*" \
     $HOME/devops/github/ \

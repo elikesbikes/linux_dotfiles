@@ -148,6 +148,7 @@ ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json"
 ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json"
 ensure_link "$HOME_DIR/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
 ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_DIR/AI/skills"
+ensure_link "$HOME_DIR/.claude/hooks" "$REPO_DIR/.claude/hooks"
 
 # --- Devops ubuntu directory (Claude Code working directory, lives in adastra) ---
 

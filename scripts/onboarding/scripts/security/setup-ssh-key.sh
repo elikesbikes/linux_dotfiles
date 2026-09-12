@@ -301,7 +301,7 @@ fi
 if [[ "$DETECTED_OS" == "windows" ]]; then
     log "Setting up SSH key on Windows host..."
 
-    HAS_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"Test-Path C:\\Users\\${TARGET_USER}\"" 2>/dev/null || echo "False")
+    HAS_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"Test-Path C:\\Users\\${TARGET_USER}\"" 2>/dev/null | tr -d '\r' || echo "False")
     if [[ "$HAS_HOME" != "True" ]]; then
         err "User ${TARGET_USER} does not exist on this Windows host."
         echo "Create the user manually:"

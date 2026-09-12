@@ -2,8 +2,19 @@
 set -uo pipefail
 
 # Setup SSH key access on a new host using Proton Pass SSH agent.
-# Supports: Ubuntu, Debian, Arch, Proxmox, Windows (OpenSSH).
-# LXC, VM, or bare metal.
+# Supports: Ubuntu, Debian, Proxmox, Arch, Windows (OpenSSH).
+# Works with: LXC, VM, bare metal, Proxmox hosts.
+#
+# Permutations handled:
+#   - Login as root (direct privilege) or non-root (uses sudo)
+#   - Login user same as target user (just install key, skip user/sudo setup)
+#   - Password auth or key auth on initial connect
+#   - sudo installed or missing (installs it if login user has privilege)
+#   - Target user exists or needs creation
+#   - Debian/Ubuntu (sudo group) vs Arch (wheel group)
+#   - Windows admin (administrators_authorized_keys) vs non-admin (.ssh/)
+#   - MaxAuthTries workaround (pubkey file + SSH config entry)
+#   - Garbage in authorized_keys from previous failed runs
 
 DOMAIN="home.elikesbikes.com"
 TARGET_USER="ecloaiza"
@@ -22,11 +33,12 @@ Options:
   --ip <address>        Use IP directly instead of <hostname>.${DOMAIN}
 
 Examples:
-  $(basename "$0") endurance                        # Proxmox LXC, root key injected
-  $(basename "$0") --password endurance              # Fresh machine, need password
-  $(basename "$0") --password --user admin kipp      # SSH as admin first
-  $(basename "$0") --windows --password nvr-prod-1   # Windows host
-  $(basename "$0") --ip 192.168.5.50 newbox          # Use IP, key name is 'newbox SSH Key'
+  $(basename "$0") endurance                            # Proxmox LXC, root key injected
+  $(basename "$0") --password endurance                  # Fresh machine, need password
+  $(basename "$0") --password --user emmanuel kipp       # Ubuntu Desktop, SSH as install user
+  $(basename "$0") --windows --password nvr-prod-1       # Windows host
+  $(basename "$0") --ip 192.168.5.50 newbox              # Use IP, key name is 'newbox SSH Key'
+  $(basename "$0") --password --user ecloaiza mydesktop  # Login user IS target user
 EOF
     exit 1
 }
@@ -61,7 +73,7 @@ else
     FQDN="${HOSTNAME}.${DOMAIN}"
 fi
 
-# --- SSH multiplexing setup ---
+# --- SSH multiplexing — single password prompt reused for all commands ---
 CONTROL_DIR=$(mktemp -d)
 CONTROL_PATH="${CONTROL_DIR}/ssh-%r@%h:%p"
 
@@ -82,14 +94,20 @@ ssh_cmd() {
     ssh $SSH_OPTS "$@"
 }
 
-# Run a command on the remote host as root.
-# If login user is root, run directly. Otherwise, prefix with sudo.
-ssh_root() {
+# Run a command with root privilege on the remote host.
+# - login user is root: run directly
+# - login user has sudo: prefix with sudo
+# - login user has no privilege: fail with guidance
+run_privileged() {
     local cmd="$1"
     if [[ "$LOGIN_USER" == "root" ]]; then
         ssh_cmd "${LOGIN_USER}@${FQDN}" "$cmd"
+    elif [[ "$CAN_SUDO" == true ]]; then
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo bash -c '$cmd'"
     else
-        ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo $cmd"
+        err "Need root privileges to run: $cmd"
+        err "Login user ${LOGIN_USER} is not root and doesn't have sudo."
+        return 1
     fi
 }
 
@@ -98,8 +116,10 @@ DID_CREATE_USER=false
 DID_INSTALL_SUDO=false
 DID_CONFIGURE_SUDO=false
 DID_INSTALL_KEY=false
+DID_INSTALL_LOGIN_KEY=false
 DID_ADD_SSH_CONFIG=false
 HAS_SUDO=false
+CAN_SUDO=false
 DETECTED_OS="unknown"
 DISTRO=""
 
@@ -120,9 +140,10 @@ if [[ -z "$PUBKEY" ]]; then
     exit 1
 fi
 
+PUBKEY_FINGERPRINT=$(echo "$PUBKEY" | awk '{print $2}')
 log "Found public key: ${PUBKEY:0:50}..."
 
-# Save pubkey to file now — we'll need it for testing later regardless
+# Save pubkey to file now — needed for testing later (avoids MaxAuthTries)
 mkdir -p ~/.ssh/pubkeys
 echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
 
@@ -173,7 +194,7 @@ fi
 log "Connected. Master connection established."
 
 # ============================================================
-# Step 5: Detect OS
+# Step 5: Detect OS and privilege level
 # ============================================================
 
 if [[ "$IS_WINDOWS" == true ]]; then
@@ -190,6 +211,33 @@ else
         log "Target OS: Linux (${DISTRO:-unknown distro})"
     else
         log "Target OS: ${DETECTED_OS}"
+    fi
+fi
+
+# Determine privilege level of login user
+if [[ "$LOGIN_USER" == "root" ]]; then
+    CAN_SUDO=false  # don't need sudo, we ARE root
+    log "Login user is root — full privilege."
+elif [[ "$DETECTED_OS" != "windows" ]]; then
+    # Check if login user can sudo without a password
+    SUDO_CHECK=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo -n true 2>/dev/null && echo yes || echo no")
+    if [[ "$SUDO_CHECK" == "yes" ]]; then
+        CAN_SUDO=true
+        log "Login user ${LOGIN_USER} has passwordless sudo."
+    else
+        # Try with password (the multiplexed session may pass it through)
+        SUDO_CHECK_PW=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo true 2>/dev/null && echo yes || echo no")
+        if [[ "$SUDO_CHECK_PW" == "yes" ]]; then
+            CAN_SUDO=true
+            log "Login user ${LOGIN_USER} has sudo (password was accepted)."
+        else
+            CAN_SUDO=false
+            if [[ "$LOGIN_USER" == "$TARGET_USER" ]]; then
+                log "Login user ${LOGIN_USER} has no sudo — will install key for own account only."
+            else
+                warn "Login user ${LOGIN_USER} has no sudo. Can install key but cannot create users or configure sudo."
+            fi
+        fi
     fi
 fi
 
@@ -223,7 +271,7 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
     fi
 
     KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '$(echo "$PUBKEY" | awk '{print $2}')' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
+        "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '${PUBKEY_FINGERPRINT}' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
 
     if [[ "$KEY_INSTALLED" == "True" ]]; then
         log "Key already installed."
@@ -277,61 +325,87 @@ fi
 # Linux path
 # ============================================================
 
+HAS_PRIVILEGE=false
+if [[ "$LOGIN_USER" == "root" ]] || [[ "$CAN_SUDO" == true ]]; then
+    HAS_PRIVILEGE=true
+fi
+
 # --- Step 6: Check / create user ---
 
 USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} > /dev/null 2>&1 && echo yes || echo no")
 
 if [[ "$USER_EXISTS" == "no" ]]; then
-    log "User ${TARGET_USER} does not exist. Creating..."
-    ssh_root "useradd -m -s /bin/bash ${TARGET_USER}"
-    DID_CREATE_USER=true
-    log "User ${TARGET_USER} created."
+    if [[ "$HAS_PRIVILEGE" == true ]]; then
+        log "User ${TARGET_USER} does not exist. Creating..."
+        run_privileged "useradd -m -s /bin/bash ${TARGET_USER}"
+        DID_CREATE_USER=true
+        log "User ${TARGET_USER} created."
+    else
+        err "User ${TARGET_USER} does not exist and login user ${LOGIN_USER} has no privilege to create it."
+        echo "Either:"
+        echo "  - Run this script with --user root"
+        echo "  - Create the user manually on the host: useradd -m -s /bin/bash ${TARGET_USER}"
+        exit 1
+    fi
 else
     log "User ${TARGET_USER} already exists."
 fi
 
 # --- Step 7: Install sudo if missing, configure if needed ---
+# Skip if login user has no privilege (can't install or configure sudo)
+# Skip if login user IS target user and already has sudo
 
-HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
+if [[ "$HAS_PRIVILEGE" == true ]]; then
+    HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
 
-if [[ "$HAS_SUDO_BIN" == "no" ]]; then
-    log "sudo not installed. Attempting to install..."
-    # Try apt (Debian/Ubuntu/Proxmox), then pacman (Arch)
-    INSTALL_RESULT=$(ssh_root "
-        if command -v apt-get > /dev/null 2>&1; then
-            apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
-        elif command -v pacman > /dev/null 2>&1; then
-            pacman -Sy --noconfirm sudo > /dev/null 2>&1 && echo ok
+    if [[ "$HAS_SUDO_BIN" == "no" ]]; then
+        log "sudo not installed. Attempting to install..."
+        INSTALL_RESULT=$(run_privileged "
+            if command -v apt-get > /dev/null 2>&1; then
+                apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
+            elif command -v pacman > /dev/null 2>&1; then
+                pacman -Sy --noconfirm sudo > /dev/null 2>&1 && echo ok
+            else
+                echo fail
+            fi
+        " || echo "fail")
+
+        if [[ "$INSTALL_RESULT" == *"ok"* ]]; then
+            HAS_SUDO=true
+            DID_INSTALL_SUDO=true
+            log "sudo installed."
         else
-            echo fail
+            warn "Could not install sudo. SSH access will work but ${TARGET_USER} won't have sudo."
         fi
-    " || echo "fail")
-
-    if [[ "$INSTALL_RESULT" == *"ok"* ]]; then
-        HAS_SUDO=true
-        DID_INSTALL_SUDO=true
-        log "sudo installed."
     else
-        warn "Could not install sudo. SSH access will work but ${TARGET_USER} won't have sudo."
+        HAS_SUDO=true
+    fi
+
+    if [[ "$HAS_SUDO" == true ]]; then
+        SUDO_CONFIGURED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
+        if [[ "$SUDO_CONFIGURED" == "no" ]]; then
+            SUDO_GROUP="sudo"
+            if [[ "${DISTRO:-}" == "arch" ]]; then
+                SUDO_GROUP="wheel"
+            fi
+
+            log "Configuring passwordless sudo (group: ${SUDO_GROUP})..."
+            run_privileged "usermod -aG ${SUDO_GROUP} ${TARGET_USER}"
+            run_privileged "echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
+            DID_CONFIGURE_SUDO=true
+            log "Sudo configured."
+        else
+            log "Sudo already configured."
+        fi
     fi
 else
-    HAS_SUDO=true
-fi
-
-if [[ "$HAS_SUDO" == true ]]; then
-    SUDO_CONFIGURED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
-    if [[ "$SUDO_CONFIGURED" == "no" ]]; then
-        SUDO_GROUP="sudo"
-        if [[ "${DISTRO:-}" == "arch" ]]; then
-            SUDO_GROUP="wheel"
-        fi
-
-        log "Configuring passwordless sudo (group: ${SUDO_GROUP})..."
-        ssh_root "usermod -aG ${SUDO_GROUP} ${TARGET_USER} && echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
-        DID_CONFIGURE_SUDO=true
-        log "Sudo configured."
+    # No privilege — check if sudo exists and target user has it
+    HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
+    if [[ "$HAS_SUDO_BIN" == "yes" ]]; then
+        HAS_SUDO=true
+        warn "No privilege to configure sudo — assuming existing setup is fine."
     else
-        log "Sudo already configured."
+        warn "No privilege to install or configure sudo. ${TARGET_USER} will have SSH access only."
     fi
 fi
 
@@ -341,62 +415,87 @@ TARGET_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${TARGET_USER}")
 
 # Check if key is already correctly installed
 KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-    "grep -cF '$(echo "$PUBKEY" | awk '{print $2}')' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+    "grep -cF '${PUBKEY_FINGERPRINT}' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
 
 if [[ "$KEY_INSTALLED" -ge 1 ]]; then
     log "Key already installed for ${TARGET_USER}."
 else
-    # Clean up any garbage from previous failed runs
-    ssh_root "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh"
+    # Determine if we need privilege to write to target user's home
+    if [[ "$LOGIN_USER" == "$TARGET_USER" ]]; then
+        # Writing to our own home — no privilege needed
+        WRITE_CMD="ssh_cmd"
+    elif [[ "$HAS_PRIVILEGE" == true ]]; then
+        WRITE_CMD="run_privileged"
+    else
+        err "Cannot install key for ${TARGET_USER} — login user ${LOGIN_USER} has no privilege to write to ${TARGET_HOME}/.ssh/"
+        echo "Either:"
+        echo "  - Run with --user root or a user with sudo"
+        echo "  - Run with --user ${TARGET_USER} if that user has password auth"
+        exit 1
+    fi
 
-    # Check if authorized_keys exists and has non-key content (garbage)
+    # Clean up garbage from previous failed runs
     if ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f ${TARGET_HOME}/.ssh/authorized_keys" 2>/dev/null; then
         VALID_KEYS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "grep -c '^ssh-' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
         TOTAL_LINES=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "wc -l < ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+        TOTAL_LINES=$(echo "$TOTAL_LINES" | tr -d '[:space:]')
         if [[ "$TOTAL_LINES" -gt 0 ]] && [[ "$VALID_KEYS" -eq 0 ]]; then
-            warn "authorized_keys contains garbage (no valid keys). Replacing."
-            ssh_root "rm -f ${TARGET_HOME}/.ssh/authorized_keys"
+            warn "authorized_keys contains garbage (no valid keys). Cleaning up."
+            $WRITE_CMD "rm -f ${TARGET_HOME}/.ssh/authorized_keys"
         fi
     fi
 
     log "Installing SSH key for ${TARGET_USER}..."
-    ssh_root "echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
+    if [[ "$LOGIN_USER" == "$TARGET_USER" ]]; then
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh && echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys"
+    else
+        run_privileged "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh && echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
+    fi
     DID_INSTALL_KEY=true
     log "Key installed."
 fi
 
-# Also install key for login user so future SSH doesn't need a password
+# Also install key for login user so future SSH won't need a password
 if [[ "$LOGIN_USER" != "$TARGET_USER" ]]; then
     LOGIN_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${LOGIN_USER}")
     LOGIN_KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "grep -cF '$(echo "$PUBKEY" | awk '{print $2}')' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+        "grep -cF '${PUBKEY_FINGERPRINT}' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
 
     if [[ "$LOGIN_KEY_INSTALLED" -ge 1 ]]; then
         log "Key already installed for ${LOGIN_USER}."
     else
         log "Installing SSH key for ${LOGIN_USER} (so future SSH won't need a password)..."
-        ssh_root "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
+        if [[ "$LOGIN_USER" == "root" ]]; then
+            ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
+        else
+            # Non-root login user can write to their own home
+            ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
+        fi
+        DID_INSTALL_LOGIN_KEY=true
         log "Key installed for ${LOGIN_USER}."
     fi
 fi
 
-# --- Step 9: Close master connection and test as target user ---
+# ============================================================
+# Step 9: Close master connection and test as target user
+# ============================================================
 
 ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
 log "Testing SSH as ${TARGET_USER}..."
 
-# Always test with the specific pubkey to avoid MaxAuthTries
 SSH_OK=false
+
+# Always test with the specific pubkey to avoid MaxAuthTries
 if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
     SSH_OK=true
     log "SSH as ${TARGET_USER} works (direct key)."
 else
-    # Try with SSH config alias if one exists
+    # Try existing config alias
     if grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
         if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
             SSH_OK=true
-            log "SSH as ${TARGET_USER} works (via config alias)."
+            log "SSH as ${TARGET_USER} works (via existing config alias)."
         fi
     fi
 
@@ -424,16 +523,18 @@ EOF
 fi
 
 if [[ "$SSH_OK" == false ]]; then
-    err "Cannot connect as ${TARGET_USER}."
+    err "Cannot connect as ${TARGET_USER} after setup."
     echo "Debug: ssh -v -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub ${TARGET_USER}@${FQDN}"
     exit 1
 fi
 
-# --- Step 10: Final verification ---
+# ============================================================
+# Step 10: Final verification
+# ============================================================
 
 VERIFY_CMD="whoami"
 if [[ "$HAS_SUDO" == true ]]; then
-    VERIFY_CMD="whoami && sudo whoami"
+    VERIFY_CMD="whoami && sudo -n whoami 2>/dev/null || echo '(sudo not available or needs password)'"
 fi
 
 RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "$VERIFY_CMD" 2>/dev/null || \
@@ -441,11 +542,13 @@ RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ss
          echo "")
 
 if [[ -z "$RESULT" ]] || [[ "$RESULT" != *"${TARGET_USER}"* ]]; then
-    warn "Final verification returned unexpected output: ${RESULT:-<empty>}"
-    warn "SSH connection works but something may be off. Check manually."
+    warn "Verification returned unexpected output: ${RESULT:-<empty>}"
+    warn "SSH works but something may be off — check manually."
 fi
 
-# --- Summary ---
+# ============================================================
+# Summary
+# ============================================================
 
 echo ""
 echo "=== Done ==="
@@ -456,6 +559,8 @@ echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
 echo "OS:     ${DETECTED_OS} (${DISTRO:-n/a})"
 if [[ "$HAS_SUDO" == true ]]; then
     echo "Sudo:   yes (NOPASSWD)"
+elif [[ "$HAS_PRIVILEGE" == false ]]; then
+    echo "Sudo:   unknown (no privilege to check/configure)"
 else
     echo "Sudo:   no (could not install)"
 fi
@@ -470,7 +575,8 @@ ACTIONS=()
 [[ "$DID_CREATE_USER" == true ]] && ACTIONS+=("created user ${TARGET_USER}")
 [[ "$DID_INSTALL_SUDO" == true ]] && ACTIONS+=("installed sudo")
 [[ "$DID_CONFIGURE_SUDO" == true ]] && ACTIONS+=("configured passwordless sudo")
-[[ "$DID_INSTALL_KEY" == true ]] && ACTIONS+=("installed SSH key")
+[[ "$DID_INSTALL_KEY" == true ]] && ACTIONS+=("installed SSH key for ${TARGET_USER}")
+[[ "$DID_INSTALL_LOGIN_KEY" == true ]] && ACTIONS+=("installed SSH key for ${LOGIN_USER}")
 [[ "$DID_ADD_SSH_CONFIG" == true ]] && ACTIONS+=("added SSH config entry")
 
 if [[ ${#ACTIONS[@]} -gt 0 ]]; then

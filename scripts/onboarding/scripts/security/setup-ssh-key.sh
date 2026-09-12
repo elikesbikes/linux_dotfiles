@@ -64,6 +64,10 @@ fi
 SSH_OPTS="-o ConnectTimeout=10"
 if [[ "$ALLOW_PASSWORD" == false ]]; then
     SSH_OPTS="$SSH_OPTS -o BatchMode=yes"
+else
+    # Bypass the agent entirely — too many keys triggers MaxAuthTries before
+    # the password prompt. Force keyboard-interactive/password only.
+    SSH_OPTS="$SSH_OPTS -o IdentitiesOnly=yes -o PreferredAuthentications=keyboard-interactive,password"
 fi
 
 ssh_cmd() {

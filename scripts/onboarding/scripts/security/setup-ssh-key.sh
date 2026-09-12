@@ -445,16 +445,24 @@ if [[ "$HAS_PRIVILEGE" == true ]]; then
     HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
 
     if [[ "$HAS_SUDO_BIN" == "no" ]]; then
-        log "sudo not installed. Attempting to install..."
-        INSTALL_RESULT=$(run_privileged "
-            if command -v apt-get > /dev/null 2>&1; then
-                apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
-            elif command -v pacman > /dev/null 2>&1; then
-                pacman -Sy --noconfirm sudo > /dev/null 2>&1 && echo ok
-            else
-                echo fail
-            fi
-        " || echo "fail")
+        if [[ "$HOST_TYPE" == "macos" ]]; then
+            # macOS always has sudo — if we're here something is very wrong
+            warn "sudo not found on macOS — this is unexpected. Skipping install."
+            INSTALL_RESULT="fail"
+        else
+            log "sudo not installed. Attempting to install..."
+            INSTALL_RESULT=$(run_privileged "
+                if command -v apt-get > /dev/null 2>&1; then
+                    apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
+                elif command -v pacman > /dev/null 2>&1; then
+                    pacman -Sy --noconfirm sudo > /dev/null 2>&1 && echo ok
+                elif command -v pkg > /dev/null 2>&1; then
+                    pkg install -y sudo > /dev/null 2>&1 && echo ok
+                else
+                    echo fail
+                fi
+            " || echo "fail")
+        fi
 
         if [[ "$INSTALL_RESULT" == *"ok"* ]]; then
             HAS_SUDO=true

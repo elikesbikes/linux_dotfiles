@@ -26,3 +26,4 @@ alias claudemddocker='rm -f CLAUDE.md && ln -s "$HOME/devops/github/adastra/AI/p
 alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'
 alias cleanupdotfiles='rm -rf $HOME/devops/github/linux_dotfiles/ && cd $HOME/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
 alias upgraderustdesk='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o '\''https://[^"]*x86_64\.deb'\'' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'
+alias repopullforce='git fetch --all && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD) && git pull'

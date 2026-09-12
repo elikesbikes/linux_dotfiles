@@ -311,7 +311,7 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
     fi
 
     IS_ADMIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "powershell -Command \"try { \\\$null -ne (Get-LocalGroupMember Administrators | Where-Object Name -match '${TARGET_USER}') } catch { 'False' }\"" 2>/dev/null || echo "False")
+        "powershell -Command \"try { \\\$null -ne (Get-LocalGroupMember Administrators | Where-Object Name -match '${TARGET_USER}') } catch { 'False' }\"" 2>/dev/null | tr -d '\r' || echo "False")
 
     if [[ "$IS_ADMIN" == "True" ]]; then
         log "User is an administrator — key goes in administrators_authorized_keys."

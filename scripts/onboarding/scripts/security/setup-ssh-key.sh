@@ -1,9 +1,9 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 # Setup SSH key access on a new host using Proton Pass SSH agent.
-# Supports: Ubuntu, Arch, Windows (OpenSSH). LXC, VM, or bare metal.
-# If SSH doesn't work at all, use the console — see the SSH Key Setup Runbook.
+# Supports: Ubuntu, Debian, Arch, Proxmox, Windows (OpenSSH).
+# LXC, VM, or bare metal.
 
 DOMAIN="home.elikesbikes.com"
 TARGET_USER="ecloaiza"
@@ -33,7 +33,7 @@ EOF
 
 log()  { echo "[+] $*"; }
 warn() { echo "[!] $*"; }
-fail() { echo "[x] $*"; exit 1; }
+err()  { echo "[x] $*"; }
 
 LOGIN_USER="root"
 ALLOW_PASSWORD=false
@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
         --windows) IS_WINDOWS=true; shift ;;
         --ip) CUSTOM_IP="$2"; shift 2 ;;
         --help|-h) usage ;;
-        -*) fail "Unknown option: $1" ;;
+        -*) err "Unknown option: $1"; usage ;;
         *) HOSTNAME="$1"; shift ;;
     esac
 done
@@ -61,7 +61,7 @@ else
     FQDN="${HOSTNAME}.${DOMAIN}"
 fi
 
-# SSH multiplexing — reuse a single connection so password is only entered once.
+# --- SSH multiplexing setup ---
 CONTROL_DIR=$(mktemp -d)
 CONTROL_PATH="${CONTROL_DIR}/ssh-%r@%h:%p"
 
@@ -75,8 +75,6 @@ SSH_OPTS="-o ConnectTimeout=10 -o ControlMaster=auto -o ControlPath=${CONTROL_PA
 if [[ "$ALLOW_PASSWORD" == false ]]; then
     SSH_OPTS="$SSH_OPTS -o BatchMode=yes"
 else
-    # Bypass the agent entirely — too many keys triggers MaxAuthTries before
-    # the password prompt. Force keyboard-interactive/password only.
     SSH_OPTS="$SSH_OPTS -o IdentitiesOnly=yes -o PreferredAuthentications=keyboard-interactive,password"
 fi
 
@@ -84,27 +82,49 @@ ssh_cmd() {
     ssh $SSH_OPTS "$@"
 }
 
-# --- Step 1: Find the public key in the agent ---
+# Track what we did for the summary
+DID_CREATE_USER=false
+DID_INSTALL_SUDO=false
+DID_CONFIGURE_SUDO=false
+DID_INSTALL_KEY=false
+DID_ADD_SSH_CONFIG=false
+HAS_SUDO=false
+DETECTED_OS="unknown"
+DISTRO=""
+
+# ============================================================
+# Step 1: Find the public key in the agent
+# ============================================================
 
 log "Looking for '${HOSTNAME} SSH Key' in the SSH agent..."
 PUBKEY=$(ssh-add -L 2>/dev/null | grep -i "${HOSTNAME} SSH Key" || true)
 
 if [[ -z "$PUBKEY" ]]; then
-    fail "No key matching '${HOSTNAME} SSH Key' found in the agent.
-    Create one first:
-      pass-cli login
-      pass-cli item create ssh-key generate --title '${HOSTNAME} SSH Key' --vault-name HOMELAB --key-type ed25519
-      systemctl --user restart proton-pass-ssh-agent"
+    err "No key matching '${HOSTNAME} SSH Key' found in the agent."
+    echo ""
+    echo "Create one first:"
+    echo "  pass-cli login"
+    echo "  pass-cli item create ssh-key generate --title '${HOSTNAME} SSH Key' --vault-name HOMELAB --key-type ed25519"
+    echo "  systemctl --user restart proton-pass-ssh-agent"
+    exit 1
 fi
 
 log "Found public key: ${PUBKEY:0:50}..."
 
-# --- Step 2: Check DNS / connectivity ---
+# Save pubkey to file now — we'll need it for testing later regardless
+mkdir -p ~/.ssh/pubkeys
+echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
+
+# ============================================================
+# Step 2: Check DNS / connectivity
+# ============================================================
 
 log "Checking connectivity to ${FQDN}..."
 if [[ -z "$CUSTOM_IP" ]]; then
     if ! host "$FQDN" > /dev/null 2>&1; then
-        fail "${FQDN} does not resolve. Check DNS or wait for DHCP registration."
+        err "${FQDN} does not resolve."
+        echo "Check DNS or wait for DHCP registration, or use --ip <address>."
+        exit 1
     fi
     IP=$(host "$FQDN" | awk '/has address/ { print $NF; exit }')
 else
@@ -112,12 +132,16 @@ else
 fi
 log "Target: ${IP}"
 
-# --- Step 3: Accept host key if needed ---
+# ============================================================
+# Step 3: Accept host key
+# ============================================================
 
 log "Accepting host key for ${FQDN}..."
 ssh-keyscan -H "$FQDN" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-# --- Step 4: Test initial SSH and open master connection ---
+# ============================================================
+# Step 4: Open master connection
+# ============================================================
 
 log "Connecting as ${LOGIN_USER}@${FQDN}..."
 if [[ "$ALLOW_PASSWORD" == true ]]; then
@@ -126,18 +150,20 @@ if [[ "$ALLOW_PASSWORD" == true ]]; then
 fi
 
 if ! ssh_cmd "${LOGIN_USER}@${FQDN}" "echo ok" > /dev/null; then
+    err "Cannot SSH as ${LOGIN_USER}@${FQDN}."
     if [[ "$ALLOW_PASSWORD" == false ]]; then
-        fail "Cannot SSH as ${LOGIN_USER}@${FQDN} (key auth failed).
-    Try again with --password if the host requires a password."
+        echo "Key auth failed. Try again with --password if the host requires a password."
     else
-        fail "Cannot SSH as ${LOGIN_USER}@${FQDN}.
-    Check: is SSH running? Is the username correct? Can you reach the host?"
+        echo "Check: is SSH running? Is the username correct? Can you reach the host?"
     fi
+    exit 1
 fi
 
 log "Connected. Master connection established."
 
-# --- Step 5: Detect OS ---
+# ============================================================
+# Step 5: Detect OS
+# ============================================================
 
 if [[ "$IS_WINDOWS" == true ]]; then
     DETECTED_OS="windows"
@@ -156,78 +182,55 @@ else
     fi
 fi
 
-# --- Windows path ---
+# ============================================================
+# Windows path
+# ============================================================
 
 if [[ "$DETECTED_OS" == "windows" ]]; then
     log "Setting up SSH key on Windows host..."
 
-    # Check if user exists
-    USER_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "powershell -Command \"(Get-LocalUser '${TARGET_USER}' -ErrorAction SilentlyContinue) -and (Test-Path C:\\Users\\${TARGET_USER}) | Write-Output\"" 2>/dev/null || echo "")
-
-    if [[ "$USER_HOME" != *"True"* ]]; then
-        warn "User ${TARGET_USER} may not exist on Windows. Checking home directory..."
-        HAS_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"Test-Path C:\\Users\\${TARGET_USER}\"" 2>/dev/null || echo "False")
-        if [[ "$HAS_HOME" != "True" ]]; then
-            fail "User ${TARGET_USER} does not exist on this Windows host.
-    Create the user manually in Windows Settings or via:
-      net user ${TARGET_USER} /add
-      net localgroup Administrators ${TARGET_USER} /add"
-        fi
+    HAS_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"Test-Path C:\\Users\\${TARGET_USER}\"" 2>/dev/null || echo "False")
+    if [[ "$HAS_HOME" != "True" ]]; then
+        err "User ${TARGET_USER} does not exist on this Windows host."
+        echo "Create the user manually:"
+        echo "  net user ${TARGET_USER} <password> /add"
+        echo "  net localgroup Administrators ${TARGET_USER} /add"
+        exit 1
     fi
 
     IS_ADMIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "powershell -Command \"(Get-LocalGroupMember Administrators | Where-Object Name -match '${TARGET_USER}') -ne \\\$null\"" 2>/dev/null || echo "False")
+        "powershell -Command \"try { \\\$null -ne (Get-LocalGroupMember Administrators | Where-Object Name -match '${TARGET_USER}') } catch { 'False' }\"" 2>/dev/null || echo "False")
 
     if [[ "$IS_ADMIN" == "True" ]]; then
         log "User is an administrator — key goes in administrators_authorized_keys."
         KEY_FILE="C:\\ProgramData\\ssh\\administrators_authorized_keys"
-
-        KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-            "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '${PUBKEY}' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
-
-        if [[ "$KEY_INSTALLED" == "True" ]]; then
-            log "Key already installed."
-        else
-            log "Installing key to ${KEY_FILE}..."
-            ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"
-                Add-Content -Path '${KEY_FILE}' -Value '${PUBKEY}'
-                icacls '${KEY_FILE}' /inheritance:r /grant 'SYSTEM:(R)' /grant 'BUILTIN\\Administrators:(R)'
-            \""
-            log "Key installed."
-        fi
+        INSTALL_CMD="Add-Content -Path '${KEY_FILE}' -Value '${PUBKEY}'; icacls '${KEY_FILE}' /inheritance:r /grant 'SYSTEM:(R)' /grant 'BUILTIN\\Administrators:(R)'"
     else
         log "User is not an administrator — key goes in user .ssh directory."
         KEY_FILE="C:\\Users\\${TARGET_USER}\\.ssh\\authorized_keys"
-
-        KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-            "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '${PUBKEY}' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
-
-        if [[ "$KEY_INSTALLED" == "True" ]]; then
-            log "Key already installed."
-        else
-            log "Installing key to ${KEY_FILE}..."
-            ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"
-                New-Item -ItemType Directory -Force -Path 'C:\\Users\\${TARGET_USER}\\.ssh' | Out-Null
-                Add-Content -Path '${KEY_FILE}' -Value '${PUBKEY}'
-                icacls '${KEY_FILE}' /inheritance:r /grant '${TARGET_USER}:(R)' /grant 'SYSTEM:(R)'
-            \""
-            log "Key installed."
-        fi
+        INSTALL_CMD="New-Item -ItemType Directory -Force -Path 'C:\\Users\\${TARGET_USER}\\.ssh' | Out-Null; Add-Content -Path '${KEY_FILE}' -Value '${PUBKEY}'; icacls '${KEY_FILE}' /inheritance:r /grant '${TARGET_USER}:(R)' /grant 'SYSTEM:(R)'"
     fi
 
-    # Close master connection before testing as target user
+    KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
+        "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '$(echo "$PUBKEY" | awk '{print $2}')' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
+
+    if [[ "$KEY_INSTALLED" == "True" ]]; then
+        log "Key already installed."
+    else
+        log "Installing key..."
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "powershell -Command \"${INSTALL_CMD}\""
+        DID_INSTALL_KEY=true
+        log "Key installed."
+    fi
+
+    # Close master, test as target user
     ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
-    # Test as target user using only the correct key
     log "Testing SSH as ${TARGET_USER}..."
-    mkdir -p ~/.ssh/pubkeys
-    echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
-
     if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
         log "SSH as ${TARGET_USER} works."
     else
-        warn "SSH as ${TARGET_USER} failed with direct key. Adding SSH config entry..."
+        warn "Direct key test failed. Adding SSH config entry..."
         if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
             cat >> ~/.ssh/config <<EOF
 
@@ -237,13 +240,15 @@ Host ${HOSTNAME}
     IdentityFile ~/.ssh/pubkeys/${HOSTNAME}.pub
     IdentitiesOnly yes
 EOF
-            log "Added SSH config entry for ${HOSTNAME}."
+            DID_ADD_SSH_CONFIG=true
+            log "Added SSH config entry."
         fi
 
         if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
             log "SSH via config alias works."
         else
-            fail "Still can't connect. Debug: ssh -v ${TARGET_USER}@${FQDN}"
+            err "Cannot connect as ${TARGET_USER}. Debug: ssh -v ${TARGET_USER}@${FQDN}"
+            exit 1
         fi
     fi
 
@@ -252,86 +257,128 @@ EOF
     echo "Host:   ${FQDN} (${IP})"
     echo "User:   ${TARGET_USER}"
     echo "Key:    ${HOSTNAME} SSH Key"
+    echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
     echo "SSH:    ssh ${TARGET_USER}@${FQDN}"
     exit 0
 fi
 
-# --- Linux path ---
+# ============================================================
+# Linux path
+# ============================================================
 
-# --- Step 6: Check if user exists ---
+# --- Step 6: Check / create user ---
 
-USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} 2>/dev/null && echo yes || echo no")
+USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} > /dev/null 2>&1 && echo yes || echo no")
 
 if [[ "$USER_EXISTS" == "no" ]]; then
     log "User ${TARGET_USER} does not exist. Creating..."
     ssh_cmd "${LOGIN_USER}@${FQDN}" "useradd -m -s /bin/bash ${TARGET_USER}"
+    DID_CREATE_USER=true
     log "User ${TARGET_USER} created."
 else
     log "User ${TARGET_USER} already exists."
 fi
 
-# Install sudo if missing
-HAS_SUDO=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
-if [[ "$HAS_SUDO" == "no" ]]; then
-    log "sudo not installed. Installing..."
-    ssh_cmd "${LOGIN_USER}@${FQDN}" "apt-get update -qq && apt-get install -y -qq sudo > /dev/null 2>&1 || pacman -S --noconfirm sudo > /dev/null 2>&1 || true"
-    HAS_SUDO=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
-    if [[ "$HAS_SUDO" == "yes" ]]; then
+# --- Step 7: Install sudo if missing, configure if needed ---
+
+HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
+
+if [[ "$HAS_SUDO_BIN" == "no" ]]; then
+    log "sudo not installed. Attempting to install..."
+    # Try apt (Debian/Ubuntu/Proxmox), then pacman (Arch)
+    INSTALL_RESULT=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "
+        if command -v apt-get > /dev/null 2>&1; then
+            apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
+        elif command -v pacman > /dev/null 2>&1; then
+            pacman -Sy --noconfirm sudo > /dev/null 2>&1 && echo ok
+        else
+            echo fail
+        fi
+    " || echo "fail")
+
+    if [[ "$INSTALL_RESULT" == *"ok"* ]]; then
+        HAS_SUDO=true
+        DID_INSTALL_SUDO=true
         log "sudo installed."
     else
-        warn "Could not install sudo. Skipping sudo setup."
+        warn "Could not install sudo. SSH access will work but ${TARGET_USER} won't have sudo."
     fi
+else
+    HAS_SUDO=true
 fi
 
-# Configure passwordless sudo
-if [[ "$HAS_SUDO" == "yes" ]]; then
-    SUDO_FILE=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
-    if [[ "$SUDO_FILE" == "no" ]]; then
+if [[ "$HAS_SUDO" == true ]]; then
+    SUDO_CONFIGURED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
+    if [[ "$SUDO_CONFIGURED" == "no" ]]; then
         SUDO_GROUP="sudo"
         if [[ "${DISTRO:-}" == "arch" ]]; then
             SUDO_GROUP="wheel"
         fi
 
-        log "Setting up passwordless sudo (group: ${SUDO_GROUP})..."
+        log "Configuring passwordless sudo (group: ${SUDO_GROUP})..."
         ssh_cmd "${LOGIN_USER}@${FQDN}" "usermod -aG ${SUDO_GROUP} ${TARGET_USER} && echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
+        DID_CONFIGURE_SUDO=true
         log "Sudo configured."
     else
         log "Sudo already configured."
     fi
 fi
 
-# --- Step 7: Install the SSH key ---
+# --- Step 8: Install the SSH key ---
 
 TARGET_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${TARGET_USER}")
 
+# Check if key is already correctly installed
 KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-    "grep -qF '${PUBKEY}' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null && echo yes || echo no")
+    "grep -cF '$(echo "$PUBKEY" | awk '{print $2}')' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
 
-if [[ "$KEY_INSTALLED" == "yes" ]]; then
+if [[ "$KEY_INSTALLED" -ge 1 ]]; then
     log "Key already installed for ${TARGET_USER}."
 else
+    # Clean up any garbage from previous failed runs
+    ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh"
+
+    # Check if authorized_keys exists and has non-key content (garbage)
+    if ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f ${TARGET_HOME}/.ssh/authorized_keys" 2>/dev/null; then
+        VALID_KEYS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "grep -c '^ssh-' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+        TOTAL_LINES=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "wc -l < ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+        if [[ "$TOTAL_LINES" -gt 0 ]] && [[ "$VALID_KEYS" -eq 0 ]]; then
+            warn "authorized_keys contains garbage (no valid keys). Replacing."
+            ssh_cmd "${LOGIN_USER}@${FQDN}" "rm -f ${TARGET_HOME}/.ssh/authorized_keys"
+        fi
+    fi
+
     log "Installing SSH key for ${TARGET_USER}..."
-    ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh && echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
+    ssh_cmd "${LOGIN_USER}@${FQDN}" "echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
+    DID_INSTALL_KEY=true
     log "Key installed."
 fi
 
-# --- Step 8: Test ecloaiza SSH ---
+# --- Step 9: Close master connection and test as target user ---
 
-# Close master connection before testing as target user
 ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
-# Save pubkey to file for direct key auth (avoids MaxAuthTries)
-mkdir -p ~/.ssh/pubkeys
-echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
-
 log "Testing SSH as ${TARGET_USER}..."
-if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "true" 2>/dev/null; then
-    log "SSH as ${TARGET_USER} works."
-else
-    warn "SSH as ${TARGET_USER} failed with direct key. Adding SSH config entry..."
 
-    if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
-        cat >> ~/.ssh/config <<EOF
+# Always test with the specific pubkey to avoid MaxAuthTries
+SSH_OK=false
+if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
+    SSH_OK=true
+    log "SSH as ${TARGET_USER} works (direct key)."
+else
+    # Try with SSH config alias if one exists
+    if grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
+        if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
+            SSH_OK=true
+            log "SSH as ${TARGET_USER} works (via config alias)."
+        fi
+    fi
+
+    # Add config entry if still failing
+    if [[ "$SSH_OK" == false ]]; then
+        warn "Direct key test failed. Adding SSH config entry..."
+        if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
+            cat >> ~/.ssh/config <<EOF
 
 Host ${HOSTNAME}
     HostName ${FQDN}
@@ -339,32 +386,40 @@ Host ${HOSTNAME}
     IdentityFile ~/.ssh/pubkeys/${HOSTNAME}.pub
     IdentitiesOnly yes
 EOF
-        log "Added SSH config entry for ${HOSTNAME}."
-    else
-        warn "SSH config entry for ${HOSTNAME} already exists — check it manually."
-    fi
+            DID_ADD_SSH_CONFIG=true
+            log "Added SSH config entry for ${HOSTNAME}."
+        fi
 
-    if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "true" 2>/dev/null; then
-        log "SSH via config alias works."
-    else
-        fail "Still can't connect. Debug: ssh -v ${TARGET_USER}@${FQDN}"
+        if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
+            SSH_OK=true
+            log "SSH via config alias works."
+        fi
     fi
 fi
 
-# --- Step 9: Final verification ---
+if [[ "$SSH_OK" == false ]]; then
+    err "Cannot connect as ${TARGET_USER}."
+    echo "Debug: ssh -v -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub ${TARGET_USER}@${FQDN}"
+    exit 1
+fi
+
+# --- Step 10: Final verification ---
 
 VERIFY_CMD="whoami"
-if [[ "${HAS_SUDO:-no}" == "yes" ]]; then
+if [[ "$HAS_SUDO" == true ]]; then
     VERIFY_CMD="whoami && sudo whoami"
 fi
 
 RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "$VERIFY_CMD" 2>/dev/null || \
          ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "$VERIFY_CMD" 2>/dev/null || \
-         echo "FAILED")
+         echo "")
 
-if [[ "$RESULT" == *"FAILED"* ]]; then
-    fail "Final verification failed."
+if [[ -z "$RESULT" ]] || [[ "$RESULT" != *"${TARGET_USER}"* ]]; then
+    warn "Final verification returned unexpected output: ${RESULT:-<empty>}"
+    warn "SSH connection works but something may be off. Check manually."
 fi
+
+# --- Summary ---
 
 echo ""
 echo "=== Done ==="
@@ -373,7 +428,34 @@ echo "User:   ${TARGET_USER}"
 echo "Key:    ${HOSTNAME} SSH Key"
 echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
 echo "OS:     ${DETECTED_OS} (${DISTRO:-n/a})"
+if [[ "$HAS_SUDO" == true ]]; then
+    echo "Sudo:   yes (NOPASSWD)"
+else
+    echo "Sudo:   no (could not install)"
+fi
 echo "SSH:    ssh ${TARGET_USER}@${FQDN}"
+if [[ "$DID_ADD_SSH_CONFIG" == true ]]; then
+    echo "Config: ~/.ssh/config entry added (Host ${HOSTNAME})"
+fi
+echo ""
+
+# What we did
+ACTIONS=()
+[[ "$DID_CREATE_USER" == true ]] && ACTIONS+=("created user ${TARGET_USER}")
+[[ "$DID_INSTALL_SUDO" == true ]] && ACTIONS+=("installed sudo")
+[[ "$DID_CONFIGURE_SUDO" == true ]] && ACTIONS+=("configured passwordless sudo")
+[[ "$DID_INSTALL_KEY" == true ]] && ACTIONS+=("installed SSH key")
+[[ "$DID_ADD_SSH_CONFIG" == true ]] && ACTIONS+=("added SSH config entry")
+
+if [[ ${#ACTIONS[@]} -gt 0 ]]; then
+    echo "Actions taken:"
+    for action in "${ACTIONS[@]}"; do
+        echo "  - ${action}"
+    done
+else
+    echo "No changes needed — everything was already set up."
+fi
+
 echo ""
 echo "Next steps:"
 echo "  - Update Proton Pass PAT Setup doc (PAT Storage table + SSH Keys list)"

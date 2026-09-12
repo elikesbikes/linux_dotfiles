@@ -390,14 +390,47 @@ USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} > /dev/null 2>&
 if [[ "$USER_EXISTS" == "no" ]]; then
     if [[ "$HAS_PRIVILEGE" == true ]]; then
         log "User ${TARGET_USER} does not exist. Creating..."
-        run_privileged "useradd -m -s /bin/bash ${TARGET_USER}"
+
+        if [[ "$HOST_TYPE" == "truenas-core" ]] || [[ "$HOST_TYPE" == "truenas-scale" ]]; then
+            warn "Creating user via CLI on TrueNAS. This may be overwritten by system updates."
+            warn "Consider creating the user through the TrueNAS web UI instead."
+        fi
+
+        case "$HOST_TYPE" in
+            macos)
+                # macOS uses sysadminctl, not useradd
+                # Create as admin user so they get sudo via admin group
+                run_privileged "sysadminctl -addUser ${TARGET_USER} -password '' -admin"
+                ;;
+            truenas-core|freebsd)
+                # FreeBSD uses pw, not useradd
+                run_privileged "pw useradd ${TARGET_USER} -m -s /bin/sh -G ${SUDO_GROUP_NAME}"
+                ;;
+            *)
+                # Linux: Ubuntu, Debian, Arch, Proxmox, LXC, TrueNAS SCALE
+                run_privileged "useradd -m -s /bin/bash ${TARGET_USER}"
+                ;;
+        esac
         DID_CREATE_USER=true
         log "User ${TARGET_USER} created."
     else
         err "User ${TARGET_USER} does not exist and login user ${LOGIN_USER} has no privilege to create it."
         echo "Either:"
         echo "  - Run this script with --user root"
-        echo "  - Create the user manually on the host: useradd -m -s /bin/bash ${TARGET_USER}"
+        case "$HOST_TYPE" in
+            macos)
+                echo "  - Create the user in System Settings → Users & Groups"
+                ;;
+            truenas-core|truenas-scale)
+                echo "  - Create the user in the TrueNAS web UI → Accounts → Users"
+                ;;
+            windows)
+                echo "  - Create the user: net user ${TARGET_USER} <password> /add"
+                ;;
+            *)
+                echo "  - Create the user manually: useradd -m -s /bin/bash ${TARGET_USER}"
+                ;;
+        esac
         exit 1
     fi
 else

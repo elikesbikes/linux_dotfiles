@@ -310,13 +310,7 @@ if [[ "$KEY_INSTALLED" == "yes" ]]; then
     log "Key already installed for ${TARGET_USER}."
 else
     log "Installing SSH key for ${TARGET_USER}..."
-    echo "$PUBKEY" | ssh_cmd "${LOGIN_USER}@${FQDN}" bash <<REMOTE
-        mkdir -p ${TARGET_HOME}/.ssh
-        chmod 700 ${TARGET_HOME}/.ssh
-        cat >> ${TARGET_HOME}/.ssh/authorized_keys
-        chmod 600 ${TARGET_HOME}/.ssh/authorized_keys
-        chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh
-REMOTE
+    ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh && echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
     log "Key installed."
 fi
 

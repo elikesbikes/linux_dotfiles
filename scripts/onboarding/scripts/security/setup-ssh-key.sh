@@ -197,18 +197,71 @@ log "Connected. Master connection established."
 # Step 5: Detect OS and privilege level
 # ============================================================
 
+HOST_TYPE=""  # proxmox, truenas-scale, truenas-core, lxc, macos, windows, linux
+SUDO_GROUP_NAME="sudo"
+
 if [[ "$IS_WINDOWS" == true ]]; then
     DETECTED_OS="windows"
+    HOST_TYPE="windows"
     log "Target OS: Windows (manual flag)"
 else
     DETECTED_OS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "uname -s 2>/dev/null || echo unknown" | tr '[:upper:]' '[:lower:]')
     if [[ "$DETECTED_OS" == *"mingw"* ]] || [[ "$DETECTED_OS" == *"msys"* ]] || [[ "$DETECTED_OS" == *"cygwin"* ]]; then
         DETECTED_OS="windows"
+        HOST_TYPE="windows"
     fi
 
-    if [[ "$DETECTED_OS" == "linux" ]]; then
+    if [[ "$DETECTED_OS" == "darwin" ]]; then
+        HOST_TYPE="macos"
+        DISTRO="macos"
+        SUDO_GROUP_NAME="admin"
+        MACOS_VERSION=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "sw_vers -productVersion 2>/dev/null" || true)
+        log "Target OS: macOS ${MACOS_VERSION:-unknown}"
+
+    elif [[ "$DETECTED_OS" == "freebsd" ]]; then
+        # TrueNAS CORE is FreeBSD-based
+        IS_TRUENAS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/version && grep -qi truenas /etc/version 2>/dev/null && echo yes || echo no")
+        if [[ "$IS_TRUENAS" == "yes" ]]; then
+            HOST_TYPE="truenas-core"
+            DISTRO="truenas-core"
+            log "Target OS: TrueNAS CORE (FreeBSD)"
+            warn "TrueNAS CORE users should be created through the web UI."
+            warn "CLI-created users may be overwritten on system updates."
+        else
+            HOST_TYPE="freebsd"
+            DISTRO="freebsd"
+            log "Target OS: FreeBSD"
+        fi
+        SUDO_GROUP_NAME="wheel"
+
+    elif [[ "$DETECTED_OS" == "linux" ]]; then
         DISTRO=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "grep -oP '^ID=\K.*' /etc/os-release 2>/dev/null | tr -d '\"'" || true)
-        log "Target OS: Linux (${DISTRO:-unknown distro})"
+
+        # Detect host type more specifically
+        IS_PROXMOX=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -d /etc/pve && echo yes || echo no")
+        IS_TRUENAS_SCALE=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/version && grep -qi truenas /etc/version 2>/dev/null && echo yes || echo no")
+        IS_LXC=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "systemd-detect-virt 2>/dev/null || echo unknown")
+
+        if [[ "$IS_PROXMOX" == "yes" ]]; then
+            HOST_TYPE="proxmox"
+            log "Target OS: Proxmox VE (${DISTRO:-debian})"
+        elif [[ "$IS_TRUENAS_SCALE" == "yes" ]]; then
+            HOST_TYPE="truenas-scale"
+            log "Target OS: TrueNAS SCALE (${DISTRO:-debian})"
+            warn "TrueNAS SCALE users should be created through the web UI."
+            warn "CLI-created users may be overwritten on system updates."
+        elif [[ "$IS_LXC" == "lxc" ]]; then
+            HOST_TYPE="lxc"
+            log "Target OS: LXC container (${DISTRO:-unknown})"
+        else
+            HOST_TYPE="linux"
+            log "Target OS: Linux (${DISTRO:-unknown distro})"
+        fi
+
+        # Set sudo group based on distro
+        if [[ "${DISTRO:-}" == "arch" ]]; then
+            SUDO_GROUP_NAME="wheel"
+        fi
     else
         log "Target OS: ${DETECTED_OS}"
     fi

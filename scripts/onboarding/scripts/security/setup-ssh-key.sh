@@ -271,7 +271,7 @@ fi
 if [[ "$LOGIN_USER" == "root" ]]; then
     CAN_SUDO=false  # don't need sudo, we ARE root
     log "Login user is root — full privilege."
-elif [[ "$DETECTED_OS" != "windows" ]]; then
+elif [[ "$DETECTED_OS" != "windows" ]] && [[ "$HOST_TYPE" != "" ]]; then
     # Check if login user can sudo without a password
     SUDO_CHECK=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo -n true 2>/dev/null && echo yes || echo no")
     if [[ "$SUDO_CHECK" == "yes" ]]; then

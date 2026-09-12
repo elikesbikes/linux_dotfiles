@@ -61,7 +61,17 @@ else
     FQDN="${HOSTNAME}.${DOMAIN}"
 fi
 
-SSH_OPTS="-o ConnectTimeout=10"
+# SSH multiplexing — reuse a single connection so password is only entered once.
+CONTROL_DIR=$(mktemp -d)
+CONTROL_PATH="${CONTROL_DIR}/ssh-%r@%h:%p"
+
+cleanup() {
+    ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
+    rm -rf "$CONTROL_DIR"
+}
+trap cleanup EXIT
+
+SSH_OPTS="-o ConnectTimeout=10 -o ControlMaster=auto -o ControlPath=${CONTROL_PATH} -o ControlPersist=120"
 if [[ "$ALLOW_PASSWORD" == false ]]; then
     SSH_OPTS="$SSH_OPTS -o BatchMode=yes"
 else
@@ -107,14 +117,15 @@ log "Target: ${IP}"
 log "Accepting host key for ${FQDN}..."
 ssh-keyscan -H "$FQDN" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-# --- Step 4: Test initial SSH access ---
+# --- Step 4: Test initial SSH and open master connection ---
 
-log "Testing SSH as ${LOGIN_USER}@${FQDN}..."
+log "Connecting as ${LOGIN_USER}@${FQDN}..."
 if [[ "$ALLOW_PASSWORD" == true ]]; then
-    log "Password prompt may appear — enter the password for ${LOGIN_USER}."
+    log "Password prompt will appear — enter the password for ${LOGIN_USER}."
+    log "(You only need to enter it once.)"
 fi
 
-if ! ssh_cmd "${LOGIN_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
+if ! ssh_cmd "${LOGIN_USER}@${FQDN}" "echo ok" > /dev/null; then
     if [[ "$ALLOW_PASSWORD" == false ]]; then
         fail "Cannot SSH as ${LOGIN_USER}@${FQDN} (key auth failed).
     Try again with --password if the host requires a password."
@@ -124,7 +135,7 @@ if ! ssh_cmd "${LOGIN_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
     fi
 fi
 
-log "SSH as ${LOGIN_USER} works."
+log "Connected. Master connection established."
 
 # --- Step 5: Detect OS ---
 
@@ -165,7 +176,6 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
         fi
     fi
 
-    # Check if user is an administrator (key goes in different places)
     IS_ADMIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
         "powershell -Command \"(Get-LocalGroupMember Administrators | Where-Object Name -match '${TARGET_USER}') -ne \\\$null\"" 2>/dev/null || echo "False")
 
@@ -206,15 +216,18 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
         fi
     fi
 
-    # Test
+    # Close master connection before testing as target user
+    ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
+
+    # Test as target user using only the correct key
     log "Testing SSH as ${TARGET_USER}..."
-    if ssh -o ConnectTimeout=5 -o BatchMode=yes "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
+    mkdir -p ~/.ssh/pubkeys
+    echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
+
+    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
         log "SSH as ${TARGET_USER} works."
     else
-        warn "SSH as ${TARGET_USER} failed. Trying MaxAuthTries workaround..."
-        mkdir -p ~/.ssh/pubkeys
-        echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
-
+        warn "SSH as ${TARGET_USER} failed with direct key. Adding SSH config entry..."
         if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
             cat >> ~/.ssh/config <<EOF
 
@@ -252,7 +265,6 @@ USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} 2>/dev/null && 
 if [[ "$USER_EXISTS" == "no" ]]; then
     log "User ${TARGET_USER} does not exist. Creating..."
 
-    # Detect sudo group name
     SUDO_GROUP="sudo"
     if [[ "${DISTRO:-}" == "arch" ]]; then
         SUDO_GROUP="wheel"
@@ -268,7 +280,6 @@ REMOTE
 else
     log "User ${TARGET_USER} already exists."
 
-    # Check if sudo is set up
     SUDO_FILE=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
     if [[ "$SUDO_FILE" == "no" ]]; then
         SUDO_GROUP="sudo"
@@ -290,7 +301,6 @@ fi
 
 # --- Step 7: Install the SSH key ---
 
-# Determine home directory (might not be /home/ on all systems)
 TARGET_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${TARGET_USER}")
 
 KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
@@ -312,15 +322,18 @@ fi
 
 # --- Step 8: Test ecloaiza SSH ---
 
+# Close master connection before testing as target user
+ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
+
+# Save pubkey to file for direct key auth (avoids MaxAuthTries)
+mkdir -p ~/.ssh/pubkeys
+echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
+
 log "Testing SSH as ${TARGET_USER}..."
-if ssh -o ConnectTimeout=5 -o BatchMode=yes "${TARGET_USER}@${FQDN}" "true" 2>/dev/null; then
+if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "true" 2>/dev/null; then
     log "SSH as ${TARGET_USER} works."
 else
-    warn "SSH as ${TARGET_USER} failed. Likely a MaxAuthTries issue (too many keys in the agent)."
-    warn "Creating pubkey file and SSH config entry..."
-
-    mkdir -p ~/.ssh/pubkeys
-    echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
+    warn "SSH as ${TARGET_USER} failed with direct key. Adding SSH config entry..."
 
     if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
         cat >> ~/.ssh/config <<EOF
@@ -345,7 +358,7 @@ fi
 
 # --- Step 9: Final verification ---
 
-RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes "${TARGET_USER}@${FQDN}" "whoami && sudo whoami" 2>/dev/null || \
+RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "whoami && sudo whoami" 2>/dev/null || \
          ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "whoami && sudo whoami" 2>/dev/null || \
          echo "FAILED")
 
@@ -358,6 +371,7 @@ echo "=== Done ==="
 echo "Host:   ${FQDN} (${IP})"
 echo "User:   ${TARGET_USER}"
 echo "Key:    ${HOSTNAME} SSH Key"
+echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
 echo "OS:     ${DETECTED_OS} (${DISTRO:-n/a})"
 echo "SSH:    ssh ${TARGET_USER}@${FQDN}"
 echo ""

@@ -264,22 +264,27 @@ USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} 2>/dev/null && 
 
 if [[ "$USER_EXISTS" == "no" ]]; then
     log "User ${TARGET_USER} does not exist. Creating..."
-
-    SUDO_GROUP="sudo"
-    if [[ "${DISTRO:-}" == "arch" ]]; then
-        SUDO_GROUP="wheel"
-    fi
-
-    ssh_cmd "${LOGIN_USER}@${FQDN}" bash <<REMOTE
-        useradd -m -s /bin/bash ${TARGET_USER}
-        usermod -aG ${SUDO_GROUP} ${TARGET_USER}
-        echo "${TARGET_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${TARGET_USER}
-        chmod 440 /etc/sudoers.d/${TARGET_USER}
-REMOTE
-    log "User ${TARGET_USER} created with passwordless sudo (group: ${SUDO_GROUP})."
+    ssh_cmd "${LOGIN_USER}@${FQDN}" "useradd -m -s /bin/bash ${TARGET_USER}"
+    log "User ${TARGET_USER} created."
 else
     log "User ${TARGET_USER} already exists."
+fi
 
+# Install sudo if missing
+HAS_SUDO=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
+if [[ "$HAS_SUDO" == "no" ]]; then
+    log "sudo not installed. Installing..."
+    ssh_cmd "${LOGIN_USER}@${FQDN}" "apt-get update -qq && apt-get install -y -qq sudo > /dev/null 2>&1 || pacman -S --noconfirm sudo > /dev/null 2>&1 || true"
+    HAS_SUDO=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1 && echo yes || echo no")
+    if [[ "$HAS_SUDO" == "yes" ]]; then
+        log "sudo installed."
+    else
+        warn "Could not install sudo. Skipping sudo setup."
+    fi
+fi
+
+# Configure passwordless sudo
+if [[ "$HAS_SUDO" == "yes" ]]; then
     SUDO_FILE=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
     if [[ "$SUDO_FILE" == "no" ]]; then
         SUDO_GROUP="sudo"
@@ -288,11 +293,7 @@ else
         fi
 
         log "Setting up passwordless sudo (group: ${SUDO_GROUP})..."
-        ssh_cmd "${LOGIN_USER}@${FQDN}" bash <<REMOTE
-            usermod -aG ${SUDO_GROUP} ${TARGET_USER}
-            echo "${TARGET_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${TARGET_USER}
-            chmod 440 /etc/sudoers.d/${TARGET_USER}
-REMOTE
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "usermod -aG ${SUDO_GROUP} ${TARGET_USER} && echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
         log "Sudo configured."
     else
         log "Sudo already configured."

@@ -476,20 +476,33 @@ if [[ "$HAS_PRIVILEGE" == true ]]; then
     fi
 
     if [[ "$HAS_SUDO" == true ]]; then
-        SUDO_CONFIGURED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
-        if [[ "$SUDO_CONFIGURED" == "no" ]]; then
-            SUDO_GROUP="sudo"
-            if [[ "${DISTRO:-}" == "arch" ]]; then
-                SUDO_GROUP="wheel"
+        if [[ "$HOST_TYPE" == "macos" ]]; then
+            # macOS: sudo is granted via admin group membership, not sudoers.d
+            IN_ADMIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "dscl . -read /Groups/admin GroupMembership 2>/dev/null | grep -qw ${TARGET_USER} && echo yes || echo no")
+            if [[ "$IN_ADMIN" == "yes" ]]; then
+                log "User ${TARGET_USER} is in admin group (has sudo)."
+            else
+                log "Adding ${TARGET_USER} to admin group for sudo..."
+                run_privileged "dseditgroup -o edit -a ${TARGET_USER} -t user admin"
+                DID_CONFIGURE_SUDO=true
+                log "Sudo configured (admin group)."
             fi
-
-            log "Configuring passwordless sudo (group: ${SUDO_GROUP})..."
-            run_privileged "usermod -aG ${SUDO_GROUP} ${TARGET_USER}"
-            run_privileged "echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
-            DID_CONFIGURE_SUDO=true
-            log "Sudo configured."
         else
-            log "Sudo already configured."
+            # Linux / FreeBSD: use sudoers.d
+            SUDO_CONFIGURED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f /etc/sudoers.d/${TARGET_USER} && echo yes || echo no")
+            if [[ "$SUDO_CONFIGURED" == "no" ]]; then
+                log "Configuring passwordless sudo (group: ${SUDO_GROUP_NAME})..."
+                if [[ "$HOST_TYPE" == "truenas-core" ]] || [[ "$HOST_TYPE" == "freebsd" ]]; then
+                    run_privileged "pw groupmod ${SUDO_GROUP_NAME} -m ${TARGET_USER}"
+                else
+                    run_privileged "usermod -aG ${SUDO_GROUP_NAME} ${TARGET_USER}"
+                fi
+                run_privileged "echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
+                DID_CONFIGURE_SUDO=true
+                log "Sudo configured."
+            else
+                log "Sudo already configured."
+            fi
         fi
     fi
 else

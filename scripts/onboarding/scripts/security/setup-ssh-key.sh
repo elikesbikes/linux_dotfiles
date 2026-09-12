@@ -354,6 +354,21 @@ else
     log "Key installed."
 fi
 
+# Also install key for login user (root) so future SSH doesn't need a password
+if [[ "$LOGIN_USER" != "$TARGET_USER" ]]; then
+    LOGIN_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${LOGIN_USER}")
+    ROOT_KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
+        "grep -cF '$(echo "$PUBKEY" | awk '{print $2}')' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+
+    if [[ "$ROOT_KEY_INSTALLED" -ge 1 ]]; then
+        log "Key already installed for ${LOGIN_USER}."
+    else
+        log "Installing SSH key for ${LOGIN_USER} (so future root SSH won't need a password)..."
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
+        log "Key installed for ${LOGIN_USER}."
+    fi
+fi
+
 # --- Step 9: Close master connection and test as target user ---
 
 ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true

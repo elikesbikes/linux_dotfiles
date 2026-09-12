@@ -353,8 +353,13 @@ fi
 
 # --- Step 9: Final verification ---
 
-RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "whoami && sudo whoami" 2>/dev/null || \
-         ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "whoami && sudo whoami" 2>/dev/null || \
+VERIFY_CMD="whoami"
+if [[ "${HAS_SUDO:-no}" == "yes" ]]; then
+    VERIFY_CMD="whoami && sudo whoami"
+fi
+
+RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "$VERIFY_CMD" 2>/dev/null || \
+         ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "$VERIFY_CMD" 2>/dev/null || \
          echo "FAILED")
 
 if [[ "$RESULT" == *"FAILED"* ]]; then

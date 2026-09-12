@@ -82,6 +82,17 @@ ssh_cmd() {
     ssh $SSH_OPTS "$@"
 }
 
+# Run a command on the remote host as root.
+# If login user is root, run directly. Otherwise, prefix with sudo.
+ssh_root() {
+    local cmd="$1"
+    if [[ "$LOGIN_USER" == "root" ]]; then
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "$cmd"
+    else
+        ssh_cmd "${LOGIN_USER}@${FQDN}" "sudo $cmd"
+    fi
+}
+
 # Track what we did for the summary
 DID_CREATE_USER=false
 DID_INSTALL_SUDO=false

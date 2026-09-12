@@ -283,7 +283,7 @@ USER_EXISTS=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "id ${TARGET_USER} > /dev/null 2>&
 
 if [[ "$USER_EXISTS" == "no" ]]; then
     log "User ${TARGET_USER} does not exist. Creating..."
-    ssh_cmd "${LOGIN_USER}@${FQDN}" "useradd -m -s /bin/bash ${TARGET_USER}"
+    ssh_root "useradd -m -s /bin/bash ${TARGET_USER}"
     DID_CREATE_USER=true
     log "User ${TARGET_USER} created."
 else
@@ -297,7 +297,7 @@ HAS_SUDO_BIN=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "command -v sudo > /dev/null 2>&1
 if [[ "$HAS_SUDO_BIN" == "no" ]]; then
     log "sudo not installed. Attempting to install..."
     # Try apt (Debian/Ubuntu/Proxmox), then pacman (Arch)
-    INSTALL_RESULT=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "
+    INSTALL_RESULT=$(ssh_root "
         if command -v apt-get > /dev/null 2>&1; then
             apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq sudo > /dev/null 2>&1 && echo ok
         elif command -v pacman > /dev/null 2>&1; then
@@ -327,7 +327,7 @@ if [[ "$HAS_SUDO" == true ]]; then
         fi
 
         log "Configuring passwordless sudo (group: ${SUDO_GROUP})..."
-        ssh_cmd "${LOGIN_USER}@${FQDN}" "usermod -aG ${SUDO_GROUP} ${TARGET_USER} && echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
+        ssh_root "usermod -aG ${SUDO_GROUP} ${TARGET_USER} && echo '${TARGET_USER} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${TARGET_USER} && chmod 440 /etc/sudoers.d/${TARGET_USER}"
         DID_CONFIGURE_SUDO=true
         log "Sudo configured."
     else
@@ -347,7 +347,7 @@ if [[ "$KEY_INSTALLED" -ge 1 ]]; then
     log "Key already installed for ${TARGET_USER}."
 else
     # Clean up any garbage from previous failed runs
-    ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh"
+    ssh_root "mkdir -p ${TARGET_HOME}/.ssh && chmod 700 ${TARGET_HOME}/.ssh"
 
     # Check if authorized_keys exists and has non-key content (garbage)
     if ssh_cmd "${LOGIN_USER}@${FQDN}" "test -f ${TARGET_HOME}/.ssh/authorized_keys" 2>/dev/null; then
@@ -355,27 +355,27 @@ else
         TOTAL_LINES=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "wc -l < ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
         if [[ "$TOTAL_LINES" -gt 0 ]] && [[ "$VALID_KEYS" -eq 0 ]]; then
             warn "authorized_keys contains garbage (no valid keys). Replacing."
-            ssh_cmd "${LOGIN_USER}@${FQDN}" "rm -f ${TARGET_HOME}/.ssh/authorized_keys"
+            ssh_root "rm -f ${TARGET_HOME}/.ssh/authorized_keys"
         fi
     fi
 
     log "Installing SSH key for ${TARGET_USER}..."
-    ssh_cmd "${LOGIN_USER}@${FQDN}" "echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
+    ssh_root "echo '${PUBKEY}' >> ${TARGET_HOME}/.ssh/authorized_keys && chmod 600 ${TARGET_HOME}/.ssh/authorized_keys && chown -R ${TARGET_USER}:${TARGET_USER} ${TARGET_HOME}/.ssh"
     DID_INSTALL_KEY=true
     log "Key installed."
 fi
 
-# Also install key for login user (root) so future SSH doesn't need a password
+# Also install key for login user so future SSH doesn't need a password
 if [[ "$LOGIN_USER" != "$TARGET_USER" ]]; then
     LOGIN_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${LOGIN_USER}")
-    ROOT_KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
+    LOGIN_KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
         "grep -cF '$(echo "$PUBKEY" | awk '{print $2}')' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
 
-    if [[ "$ROOT_KEY_INSTALLED" -ge 1 ]]; then
+    if [[ "$LOGIN_KEY_INSTALLED" -ge 1 ]]; then
         log "Key already installed for ${LOGIN_USER}."
     else
-        log "Installing SSH key for ${LOGIN_USER} (so future root SSH won't need a password)..."
-        ssh_cmd "${LOGIN_USER}@${FQDN}" "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
+        log "Installing SSH key for ${LOGIN_USER} (so future SSH won't need a password)..."
+        ssh_root "mkdir -p ${LOGIN_HOME}/.ssh && chmod 700 ${LOGIN_HOME}/.ssh && echo '${PUBKEY}' >> ${LOGIN_HOME}/.ssh/authorized_keys && chmod 600 ${LOGIN_HOME}/.ssh/authorized_keys"
         log "Key installed for ${LOGIN_USER}."
     fi
 fi

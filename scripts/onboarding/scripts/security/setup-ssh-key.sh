@@ -324,7 +324,7 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
     fi
 
     KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '${PUBKEY_FINGERPRINT}' -Quiet) } else { 'False' }\"" 2>/dev/null || echo "False")
+        "powershell -Command \"if (Test-Path '${KEY_FILE}') { (Get-Content '${KEY_FILE}' | Select-String -SimpleMatch '${PUBKEY_FINGERPRINT}' -Quiet) } else { 'False' }\"" 2>/dev/null | tr -d '\r' || echo "False")
 
     if [[ "$KEY_INSTALLED" == "True" ]]; then
         log "Key already installed."

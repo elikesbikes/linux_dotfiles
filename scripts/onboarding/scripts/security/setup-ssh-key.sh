@@ -663,7 +663,7 @@ echo "Host:   ${FQDN} (${IP})"
 echo "User:   ${TARGET_USER}"
 echo "Key:    ${HOSTNAME} SSH Key"
 echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
-echo "OS:     ${DETECTED_OS} (${DISTRO:-n/a})"
+echo "OS:     ${DETECTED_OS} (${HOST_TYPE}${DISTRO:+, ${DISTRO}})"
 if [[ "$HAS_SUDO" == true ]]; then
     echo "Sudo:   yes (NOPASSWD)"
 elif [[ "$HAS_PRIVILEGE" == false ]]; then

@@ -13,8 +13,8 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = omarchy
 --   DP-3 Gigabyte  3440x1440 -> 2752x1152
 -- The Dell is centered horizontally over the wider ultrawide: (2752 - 2048) / 2 = 352.
 
--- Top: Dell U2719DX
-hl.monitor({ output = "DP-5", mode = "preferred", position = "352x0", scale = omarchy_monitor_scale })
+-- Top: Dell U2719DX — default workspace 9
+hl.monitor({ output = "DP-5", mode = "preferred", position = "352x0", scale = omarchy_monitor_scale, default_workspace = "9" })
 
 -- Bottom: Gigabyte G34WQC ultrawide
 hl.monitor({ output = "DP-3", mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })

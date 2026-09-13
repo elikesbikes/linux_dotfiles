@@ -19,9 +19,11 @@ hl.monitor({ output = "DP-5", mode = "preferred", position = "352x0", scale = om
 -- Bottom: Gigabyte G34WQC ultrawide
 hl.monitor({ output = "DP-3", mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })
 
--- Pin workspaces 3-5 to the Gigabyte ultrawide (DP-3). Without this, new
--- workspaces default to whichever monitor is focused the first time you
--- switch to them, which was landing them on the Dell (DP-5).
+-- Pin workspaces to monitors.
+-- Ultrawide (DP-3) gets 1-5, Dell (DP-5) gets 9.
+hl.workspace_rule({ workspace = "1", monitor = "DP-3" })
+hl.workspace_rule({ workspace = "2", monitor = "DP-3" })
 hl.workspace_rule({ workspace = "3", monitor = "DP-3" })
 hl.workspace_rule({ workspace = "4", monitor = "DP-3" })
 hl.workspace_rule({ workspace = "5", monitor = "DP-3" })
+hl.workspace_rule({ workspace = "9", monitor = "DP-5", default = true })

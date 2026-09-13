@@ -51,7 +51,23 @@ pause() {
   read -r -p "Press Enter to return to menu..." </dev/tty
 }
 
+wait_for_apt_lock() {
+  local max_wait=120 elapsed=0
+  while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+    if [[ $elapsed -eq 0 ]]; then
+      echo "⏳ Waiting for apt lock to be released..."
+    fi
+    sleep 2
+    elapsed=$((elapsed + 2))
+    if [[ $elapsed -ge $max_wait ]]; then
+      echo "⚠ apt lock still held after ${max_wait}s — proceeding anyway"
+      return 1
+    fi
+  done
+}
+
 run_script() {
+  wait_for_apt_lock || true
   chmod +x "$1"
   "$1"
 }

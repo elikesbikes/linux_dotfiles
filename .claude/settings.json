@@ -141,5 +141,38 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
+  },
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: assume private (self-hosted GitLab at gitlab.home.elikesbikes.com, not queryable via gh; no evidence of public exposure)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: Proton Pass (per ~/.claude/CLAUDE.md) — PAT at ~/.secrets/proton-pass-pat or TPM-sealed (handle 0x81010001); git credential helper for github.com and gitlab.home.elikesbikes.com; treat ~/.secrets/ as sensitive",
+      "**Default / protected branches**: main (default branch); protection status not queryable here",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: Homelab, internal domain home.elikesbikes.com via UniFi router (192.168.5.1); hosts tars (sandbox), rocky (dev, auto-deploy), hailmary (prod, manual deploy), kipp (macOS/iOS build)",
+      "**Source control**: gitlab.home.elikesbikes.com/ecloaiza/adastra.git (this repo's origin remote) only",
+      "**Trusted internal domains**: home.elikesbikes.com and its subdomains (gitlab.home.elikesbikes.com, proxy-hailmary.home.elikesbikes.com, auth-hailmary.home.elikesbikes.com, proxy-rocky.home.elikesbikes.com, auth-rocky.home.elikesbikes.com, router.home.elikesbikes.com, security.home.elikesbikes.com)",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: gitlab.home.elikesbikes.com (self-hosted GitLab); grafana; prometheus-rocky.home.elikesbikes.com; checkmk-prod-1 (monitoring); proxmox-prod-5s.home.elikesbikes.com and proxmox-prod-5m.home.elikesbikes.com (virtualization hosts)",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: ~/.secrets/ (PAT, cloudflare.ini), Proton Pass vaults (Emmanuel Vault, Family, Escuincles, Career, HOMELAB), SSH keys in HOMELAB vault, Obsidian vault at ~/Documents/Obsidian/Loaiza/ (access only via CouchDB on hailmary, never local read/write) — share only with user ecloaiza",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any host/namespace with `prod` or `production` as a whole word/segment — includes hailmary (production host per CLAUDE.md), proxmox-prod-5s.home.elikesbikes.com, proxmox-prod-5m.home.elikesbikes.com, checkmk-prod-1",
+      "**Protected deployment namespaces / environments**: hailmary (production tier, manual deploy only per pipeline workflow tars → rocky → hailmary)",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything with `prod`/`production` as a whole word or segment (e.g. proxmox-prod-5s, proxmox-prod-5m, checkmk-prod-1)",
+      "### User-specific",
+      "**Primary use of Claude Code**: homelab devops (Docker, CI/CD, infrastructure-as-code, self-hosted services) — from CLAUDE.md and repo path context",
+      "**Trusted repo**: gitlab.home.elikesbikes.com/ecloaiza/adastra.git (this repo's origin remote); assume private",
+      "**Org-specific CLIs**: pass-cli (Proton Pass secret retrieval); gacp_adastra / gacp_dotfiles (git commit+push wrapper functions); claudepower (launches Claude in auto-mode)",
+      "**routine under ecloaiza/ prefix**: routine git and API operations should target user ecloaiza, never root, per CLAUDE.md identity convention"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(systemctl stop:*) on rocky/hailmary — service lifecycle changes on dev/prod hosts",
+      "Bash(pass-cli delete:*) — Proton Pass secret deletion"
+    ]
   }
 }

@@ -54,6 +54,17 @@ check_cmd "yazi"     yazi
 check_cmd "zoxide"   zoxide
 check_cmd "unison"   unison
 check_pkg "build-essential" build-essential
+check_file "sudoers deployed" /etc/sudoers.d/ecloaiza-nopasswd
+
+# Default editor should be nvim (Debian `editor` alternative).
+echo -n "• default editor is nvim : "
+EDITOR_VAL="$(update-alternatives --query editor 2>/dev/null | awk -F': ' '/^Value:/{print $2}')"
+if [[ "$EDITOR_VAL" == *nvim ]]; then
+  echo "OK ($EDITOR_VAL)"
+else
+  echo "FAIL (${EDITOR_VAL:-unset})"
+  FAIL=$((FAIL+1))
+fi
 
 echo
 if [[ "$FAIL" -eq 0 ]]; then

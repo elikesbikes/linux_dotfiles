@@ -24,6 +24,17 @@ check_cmd() {
   fi
 }
 
+check_file() {
+  local label="$1" path="$2"
+  echo -n "• $label : "
+  if [[ -e "$path" ]]; then
+    echo "OK ($path)"
+  else
+    echo "MISSING ($path)"
+    FAIL=$((FAIL+1))
+  fi
+}
+
 check_pkg() {
   local label="$1" pkg="$2"
   echo -n "• $label : "

@@ -73,6 +73,27 @@ else
     FQDN="${HOSTNAME}.${DOMAIN}"
 fi
 
+# --- Extract pubkey early so we can pin it in SSH_OPTS ---
+
+log "Looking for '${HOSTNAME} SSH Key' in the SSH agent..."
+PUBKEY=$(ssh-add -L 2>/dev/null | grep -i "${HOSTNAME} SSH Key" || true)
+
+if [[ -z "$PUBKEY" ]]; then
+    err "No key matching '${HOSTNAME} SSH Key' found in the agent."
+    echo ""
+    echo "Create one first:"
+    echo "  pass-cli login"
+    echo "  pass-cli item create ssh-key generate --title '${HOSTNAME} SSH Key' --vault-name HOMELAB --key-type ed25519"
+    echo "  systemctl --user restart proton-pass-ssh-agent"
+    exit 1
+fi
+
+PUBKEY_FINGERPRINT=$(echo "$PUBKEY" | awk '{print $2}')
+log "Found public key: ${PUBKEY:0:50}..."
+
+mkdir -p ~/.ssh/pubkeys
+echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
+
 # --- SSH multiplexing — single password prompt reused for all commands ---
 CONTROL_DIR=$(mktemp -d)
 CONTROL_PATH="${CONTROL_DIR}/ssh-%r@%h:%p"
@@ -85,7 +106,7 @@ trap cleanup EXIT
 
 SSH_OPTS="-o ConnectTimeout=10 -o ControlMaster=auto -o ControlPath=${CONTROL_PATH} -o ControlPersist=120"
 if [[ "$ALLOW_PASSWORD" == false ]]; then
-    SSH_OPTS="$SSH_OPTS -o BatchMode=yes"
+    SSH_OPTS="$SSH_OPTS -o BatchMode=yes -o IdentitiesOnly=yes -i $HOME/.ssh/pubkeys/${HOSTNAME}.pub"
 else
     SSH_OPTS="$SSH_OPTS -o IdentitiesOnly=yes -o PreferredAuthentications=keyboard-interactive,password"
 fi
@@ -122,30 +143,6 @@ HAS_SUDO=false
 CAN_SUDO=false
 DETECTED_OS="unknown"
 DISTRO=""
-
-# ============================================================
-# Step 1: Find the public key in the agent
-# ============================================================
-
-log "Looking for '${HOSTNAME} SSH Key' in the SSH agent..."
-PUBKEY=$(ssh-add -L 2>/dev/null | grep -i "${HOSTNAME} SSH Key" || true)
-
-if [[ -z "$PUBKEY" ]]; then
-    err "No key matching '${HOSTNAME} SSH Key' found in the agent."
-    echo ""
-    echo "Create one first:"
-    echo "  pass-cli login"
-    echo "  pass-cli item create ssh-key generate --title '${HOSTNAME} SSH Key' --vault-name HOMELAB --key-type ed25519"
-    echo "  systemctl --user restart proton-pass-ssh-agent"
-    exit 1
-fi
-
-PUBKEY_FINGERPRINT=$(echo "$PUBKEY" | awk '{print $2}')
-log "Found public key: ${PUBKEY:0:50}..."
-
-# Save pubkey to file now — needed for testing later (avoids MaxAuthTries)
-mkdir -p ~/.ssh/pubkeys
-echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
 
 # ============================================================
 # Step 2: Check DNS / connectivity

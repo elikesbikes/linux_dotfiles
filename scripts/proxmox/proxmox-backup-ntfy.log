@@ -1,3 +1,4 @@
 ssh: connect to host proxmox-prod-2s port 22: No route to host
 ssh: connect to host proxmox-prod-2s port 22: No route to host
 ssh: connect to host proxmox-prod-2s port 22: No route to host
+{"id":"fEiVFBmJRLmn","time":1789340403,"expires":1789383603,"event":"message","topic":"backups","title":"Proxmox Backup FAILED","message":"❌ Backup job failed\n\n🖥 Node:     proxmox-prod-1\n🕒 Started:  2026-09-13 11:30:12\n🏁 Finished: 2026-09-13 15:26:37\n⏱ Duration: 03h:56m:25s\n\nStatus: WARNINGS: 3\nCheck the Proxmox task log for details.","priority":4}

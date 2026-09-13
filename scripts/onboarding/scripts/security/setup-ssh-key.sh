@@ -519,7 +519,7 @@ TARGET_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${TARGET_USER}")
 
 # Check if key is already correctly installed
 KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-    "grep -cF '${PUBKEY_FINGERPRINT}' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+    "grep -cF '${PUBKEY_FINGERPRINT}' ${TARGET_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0" | tail -1 | tr -d '[:space:]')
 
 if [[ "$KEY_INSTALLED" -ge 1 ]]; then
     log "Key already installed for ${TARGET_USER}."
@@ -563,7 +563,7 @@ fi
 if [[ "$LOGIN_USER" != "$TARGET_USER" ]]; then
     LOGIN_HOME=$(ssh_cmd "${LOGIN_USER}@${FQDN}" "eval echo ~${LOGIN_USER}")
     LOGIN_KEY_INSTALLED=$(ssh_cmd "${LOGIN_USER}@${FQDN}" \
-        "grep -cF '${PUBKEY_FINGERPRINT}' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0")
+        "grep -cF '${PUBKEY_FINGERPRINT}' ${LOGIN_HOME}/.ssh/authorized_keys 2>/dev/null || echo 0" | tail -1 | tr -d '[:space:]')
 
     if [[ "$LOGIN_KEY_INSTALLED" -ge 1 ]]; then
         log "Key already installed for ${LOGIN_USER}."
@@ -586,28 +586,9 @@ fi
 
 ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
-log "Testing SSH as ${TARGET_USER}..."
-
-SSH_OK=false
-
-# Always test with the specific pubkey to avoid MaxAuthTries
-if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
-    SSH_OK=true
-    log "SSH as ${TARGET_USER} works (direct key)."
-else
-    # Try existing config alias
-    if grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
-        if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
-            SSH_OK=true
-            log "SSH as ${TARGET_USER} works (via existing config alias)."
-        fi
-    fi
-
-    # Add config entry if still failing
-    if [[ "$SSH_OK" == false ]]; then
-        warn "Direct key test failed. Adding SSH config entry..."
-        if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
-            cat >> ~/.ssh/config <<EOF
+# Always add SSH config entry — Proton Pass agent has too many keys for MaxAuthTries
+if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
+    cat >> ~/.ssh/config <<EOF
 
 Host ${HOSTNAME}
     HostName ${FQDN}
@@ -615,20 +596,19 @@ Host ${HOSTNAME}
     IdentityFile ~/.ssh/pubkeys/${HOSTNAME}.pub
     IdentitiesOnly yes
 EOF
-            DID_ADD_SSH_CONFIG=true
-            log "Added SSH config entry for ${HOSTNAME}."
-        fi
-
-        if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
-            SSH_OK=true
-            log "SSH via config alias works."
-        fi
-    fi
+    DID_ADD_SSH_CONFIG=true
+    log "Added SSH config entry for ${HOSTNAME}."
+else
+    log "SSH config entry for ${HOSTNAME} already exists."
 fi
 
-if [[ "$SSH_OK" == false ]]; then
+log "Testing SSH as ${TARGET_USER}..."
+
+if ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "echo ok" > /dev/null 2>&1; then
+    log "SSH as ${TARGET_USER} works."
+else
     err "Cannot connect as ${TARGET_USER} after setup."
-    echo "Debug: ssh -v -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub ${TARGET_USER}@${FQDN}"
+    echo "Debug: ssh -v ${HOSTNAME}"
     exit 1
 fi
 

@@ -3,9 +3,12 @@ set -euo pipefail
 
 # ==================================================
 # Script: install_fastfetch.sh
-# Version: 1.1.0
+# Version: 2.0.0
 #
 # Versioning:
+# 2.0.0 - Install latest fastfetch from GitHub releases instead of Ubuntu
+#         repo (repo version lacks kitty graphics auto-detection).
+#         Also installs imagemagick (required for image logo rendering).
 # 1.1.0 - FIX: Script previously installed neovim due to
 #         copy/paste of SCRIPT_NAME and package. Now correctly
 #         installs fastfetch.
@@ -13,7 +16,7 @@ set -euo pipefail
 # ==================================================
 
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_VERSION="1.1.0"
+SCRIPT_VERSION="2.0.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
@@ -40,21 +43,44 @@ log "[$SCRIPT_NAME] Starting at: $(ts)"
 log "Log: $LOG_FILE"
 log "=================================================="
 
-if command -v fastfetch >/dev/null 2>&1; then
-  log "fastfetch already installed:"
-  run "fastfetch --version"
-  log "Nothing to do."
-  exit 0
+# --------------------------------------------------
+# ImageMagick (required for fastfetch image logo rendering)
+# --------------------------------------------------
+if ! command -v magick >/dev/null 2>&1 && ! command -v convert >/dev/null 2>&1; then
+  log "Installing imagemagick (needed for fastfetch image logos)..."
+  run "sudo apt-get install -y imagemagick"
+else
+  log "ImageMagick already installed."
 fi
 
-log "Installing fastfetch (Ubuntu package)..."
-
-# Install via apt
-run "sudo apt-get install -y fastfetch"
+# --------------------------------------------------
+# Fastfetch — latest from GitHub releases
+# --------------------------------------------------
+LATEST_DEB="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"
+TMP_DEB="/tmp/fastfetch-latest.deb"
 
 if command -v fastfetch >/dev/null 2>&1; then
-  log "SUCCESS: fastfetch installed:"
-  run "fastfetch --version"
+  CURRENT="$(fastfetch --version | awk '{print $2}')"
+  log "fastfetch $CURRENT is installed — checking for update..."
+else
+  CURRENT=""
+  log "fastfetch not found — installing..."
+fi
+
+log "Downloading latest fastfetch from GitHub..."
+run "curl -sL '$LATEST_DEB' -o '$TMP_DEB'"
+
+log "Installing fastfetch .deb..."
+run "sudo dpkg -i '$TMP_DEB'"
+rm -f "$TMP_DEB"
+
+if command -v fastfetch >/dev/null 2>&1; then
+  NEW="$(fastfetch --version | awk '{print $2}')"
+  if [[ -n "$CURRENT" && "$CURRENT" == "$NEW" ]]; then
+    log "SUCCESS: fastfetch $NEW (already up to date)"
+  else
+    log "SUCCESS: fastfetch installed: $NEW"
+  fi
 else
   log "FAIL: fastfetch not found after install"
   exit 1

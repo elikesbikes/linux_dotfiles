@@ -280,6 +280,7 @@ gacp_reviere-ios() {
   gacp "$@"
   popd > /dev/null
 }
+gacp_reviere_ios() { gacp_reviere-ios "$@"; }
 
 
 # ------------------------------------------------------------

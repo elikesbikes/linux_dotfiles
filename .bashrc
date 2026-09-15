@@ -22,6 +22,7 @@ set -h
 load_hass() { [[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant && echo "Home Assistant vars loaded"; }
 load_uptime() { [[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma && echo "Uptime Kuma vars loaded"; }
 [[ -f ~/.secrets/gitlab ]] && source ~/.secrets/gitlab
+export PROTON_PASS_KEY_PROVIDER=fs
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh

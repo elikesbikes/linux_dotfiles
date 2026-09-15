@@ -114,6 +114,14 @@ gacp() {
         return 1
     }
 
+    if git remote get-url gitlab &>/dev/null; then
+        echo "--> Running: git pull --rebase gitlab main"
+        git pull --rebase gitlab main || {
+            echo "ERROR: GitLab rebase failed. Resolve conflicts, then run 'git rebase --continue'."
+            return 1
+        }
+    fi
+
     echo "--> Running: git push -u origin main"
     git push -u origin main || return 1
 

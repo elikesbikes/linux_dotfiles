@@ -276,7 +276,7 @@ gacp_adastra() {
 #   gacp_reviere-ios "Commit message"
 # ------------------------------------------------------------
 gacp_reviere-ios() {
-  pushd $HOME/devops/projects/iOS/reviere > /dev/null || return 1
+  pushd $HOME/devops/projects/ios/reviere > /dev/null || return 1
   gacp "$@"
   popd > /dev/null
 }

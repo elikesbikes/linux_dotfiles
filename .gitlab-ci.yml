@@ -1,34 +1,38 @@
 stages:
   - deploy
 
-variables:
-  GIT_DEPTH: "0"
-
-deploy_dotfiles:
+deploy-rocky:
   stage: deploy
-  image: alpine:latest
-  before_script:
-    - apk add --no-cache openssh-client git
+  tags: [rocky]
   script:
+    - cd ~/devops/github/linux_dotfiles
+    - echo "BEFORE:" && git log --oneline -1
+    - git fetch gitlab main
+    - git reset --hard gitlab/main
+    - echo "AFTER:" && git log --oneline -1
     - |
-      # Check if sudoers/ files changed in this commit
-      if git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
-        SUDOERS_CHANGED="false"
-      else
-        SUDOERS_CHANGED="true"
+      if ! git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
+        echo "sudoers changed, syncing..."
+        sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh
       fi
-      echo "Sudoers changed: $SUDOERS_CHANGED"
+    - echo "dotfiles synced on rocky"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
-      export SSH_AUTH_SOCK=/ssh-agent.sock
-
-      # Deploy to rocky
-      ssh -o StrictHostKeyChecking=no ecloaiza@rocky \
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
-        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
-
-      # Deploy to hailmary
-      ssh -o StrictHostKeyChecking=no ecloaiza@hailmary \
-        "cd ~/devops/github/linux_dotfiles && git fetch origin && git reset --hard origin/main && \
-        (git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null && true || sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh)"
-  only:
-    - main
+deploy-hailmary:
+  stage: deploy
+  tags: [hailmary]
+  script:
+    - cd ~/devops/github/linux_dotfiles
+    - echo "BEFORE:" && git log --oneline -1
+    - git fetch gitlab main
+    - git reset --hard gitlab/main
+    - echo "AFTER:" && git log --oneline -1
+    - |
+      if ! git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
+        echo "sudoers changed, syncing..."
+        sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh
+      fi
+    - echo "dotfiles synced on hailmary"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

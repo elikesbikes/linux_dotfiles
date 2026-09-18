@@ -99,8 +99,11 @@ BarWidget {
   function cycleFocusPreset() {
     S.focusIndex = (S.focusIndex + 1) % S.focusPresets.length
     S.lapLength = S.focusPresets[S.focusIndex]
-    if (S.phase === "idle")
+    if (S.phase === "idle" || S.phase === "work") {
       S.remaining = S.lapLength * 60
+      if (S.running)
+        S.deadline = Date.now() / 1000 + S.remaining
+    }
     pushAndBroadcast()
     root.showingPreset = true
     presetTimer.restart()

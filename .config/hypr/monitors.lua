@@ -13,20 +13,23 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = omarchy
 --   DP-3 Gigabyte  3440x1440 -> 2752x1152
 -- The Dell is centered horizontally over the wider ultrawide: (2752 - 2048) / 2 = 352.
 
+local dell = "desc:Dell Inc. DELL U2719DX JTFZ023"
+local ultrawide = "desc:GIGA-BYTE TECHNOLOGY CO. LTD. G34WQC A 23082B002289"
+
 -- Top: Dell U2719DX — default workspace 9
-hl.monitor({ output = "DP-5", mode = "preferred", position = "352x0", scale = omarchy_monitor_scale })
+hl.monitor({ output = dell, mode = "preferred", position = "352x0", scale = omarchy_monitor_scale })
 
 -- Bottom: Gigabyte G34WQC ultrawide
-hl.monitor({ output = "DP-3", mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })
+hl.monitor({ output = ultrawide, mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })
 
 -- Pin workspaces to monitors.
--- Ultrawide (DP-3) gets 1-5, Dell (DP-5) gets 9.
-hl.workspace_rule({ workspace = "1", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "2", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "3", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "4", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "5", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "6", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "7", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "8", monitor = "DP-3" })
-hl.workspace_rule({ workspace = "9", monitor = "DP-5", default = true })
+-- Ultrawide gets 1-8, Dell gets 9.
+hl.workspace_rule({ workspace = "1", monitor = ultrawide })
+hl.workspace_rule({ workspace = "2", monitor = ultrawide })
+hl.workspace_rule({ workspace = "3", monitor = ultrawide })
+hl.workspace_rule({ workspace = "4", monitor = ultrawide })
+hl.workspace_rule({ workspace = "5", monitor = ultrawide })
+hl.workspace_rule({ workspace = "6", monitor = ultrawide })
+hl.workspace_rule({ workspace = "7", monitor = ultrawide })
+hl.workspace_rule({ workspace = "8", monitor = ultrawide })
+hl.workspace_rule({ workspace = "9", monitor = dell, default = true })

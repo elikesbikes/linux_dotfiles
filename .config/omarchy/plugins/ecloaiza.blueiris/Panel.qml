@@ -52,8 +52,8 @@ Panel {
   }
 
   function setCenterHoverRevealSuppressed(value) {
-    if (root.bar && "centerHoverRevealSuppressed" in root.bar)
-      root.bar.centerHoverRevealSuppressed = value
+    if (root.bar && typeof root.bar.setCenterHoverRevealSuppressed === "function")
+      root.bar.setCenterHoverRevealSuppressed(value)
   }
 
   function saveConnection() {
@@ -325,6 +325,7 @@ Panel {
             placeholderText: "5"
             foreground: root.contentForeground
             onEditingFinished: root.saveRefresh()
+            Keys.onEscapePressed: { focus = false; root.close() }
           }
         }
 
@@ -338,12 +339,14 @@ Panel {
             id: urlField
             width: parent.width
             placeholderText: "http://192.168.1.100:81"
+            Keys.onEscapePressed: { focus = false; root.close() }
           }
 
           TextField {
             id: userField
             width: parent.width
             placeholderText: "username"
+            Keys.onEscapePressed: { focus = false; root.close() }
           }
 
           TextField {
@@ -351,6 +354,7 @@ Panel {
             width: parent.width
             password: true
             placeholderText: "password"
+            Keys.onEscapePressed: { focus = false; root.close() }
           }
 
           Button {

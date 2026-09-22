@@ -25,7 +25,7 @@ Item {
   readonly property string cacheDir: home + "/.cache/omarchy/blueiris"
   readonly property string passwordPath: stateDir + "/blueiris.json"
   readonly property string apiBodyPath: cacheDir + "/api-body.json"
-  readonly property var pluginSettings: Model.pluginSettings(shell ? shell.shellConfig : null, Model.PLUGIN_ID)
+  readonly property var pluginSettings: Model.pluginSettings(shell ? { bar: shell.barConfig } : null, Model.PLUGIN_ID)
   readonly property string url: pluginSettings.url
   readonly property string username: pluginSettings.username
   readonly property int refreshSeconds: pluginSettings.refreshSeconds

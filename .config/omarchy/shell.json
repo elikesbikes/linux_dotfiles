@@ -55,8 +55,8 @@
         },
         {
           "id": "ecloaiza.blueiris",
-          "url": "https://security.home.elikesbikes.com",
-          "username": "ecloaiza",
+          "url": "http://127.0.0.1:81",
+          "username": "",
           "refreshSeconds": 5,
           "aspectRatio": "16:9"
         },

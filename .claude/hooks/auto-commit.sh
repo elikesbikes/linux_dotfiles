@@ -28,6 +28,11 @@ fi
 
 cd "$REPO_DIR" || exit 0
 
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ -n "$CURRENT_BRANCH" ] && [ "$CURRENT_BRANCH" != "main" ]; then
+    exit 0
+fi
+
 if [ -z "$(git status --porcelain)" ]; then
     exit 0
 fi

@@ -197,20 +197,14 @@ gacp_tutorials() {
 # ------------------------------------------------------------
 # Runs the standard gacp workflow inside the mcc repository.
 #
-# WARNING: HAILMARY is the source of truth for mcc. tars and rocky
-# are replicas (rsync'd from hailmary on 2026-09-07). Commit from
-# HAILMARY unless you know the local copy is ahead. Running this on
-# tars/rocky can push a stale replica over hailmary's work.
+# TARS is the source of truth for mcc: code is edited on tars and
+# deployed byte-identically to rocky (dev, auto-deploy on push) and
+# hailmary (prod, manual promote). Commit and push from tars.
 #
 # Usage:
 #   gacp_mcc "Commit message"
 # ------------------------------------------------------------
 gacp_mcc() {
-  if [[ "$(hostname -s)" != "hailmary" ]]; then
-    echo "WARNING: hailmary is the source of truth for mcc; you are on $(hostname -s)."
-    read -r -p "Commit and push from this host anyway? [y/N] " _reply
-    [[ "$_reply" =~ ^[Yy]$ ]] || { echo "Aborted."; return 1; }
-  fi
   pushd $HOME/devops/projects/mcc > /dev/null || return 1
   gacp "$@"
   popd > /dev/null

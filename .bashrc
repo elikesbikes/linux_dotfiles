@@ -48,7 +48,17 @@ command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 if [[ "$TERM" == "xterm-kitty" || "$TERM" == tmux-* ]]; then
   export TERM_PROGRAM=kitty
 fi
-command -v fastfetch &>/dev/null && fastfetch
+# The config's default logo type is 'kitty' (fastfetch's own renderer, draws
+# inline, no side effects) -- that's correct everywhere EXCEPT inside tmux,
+# where it's silently dropped. Override to 'kitty-icat' only inside tmux
+# ($TMUX set): it works there, at the cost of a screen/scrollback clear
+# (inherent to `kitten icat`'s layout, not something we can suppress) --
+# an acceptable tradeoff only where the default renders nothing at all.
+if [[ -n "$TMUX" ]] && command -v fastfetch &>/dev/null; then
+  fastfetch --logo-type kitty-icat
+elif command -v fastfetch &>/dev/null; then
+  fastfetch
+fi
 
 # ==============================================================================
 # 3. Environment Variables (Order-independent)

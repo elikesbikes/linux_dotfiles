@@ -130,6 +130,12 @@ done
 
 if ! is_macos; then
   ensure_link "$HOME_DIR/sudoers" "$REPO_DIR/sudoers" || true
+  # `icat` shim -> `kitten icat`: fastfetch's kitty-icat logo type expects a
+  # binary literally named `icat`, which recent Kitty folded into `kitten
+  # icat`. `kitten icat` has native tmux passthrough support, unlike
+  # fastfetch's own `kitty` renderer — see .config/fastfetch/config.jsonc.
+  mkdir -p "$HOME_DIR/.local/bin"
+  ensure_link "$HOME_DIR/.local/bin/icat" "$REPO_DIR/.local/bin/icat" || true
   ensure_link "$HOME_DIR/.config/VeraCrypt" "$REPO_DIR/.config/VeraCrypt" || true
   ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch" || true
 fi

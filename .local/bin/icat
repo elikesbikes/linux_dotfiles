@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Shim for fastfetch's --logo-type kitty-icat, which expects a binary
+# literally named `icat`. Modern Kitty folded the standalone `icat` into
+# `kitten icat`; this just forwards to that.
+exec kitten icat "$@"

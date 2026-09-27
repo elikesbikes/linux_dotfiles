@@ -7,8 +7,13 @@
 
   // 🐅 LOGO CONFIGURATION - ADDING THE TIGER
   "logo": {
-    // We are setting the type to 'kitty'. Change this to 'sixel' or 'iterm' if needed.
-    "type": "kitty", 
+    // 'kitty-icat' (shells out to `kitten icat`, needs ~/.local/bin/icat shim)
+    // instead of 'kitty' (fastfetch's own renderer) — the built-in 'kitty'
+    // type writes a raw, unwrapped Kitty graphics escape sequence that tmux
+    // silently drops. `kitten icat` has native tmux support: it wraps its
+    // output in a tmux passthrough envelope, so this renders correctly both
+    // in plain Kitty and inside tmux.
+    "type": "kitty-icat",
     
     // *** YOU MUST CHANGE THIS PATH! ***
     // Replace "/path/to/your/tiger.jpg" with the actual path to your tiger image file.

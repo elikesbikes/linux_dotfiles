@@ -7,16 +7,19 @@
 
   // 🐅 LOGO CONFIGURATION - ADDING THE TIGER
   "logo": {
-    // We are setting the type to 'kitty'. Change this to 'sixel' or 'iterm' if needed.
-    "type": "kitty", 
-    
+    // "auto" probes the terminal quickly and falls back to ascii if it
+    // can't confirm kitty-graphics support -- "kitty" forces the protocol
+    // unconditionally, which blocks waiting on a query reply that some
+    // remote ptys (e.g. LXC containers over plain SSH) never send back.
+    "type": "auto",
+
     // *** YOU MUST CHANGE THIS PATH! ***
     // Replace "/path/to/your/tiger.jpg" with the actual path to your tiger image file.
     "source": "/home/ecloaiza/.config/fastfetch/tiger.jpg",
     //"source": "tiger.jpg",
     // Set width and height to fit nicely next to the modules. Adjust as needed.
-    "width": 60, 
-    "height": 18 
+    "width": 60,
+    "height": 18
   },
   
   // Custom formatting for the results. (The escaped backslashes are preserved)

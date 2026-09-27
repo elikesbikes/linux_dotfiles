@@ -11,6 +11,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
 | `install_kitty.sh` | Kitty terminal + `kitty-terminfo` | apt |
 | `install_node.sh` | Node.js + npm | apt |
+| `install_motd.sh` | Disables Ubuntu's dynamic MOTD (news/ads, ESM/Pro nags, sysinfo block) on SSH login | `/etc/update-motd.d`, `/etc/default/motd-news` |
 
 Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternative
 (`cli/install_zz_default_editor.sh`) live in the `cli` category, not here — see
@@ -28,6 +29,9 @@ Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternativ
 - Install Flatpak and configure the Flathub remote
 - Install the Kitty terminal emulator and its terminfo entry
 - Install Node.js and npm
+- Disable Ubuntu's dynamic MOTD (`update-motd.d` fragments + `motd-news`) so SSH logins
+  show only the static "Welcome to Ubuntu ..." line, not the load/memory/IP block, news
+  fetch, or ESM/Pro ads. Debian/Ubuntu-only; a clean no-op elsewhere (e.g. tars/Omarchy).
 
 Sudoers drop-in deployment and the default-editor alternative are handled later in the
 `cli` category (they depend on `unison` and `nvim`, both installed there) — see

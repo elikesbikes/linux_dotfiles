@@ -51,6 +51,17 @@ check_cmd "flatpak" flatpak
 check_cmd "kitty"   kitty
 check_cmd "node"    node
 
+# Dynamic MOTD is Ubuntu/Debian-only; skip the check elsewhere.
+if [[ -d /etc/update-motd.d ]]; then
+  echo -n "• dynamic MOTD disabled : "
+  if [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/installed/motd" ]]; then
+    echo "OK"
+  else
+    echo "MISSING (run core/install_motd.sh)"
+    FAIL=$((FAIL+1))
+  fi
+fi
+
 echo
 if [[ "$FAIL" -eq 0 ]]; then
   echo "✓ Core verification PASSED"

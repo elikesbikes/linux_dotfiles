@@ -62,7 +62,7 @@ These five are driven by the master menu (`Install components` / `Verify system`
 
 | Category | Purpose | Source |
 |----------|---------|--------|
-| `core` | sudo (classic, not sudo-rs), SSH client, Flatpak/Flathub, Kitty (+terminfo), Node.js | apt |
+| `core` | sudo (classic, not sudo-rs), SSH client, Flatpak/Flathub, Kitty (+terminfo), Node.js, disables Ubuntu's dynamic MOTD | apt / `/etc/update-motd.d` |
 | `cli` | Neovim, Starship, direnv, zoxide, stow, fastfetch, figlet, exa/eza, yazi, unison, build-essential, sudoers drop-ins, default editor | apt / GitHub release / official installer |
 | `desktop` | Timeshift, Spotify, RustDesk, Todoist, Flatpak GUI apps | apt / snap / flatpak |
 | `security` | Proton VPN, Mail Desktop, Mail Bridge, Pass, Authenticator | official `.deb` |

@@ -71,7 +71,7 @@ log "Downloading latest fastfetch from GitHub..."
 run "curl -sL '$LATEST_DEB' -o '$TMP_DEB'"
 
 log "Installing fastfetch .deb..."
-run "sudo dpkg -i '$TMP_DEB'"
+run "sudo dpkg -i '$TMP_DEB' || sudo apt-get -f install -y"
 rm -f "$TMP_DEB"
 
 if command -v fastfetch >/dev/null 2>&1; then

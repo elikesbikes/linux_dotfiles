@@ -237,6 +237,11 @@ uninstall_menu() {
 main_menu() {
   while true; do
     clear
+    if [[ ! -f "$HOME/.unison/sudoers.prf" ]]; then
+      gum style --foreground 214 "⚠ Dotfiles not yet deployed — cli/install_zz_sudoers.sh will fail until you run:"
+      gum style --foreground 214 "  bash \"$BASE_DIR/dotfiles/create-managed-symlinks.sh\""
+      echo
+    fi
     gum style --border double --padding "1 4" "Linux Dotfiles Onboarding"
 
     choice="$(printf "Install components\nVerify system\nUninstall components\nExit\n" \

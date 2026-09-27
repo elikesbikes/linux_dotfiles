@@ -83,7 +83,9 @@ fi
 # --------------------------------------------------
 if ! update-alternatives --list editor 2>/dev/null | grep -qx "$NVIM"; then
   echo "Registering $NVIM as an 'editor' alternative..."
-  as_root update-alternatives --install /usr/bin/editor editor "$NVIM" 100
+  # Silence update-alternatives' own "using ... in auto mode" notice — it's
+  # Debian/Ubuntu-specific noise, not actionable, and we report success below.
+  as_root update-alternatives --install /usr/bin/editor editor "$NVIM" 100 >/dev/null
 fi
 
 echo "Setting system default editor to nvim..."

@@ -28,12 +28,12 @@ fi
 # --------------------------------------------------
 # Flathub remote
 # --------------------------------------------------
-if flatpak remotes | awk '{print $1}' | grep -qx flathub; then
+if flatpak remote-list | awk '{print $1}' | grep -qx flathub; then
   echo "Flathub remote already configured."
 else
   echo "Adding Flathub remote..."
-  flatpak remote-add --if-not-exists \
-    flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  sudo flatpak remote-add --if-not-exists \
+    flathub https://flathub.org/repo/flathub.flatpakrepo
 fi
 
 echo ""

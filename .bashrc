@@ -42,11 +42,12 @@ command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 # over `sshe`/kitty-ssh sessions too, not just local kitty windows.
 [[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
 # Forcing TERM_PROGRAM=kitty makes fastfetch's kitty-image detection send a
-# terminal query escape sequence and block on the reply. Over plain `ssh`
-# (no kitty ssh kitten) into some hosts (e.g. LXC containers) that reply can
-# go missing, hanging the whole login shell. Bound it with timeout so a
-# stalled query degrades to a missing logo instead of an unkillable login.
-command -v fastfetch &>/dev/null && timeout 5s fastfetch
+# terminal query escape sequence and block on the reply. That reply only
+# ever arrives over a real `sshe`/kitty-ssh-kitten session -- plain `ssh`
+# has no plumbing to answer it and blocks indefinitely (100s+ observed on
+# an LXC container's pty). A working query/response is near-instant, so a
+# short timeout catches the plain-ssh case fast without punishing sshe.
+command -v fastfetch &>/dev/null && timeout 1s fastfetch
 
 # ==============================================================================
 # 3. Environment Variables (Order-independent)

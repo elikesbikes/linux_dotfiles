@@ -86,7 +86,7 @@ Paths honor `XDG_STATE_HOME` when set. Re-running an already-installed script is
 
 ## 7. Design Principles
 
-- **Core owns `apt update`** — other categories avoid redundant refreshes
+- **Categories are independently runnable** — since any category can be selected on its own without `core` running first, `desktop` and `security` each refresh `apt` themselves before installing (e.g. after adding a new repo). `cli` assumes the cache is already fresh from `core`.
 - **Idempotent** — every script is safe to re-run; state-tracked markers
 - **gum is UX only** — no hidden execution behind the menu
 - **Official sources** — third-party repos added explicitly with modern signed keyrings

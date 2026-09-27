@@ -8,6 +8,13 @@ set -euo pipefail
 # OS-aware: detects the running distro and only creates links that apply.
 #   - Common links are created on every distro.
 #   - Omarchy-specific links (hypr, omarchy, kitty) are skipped on non-Omarchy hosts.
+#
+# Each ensure_link call is independent (`|| true`): a single missing/renamed
+# repo path or a pre-existing conflicting symlink is reported and skipped,
+# not fatal to the rest of the script. (Regression fixed 2026-09: a stale
+# reference to a since-removed .config/git repo path used to abort the whole
+# script under `set -e`, silently skipping every link after it — including
+# the .unison/*.prf profiles master.sh checks for.)
 
 HOME_DIR="${HOME:-/home/ecloaiza}"
 REPO_DIR="${DOTFILES_REPO_DIR:-$HOME_DIR/devops/github/linux_dotfiles}"
@@ -62,12 +69,15 @@ else
   printf 'Non-Omarchy host — skipping Omarchy/Hyprland links\n'
 fi
 
+LINK_FAILURES=0
+
 ensure_link() {
   local destination="$1"
   local source="$2"
 
   if [[ ! -e "$source" && ! -L "$source" ]]; then
-    printf 'Source is missing; refusing to link: %s\n' "$source" >&2
+    printf 'MISSING SOURCE — skipping: %s\n' "$source" >&2
+    LINK_FAILURES=$((LINK_FAILURES + 1))
     return 1
   fi
 
@@ -82,6 +92,7 @@ ensure_link() {
 
   if [[ -L "$destination" ]]; then
     printf 'conflict %s already links to %s\n' "$destination" "$(readlink -- "$destination")" >&2
+    LINK_FAILURES=$((LINK_FAILURES + 1))
     return 1
   fi
 
@@ -99,29 +110,28 @@ ensure_link() {
 
 # --- Common links (all platforms) ---
 
-ensure_link "$HOME_DIR/.bash" "$REPO_DIR/.bash"
-ensure_link "$HOME_DIR/.bashrc" "$REPO_DIR/.bashrc"
-ensure_link "$HOME_DIR/scripts" "$REPO_DIR/scripts"
+ensure_link "$HOME_DIR/.bash" "$REPO_DIR/.bash" || true
+ensure_link "$HOME_DIR/.bashrc" "$REPO_DIR/.bashrc" || true
+ensure_link "$HOME_DIR/scripts" "$REPO_DIR/scripts" || true
 
-ensure_link "$HOME_DIR/.config/eza" "$REPO_DIR/.config/eza"
-ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch"
-ensure_link "$HOME_DIR/.config/git" "$REPO_DIR/.config/git"
-ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml"
+ensure_link "$HOME_DIR/.config/eza" "$REPO_DIR/.config/eza" || true
+ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch" || true
+ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml" || true
 
 # Unison: symlink only profile files, not the whole directory.
 # Runtime files (archives, fingerprints, logs) stay in the real ~/.unison/.
 mkdir -p "$HOME_DIR/.unison"
 for prf in "$REPO_DIR/.unison"/*.prf; do
   [[ -f "$prf" ]] || continue
-  ensure_link "$HOME_DIR/.unison/$(basename "$prf")" "$prf"
+  ensure_link "$HOME_DIR/.unison/$(basename "$prf")" "$prf" || true
 done
 
 # --- Linux-only common links ---
 
 if ! is_macos; then
-  ensure_link "$HOME_DIR/sudoers" "$REPO_DIR/sudoers"
-  ensure_link "$HOME_DIR/.config/VeraCrypt" "$REPO_DIR/.config/VeraCrypt"
-  ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch"
+  ensure_link "$HOME_DIR/sudoers" "$REPO_DIR/sudoers" || true
+  ensure_link "$HOME_DIR/.config/VeraCrypt" "$REPO_DIR/.config/VeraCrypt" || true
+  ensure_link "$HOME_DIR/.config/neofetch" "$REPO_DIR/.config/neofetch" || true
 fi
 
 # --- Adastra repo (homelab docs, Claude skills, ubuntu working dir) ---
@@ -144,32 +154,42 @@ fi
 
 mkdir -p "$HOME_DIR/.claude"
 
-ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json"
-ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json"
-ensure_link "$HOME_DIR/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
-ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_DIR/AI/skills"
-ensure_link "$HOME_DIR/.claude/hooks" "$REPO_DIR/.claude/hooks"
+ensure_link "$HOME_DIR/.claude/settings.json" "$REPO_DIR/.claude/settings.json" || true
+ensure_link "$HOME_DIR/.claude/settings.local.json" "$REPO_DIR/.claude/settings.local.json" || true
+ensure_link "$HOME_DIR/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md" || true
+ensure_link "$HOME_DIR/.claude/skills" "$ADASTRA_DIR/AI/skills" || true
+ensure_link "$HOME_DIR/.claude/hooks" "$REPO_DIR/.claude/hooks" || true
 
 # --- Devops ubuntu directory (Claude Code working directory, lives in adastra) ---
 
 mkdir -p "$HOME_DIR/devops"
-ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu"
+ensure_link "$HOME_DIR/devops/ubuntu" "$ADASTRA_DIR/AI/ubuntu" || true
 
 # --- macOS-only links ---
 
 if is_macos; then
-  ensure_link "$HOME_DIR/.config/iterm2" "$REPO_DIR/.config/iterm2"
-  ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty"
+  ensure_link "$HOME_DIR/.config/iterm2" "$REPO_DIR/.config/iterm2" || true
+  ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty" || true
 fi
 
 # --- Omarchy-only links (Hyprland, kitty, omarchy config) ---
 
 if ! is_macos && is_omarchy; then
-  ensure_link "$HOME_DIR/.config/hypr" "$REPO_DIR/.config/hypr"
-  ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty"
-  ensure_link "$HOME_DIR/.config/omarchy/extensions" "$REPO_DIR/.config/omarchy/extensions"
-  ensure_link "$HOME_DIR/.config/omarchy/hooks" "$REPO_DIR/.config/omarchy/hooks"
-  ensure_link "$HOME_DIR/.config/omarchy/plugins" "$REPO_DIR/.config/omarchy/plugins"
-  ensure_link "$HOME_DIR/.config/omarchy/shell.json" "$REPO_DIR/.config/omarchy/shell.json"
-  ensure_link "$HOME_DIR/.config/omarchy/shell.toml" "$REPO_DIR/.config/omarchy/shell.toml"
+  ensure_link "$HOME_DIR/.config/hypr" "$REPO_DIR/.config/hypr" || true
+  ensure_link "$HOME_DIR/.config/kitty" "$REPO_DIR/.config/kitty" || true
+  ensure_link "$HOME_DIR/.config/omarchy/extensions" "$REPO_DIR/.config/omarchy/extensions" || true
+  ensure_link "$HOME_DIR/.config/omarchy/hooks" "$REPO_DIR/.config/omarchy/hooks" || true
+  ensure_link "$HOME_DIR/.config/omarchy/plugins" "$REPO_DIR/.config/omarchy/plugins" || true
+  ensure_link "$HOME_DIR/.config/omarchy/shell.json" "$REPO_DIR/.config/omarchy/shell.json" || true
+  ensure_link "$HOME_DIR/.config/omarchy/shell.toml" "$REPO_DIR/.config/omarchy/shell.toml" || true
+fi
+
+# --- Summary ---
+
+echo
+if [[ "$LINK_FAILURES" -eq 0 ]]; then
+  echo "All managed symlinks created successfully."
+else
+  echo "⚠ $LINK_FAILURES link(s) skipped — see MISSING SOURCE / conflict lines above." >&2
+  echo "  This is not fatal (each failure is independent), but check them." >&2
 fi

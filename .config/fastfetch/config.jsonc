@@ -7,14 +7,18 @@
 
   // 🐅 LOGO CONFIGURATION - ADDING THE TIGER
   "logo": {
-    // 'kitty-icat' (shells out to `kitten icat`, needs ~/.local/bin/icat shim)
-    // instead of 'kitty' (fastfetch's own renderer) — the built-in 'kitty'
-    // type writes a raw, unwrapped Kitty graphics escape sequence that tmux
-    // silently drops. `kitten icat` has native tmux support: it wraps its
-    // output in a tmux passthrough envelope, so this renders correctly both
-    // in plain Kitty and inside tmux.
-    "type": "kitty-icat",
-    
+    // Default type: fastfetch's own 'kitty' renderer. Draws inline without
+    // touching existing screen content — the right default for normal
+    // logins. It does NOT work inside tmux (raw escape gets dropped there).
+    //
+    // 'kitty-icat' (shells out to `kitten icat`) DOES work inside tmux, but
+    // clears the screen + scrollback before drawing as part of its own
+    // layout — that's inherent to kitten icat, not fixable via config here,
+    // and unacceptable as a global default (wipes the login banner/MOTD on
+    // every plain SSH login too). So it's applied only inside tmux, via a
+    // --logo-type override in .bashrc, never as this default.
+    "type": "kitty",
+
     // *** YOU MUST CHANGE THIS PATH! ***
     // Replace "/path/to/your/tiger.jpg" with the actual path to your tiger image file.
     "source": "/home/ecloaiza/.config/fastfetch/tiger.jpg",

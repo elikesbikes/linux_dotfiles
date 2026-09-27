@@ -40,7 +40,14 @@ command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 # these (they'd be stale over SSH), even though it does forward everything
 # the graphics protocol itself needs. Force it so the tiger logo renders
 # over `sshe`/kitty-ssh sessions too, not just local kitty windows.
-[[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
+#
+# Also covers tmux: TERM becomes "tmux-256color" (not "xterm-kitty") inside
+# a tmux session, and that's what gets forwarded over SSH from a tmux pane
+# too -- so the plain xterm-kitty check alone misses every tmux case. Every
+# terminal in this homelab is Kitty, so treat tmux-* the same way.
+if [[ "$TERM" == "xterm-kitty" || "$TERM" == tmux-* ]]; then
+  export TERM_PROGRAM=kitty
+fi
 command -v fastfetch &>/dev/null && fastfetch
 
 # ==============================================================================

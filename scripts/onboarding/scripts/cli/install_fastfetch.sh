@@ -45,6 +45,11 @@ log "=================================================="
 
 # --------------------------------------------------
 # ImageMagick (required for fastfetch image logo rendering)
+#
+# This is really kitty's own optional dependency for `kitten icat` (see
+# core/install_kitty.sh, which now installs it too) — duplicated here as a
+# safety net since categories are independently runnable: someone could run
+# `cli` without ever running `core`.
 # --------------------------------------------------
 if ! command -v magick >/dev/null 2>&1 && ! command -v convert >/dev/null 2>&1; then
   log "Installing imagemagick (needed for fastfetch image logos)..."

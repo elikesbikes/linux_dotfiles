@@ -3,16 +3,24 @@ set -euo pipefail
 
 # ==================================================
 # Script: install_kitty.sh
-# Version: 1.0.0
+# Version: 1.1.0
 #
 # Versioning:
+# 1.1.0 - Also install imagemagick: it's Kitty's own optional dependency for
+#         `kitten icat` (confirmed via `pacman -Qi kitty` on Arch: "Optional
+#         Deps: imagemagick: viewing images with icat"). Without it, `kitten
+#         icat` — and anything that shells out to it, like fastfetch's
+#         kitty-icat logo type — silently fails to render certain image
+#         formats. Previously only installed defensively inside
+#         cli/install_fastfetch.sh; belongs here since it's a kitty concern,
+#         not a fastfetch one.
 # 1.0.0 - Initial implementation:
 #         - State-based idempotency via XDG state marker
 #         - Install kitty terminal via apt
 # ==================================================
 
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.1.0"
 
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/onboarding/logs"
 LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.sh}.log"
@@ -36,7 +44,14 @@ echo "=================================================="
 # --------------------------------------------------
 if [[ -f "$STATE_FILE" ]]; then
   echo "STATE: kitty already marked as installed ($STATE_FILE)"
-  echo "Nothing to do. Exiting."
+  if command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1; then
+    echo "imagemagick already installed."
+    echo "Nothing to do. Exiting."
+    exit 0
+  fi
+  echo "imagemagick missing (older install predates this dependency) — installing it now."
+  sudo apt-get update
+  sudo apt-get install -y imagemagick
   exit 0
 fi
 
@@ -46,6 +61,13 @@ fi
 if command -v kitty >/dev/null 2>&1; then
   echo "kitty already installed: $(command -v kitty)"
   kitty --version || true
+  if ! command -v magick >/dev/null 2>&1 && ! command -v convert >/dev/null 2>&1; then
+    echo "Installing imagemagick (kitty's optional dependency for kitten icat)..."
+    sudo apt-get update
+    sudo apt-get install -y imagemagick
+  else
+    echo "imagemagick already installed."
+  fi
   echo "Marking as installed."
   touch "$STATE_FILE"
   exit 0
@@ -59,7 +81,8 @@ echo "Installing kitty via apt..."
 sudo apt-get update
 # kitty-terminfo ships the xterm-kitty terminfo entry so remote/SSH sessions
 # launched from a Kitty terminal don't fail with "unknown terminal type".
-sudo apt-get install -y kitty kitty-terminfo
+# imagemagick is kitty's own optional dependency for `kitten icat`.
+sudo apt-get install -y kitty kitty-terminfo imagemagick
 
 # --------------------------------------------------
 # Post-install validation

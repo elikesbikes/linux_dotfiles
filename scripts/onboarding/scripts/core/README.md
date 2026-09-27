@@ -9,7 +9,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | `install_sudo.sh` | Traditional `sudo` (TARS baseline; switches away from `sudo-rs`) | apt |
 | `install_ssh.sh` | OpenSSH client | apt |
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
-| `install_kitty.sh` | Kitty terminal + `kitty-terminfo` | apt |
+| `install_kitty.sh` | Kitty terminal + `kitty-terminfo` + `imagemagick` | apt |
 | `install_node.sh` | Node.js + npm | apt |
 | `install_motd.sh` | Disables Ubuntu's dynamic MOTD (news/ads, ESM/Pro nags, sysinfo block) on SSH login | `/etc/update-motd.d`, `/etc/default/motd-news` |
 
@@ -27,7 +27,9 @@ Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternativ
   per-command `Defaults!`). TARS is the baseline.
 - Ensure the OpenSSH client is present
 - Install Flatpak and configure the Flathub remote
-- Install the Kitty terminal emulator and its terminfo entry
+- Install the Kitty terminal emulator, its terminfo entry, and `imagemagick`
+  (kitty's own optional dependency for `kitten icat`, needed for image rendering
+  in the terminal — e.g. fastfetch's `kitty-icat` logo type shells out to it)
 - Install Node.js and npm
 - Disable Ubuntu's dynamic MOTD (`update-motd.d` fragments + `motd-news`) so SSH logins
   show only the static "Welcome to Ubuntu ..." line, not the load/memory/IP block, news

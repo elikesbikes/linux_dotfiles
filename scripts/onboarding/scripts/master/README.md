@@ -14,7 +14,9 @@ The interactive entry point (`master.sh`). It orchestrates install / verify / un
 
 - **Install by category** — multi-select `core`, `cli`, `desktop`, `security`, `extensions`
 - **Verify by category** — runs the matching audit-only verify script
-- **Uninstall by category** — runs any `uninstall_*.sh` present in a category
+- **Uninstall by category** — runs any `uninstall_*.sh` present in a category (no category
+  currently ships one, so this is a no-op today; add `uninstall_<tool>.sh` files to
+  activate it for a category)
 
 ## 3. How It Works
 

@@ -98,9 +98,11 @@ bash scripts/master/master.sh
 From the menu you can:
 - **Install components** — pick one or more of `core`, `cli`, `desktop`, `security`, `extensions`
 - **Verify system** — run audit-only checks per category
-- **Uninstall components** — remove by category (where supported)
+- **Uninstall components** — runs any `uninstall_*.sh` present in a category
 
 A category is only marked installed if **all** its installers succeed; a failing installer is reported and skipped without tearing down the menu.
+
+> **Note:** the uninstall menu path is implemented in `master.sh`, but no category currently ships an `uninstall_*.sh` script — selecting "Uninstall components" today is a no-op for every category. Add `uninstall_<tool>.sh` files (mirroring the matching `install_<tool>.sh`) to make a category's uninstall actually do something.
 
 ## 7. Verification
 

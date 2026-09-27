@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==================================================
-# Script: install_sudoers.sh
+# Script: install_zz_sudoers.sh
 # Version: 1.0.0
 #
 # Versioning:
@@ -14,9 +14,12 @@ set -euo pipefail
 #           the in-repo copy; validates prerequisites (unison) first.
 #
 # Note: This deploys *configuration* (sudoers files) rather than a package,
-#       but it lives in core because it is foundational and the user drives
-#       it via the `syncs` alias. The actual sync logic is owned by
-#       sync-sudoers.sh; this wrapper only handles discovery + idempotency.
+#       but it lives in the `cli` category (runs last, hence the `zz_`
+#       prefix) because it depends on `unison` (cli/install_unison.sh) and
+#       the `~/.unison/sudoers.prf` profile from dotfiles. The user also
+#       drives it directly via the `syncs` alias. The actual sync logic is
+#       owned by sync-sudoers.sh; this wrapper only handles discovery +
+#       idempotency.
 # ==================================================
 
 SCRIPT_NAME="$(basename "$0")"

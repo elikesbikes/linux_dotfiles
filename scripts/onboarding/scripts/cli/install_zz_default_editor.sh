@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==================================================
-# Script: install_default_editor.sh
+# Script: install_zz_default_editor.sh
 # Version: 1.0.0
 #
 # Versioning:

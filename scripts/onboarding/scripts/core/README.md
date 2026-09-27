@@ -7,12 +7,14 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | Script | Installs | Source |
 |--------|----------|--------|
 | `install_sudo.sh` | Traditional `sudo` (TARS baseline; switches away from `sudo-rs`) | apt |
-| `install_sudoers.sh` | Deploys sudoers drop-ins to `/etc/sudoers.d` (the `syncs` alias) | `sync-sudoers.sh` |
 | `install_ssh.sh` | OpenSSH client | apt |
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
 | `install_kitty.sh` | Kitty terminal + `kitty-terminfo` | apt |
-| `install_default_editor.sh` | Sets system default `editor` alternative to nvim | `update-alternatives` |
 | `install_node.sh` | Node.js + npm | apt |
+
+Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternative
+(`cli/install_zz_default_editor.sh`) live in the `cli` category, not here — see
+`cli/README.md`.
 
 ## 2. Responsibilities
 
@@ -22,14 +24,14 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
   switches the host back to classic sudo (via apt + the Debian alternatives system) because
   `sudo-rs` rejects directives our sudoers fragments use (`log_output`, `iolog_dir`,
   per-command `Defaults!`). TARS is the baseline.
-- Deploy sudoers drop-in files to `/etc/sudoers.d` via `sync-sudoers.sh` (the `syncs` alias);
-  requires `unison` (see `cli/install_unison.sh`) and the `~/.unison/sudoers.prf` profile from dotfiles
 - Ensure the OpenSSH client is present
 - Install Flatpak and configure the Flathub remote
 - Install the Kitty terminal emulator and its terminfo entry
-- Set the system default editor to nvim via the Debian `editor` alternative
-  (fresh installs default to nano); requires nvim (`cli/install_neovim.sh`)
 - Install Node.js and npm
+
+Sudoers drop-in deployment and the default-editor alternative are handled later in the
+`cli` category (they depend on `unison` and `nvim`, both installed there) — see
+`cli/README.md`.
 
 ## 3. Notes
 

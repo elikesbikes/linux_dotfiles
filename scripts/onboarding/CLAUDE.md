@@ -17,8 +17,9 @@ for the overview.
 - `scripts/verify/verify_<category>.sh` — audit-only checks (extensions verifies itself)
 - One `README.md` per directory describing that category
 
-Categories (menu-driven): `core`, `cli`, `desktop`, `security`, `extensions`, `themes`.
-Dotfiles are handled separately by `scripts/dotfiles/create-managed-symlinks.sh`.
+Categories (menu-driven, per `master.sh`): `core`, `cli`, `desktop`, `security`, `extensions`.
+`themes` and `security/setup-ssh-key.sh` are standalone scripts run directly — not in the
+master menu. Dotfiles are handled separately by `scripts/dotfiles/create-managed-symlinks.sh`.
 
 ## Hard rules
 

@@ -11,12 +11,14 @@ Daily-use command-line tools. This category does **not** run `apt update` (Core 
 | `install_direnv.sh` | direnv | apt | |
 | `install_zoxide.sh` | zoxide | apt | |
 | `install_stow.sh` | GNU Stow | apt | |
-| `install_fastfetch.sh` | fastfetch | apt | |
+| `install_fastfetch.sh` | fastfetch | GitHub release (`.deb`) | Latest release, not the apt repo version — needed for kitty graphics auto-detection; also installs `imagemagick` (image logo rendering) |
 | `install_figlet.sh` | figlet | apt | |
 | `install_exa.sh` | exa (falls back to eza) | apt | `eza` is the modern replacement |
 | `install_yazi.sh` | yazi | snap | Approved snap exception |
 | `install_unison.sh` | unison | apt | File synchronizer |
 | `install_build-essential.sh` | build-essential | apt | gcc/g++/make/libc-dev |
+| `install_zz_sudoers.sh` | Sudoers drop-ins in `/etc/sudoers.d` | `sync-sudoers.sh` (the `syncs` alias) | Runs last (`zz_` prefix); requires `unison` and the `~/.unison/sudoers.prf` profile from dotfiles |
+| `install_zz_default_editor.sh` | System default `editor` alternative → nvim | `update-alternatives` | Runs last (`zz_` prefix); requires `install_neovim.sh` to have run first |
 
 ## 2. Notes
 

@@ -1,6 +1,7 @@
 # Dotfiles Bootstrap
 
-Bootstrap logic for new hosts plus a helper to rebuild the GNU Stow package layout.
+Bootstrap logic for new hosts: clones/pulls the dotfiles repo and deploys it via direct
+symlinks (not GNU Stow).
 
 ## 1. create-managed-symlinks.sh
 
@@ -24,4 +25,4 @@ Set `DOTFILES_REPO_DIR` to use a checkout outside the default location.
 ## 2. Notes
 
 - Logs are written under `~/.local/state/onboarding/logs/`
-- Both scripts are intended to run on a Debian/Ubuntu host with `apt`
+- Intended to run on a Debian/Ubuntu host with `apt`

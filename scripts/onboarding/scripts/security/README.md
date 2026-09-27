@@ -27,3 +27,13 @@ bash ../verify/verify_security.sh
 ```
 
 Verification is marker-based, since the underlying Proton package names vary.
+
+## 4. setup-ssh-key.sh (standalone — not part of the master menu)
+
+Bootstraps SSH key access for `ecloaiza` on a **new remote host** via the Proton Pass SSH agent. This is a manual, one-off tool run against a target hostname — not a local package installer — so it intentionally does not match the `install_*.sh` naming convention and is not auto-discovered by `master.sh`'s category runner.
+
+```bash
+bash security/setup-ssh-key.sh <hostname>
+```
+
+See the script's own `usage()` for options (`--user`, `--password`, `--windows`, `--ip`).

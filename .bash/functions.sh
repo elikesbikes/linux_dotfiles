@@ -114,6 +114,25 @@ gacp() {
         return 1
     }
 
+    # Some repos (e.g. linux_dotfiles) mirror to GitLab via a second
+    # pushurl on 'origin' rather than a separately-named 'gitlab' remote.
+    # 'git pull origin' only ever fetches origin's primary fetch URL, so
+    # any commits pushed straight to that second URL from elsewhere never
+    # get pulled here — the next push then silently fails non-fast-forward
+    # on GitLab while still succeeding on GitHub. Pull every configured
+    # origin pushurl that differs from the fetch URL before pushing.
+    local FETCH_URL PUSH_URL
+    FETCH_URL="$(git remote get-url origin 2>/dev/null)"
+    while IFS= read -r PUSH_URL; do
+        [ -z "$PUSH_URL" ] && continue
+        [ "$PUSH_URL" = "$FETCH_URL" ] && continue
+        echo "--> Running: git pull --rebase $PUSH_URL main"
+        git pull --rebase "$PUSH_URL" main || {
+            echo "ERROR: Rebase against $PUSH_URL failed. Resolve conflicts, then run 'git rebase --continue'."
+            return 1
+        }
+    done < <(git remote get-url --all origin 2>/dev/null)
+
     if git remote get-url gitlab &>/dev/null; then
         echo "--> Running: git pull --rebase gitlab main"
         git pull --rebase gitlab main || {

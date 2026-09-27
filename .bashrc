@@ -41,7 +41,12 @@ command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 # the graphics protocol itself needs. Force it so the tiger logo renders
 # over `sshe`/kitty-ssh sessions too, not just local kitty windows.
 [[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
-command -v fastfetch &>/dev/null && fastfetch
+# Forcing TERM_PROGRAM=kitty makes fastfetch's kitty-image detection send a
+# terminal query escape sequence and block on the reply. Over plain `ssh`
+# (no kitty ssh kitten) into some hosts (e.g. LXC containers) that reply can
+# go missing, hanging the whole login shell. Bound it with timeout so a
+# stalled query degrades to a missing logo instead of an unkillable login.
+command -v fastfetch &>/dev/null && timeout 5s fastfetch
 
 # ==============================================================================
 # 3. Environment Variables (Order-independent)

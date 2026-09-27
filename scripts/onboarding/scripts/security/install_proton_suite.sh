@@ -224,3 +224,5 @@ echo " Proton Suite Installation COMPLETE"
 echo " Installed markers:"
 ls -1 "$STATE_DIR" | grep proton || true
 echo "=================================================="
+
+exit "$FAILURES"

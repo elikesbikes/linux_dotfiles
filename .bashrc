@@ -35,19 +35,16 @@ command -v starship &>/dev/null && eval "$(starship init bash)"
 command -v direnv &>/dev/null && eval "$(direnv hook bash)"
 
 # Run output commands last
-# fastfetch's kitty-image detection checks TERM_PROGRAM/KITTY_PID to confirm
-# a local kitty process -- kitty's ssh kitten deliberately doesn't forward
-# these (they'd be stale over SSH), even though it does forward everything
-# the graphics protocol itself needs. Force it so the tiger logo renders
-# over `sshe`/kitty-ssh sessions too, not just local kitty windows.
-[[ "$TERM" == "xterm-kitty" ]] && export TERM_PROGRAM=kitty
-# Forcing TERM_PROGRAM=kitty makes fastfetch's kitty-image detection send a
-# terminal query escape sequence and block on the reply. That reply only
-# ever arrives over a real `sshe`/kitty-ssh-kitten session -- plain `ssh`
-# has no plumbing to answer it and blocks indefinitely (100s+ observed on
-# an LXC container's pty). A working query/response is near-instant, so a
-# short timeout catches the plain-ssh case fast without punishing sshe.
-command -v fastfetch &>/dev/null && timeout 1s fastfetch
+# NOTE: previously forced TERM_PROGRAM=kitty here whenever $TERM was
+# xterm-kitty, so fastfetch's kitty-image detection would try to render
+# the tiger logo over SSH too. Removed: there's no reliable way to tell a
+# real `sshe`/kitty-ssh-kitten session (which can answer the graphics
+# query) apart from plain `ssh` (which can't -- even kitty's own official
+# shell-integration script only checks $SSH_TTY, true for both). Forcing
+# it made every plain `ssh` login silently swallow fastfetch's output for
+# up to the timeout below, with nothing to show for it. Letting fastfetch
+# use its own (un-forced) auto-detection instead is fast and reliable.
+command -v fastfetch &>/dev/null && timeout 3s fastfetch
 
 # ==============================================================================
 # 3. Environment Variables (Order-independent)

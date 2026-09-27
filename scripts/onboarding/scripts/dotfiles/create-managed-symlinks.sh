@@ -142,7 +142,10 @@ ADASTRA_URL="https://gitlab.home.elikesbikes.com/ecloaiza/adastra.git"
 if [[ ! -d "$ADASTRA_DIR" ]]; then
   printf 'Adastra repository not found at %s — cloning...\n' "$ADASTRA_DIR"
   mkdir -p "$(dirname "$ADASTRA_DIR")"
-  git clone "$ADASTRA_URL" "$ADASTRA_DIR"
+  git clone "$ADASTRA_URL" "$ADASTRA_DIR" || {
+    printf 'Warning: adastra clone failed (check GitLab credentials) — skipping adastra-dependent links\n' >&2
+    LINK_FAILURES=$((LINK_FAILURES + 1))
+  }
 else
   printf 'Pulling latest adastra changes...\n'
   git -C "$ADASTRA_DIR" pull --rebase || {

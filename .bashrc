@@ -10,6 +10,10 @@
 # `hash -r` (nvm.sh) emit "bash: hash: hashing disabled" on shell startup.
 set -h
 
+# pass-cli must use the same key provider everywhere (non-interactive shells too),
+# or a keyring-encrypted session DB fails to open under fs ("hmac check failed").
+export PROTON_PASS_KEY_PROVIDER=fs
+
 # CRITICAL FIX: Exit immediately if the shell is NOT interactive (e.g., scp, sftp).
 # This prevents all output-generating code (like fastfetch) from running.
 [[ $- != *i* ]] && return
@@ -22,7 +26,6 @@ set -h
 load_hass() { [[ -f ~/.secrets/home_assistant ]] && source ~/.secrets/home_assistant && echo "Home Assistant vars loaded"; }
 load_uptime() { [[ -f ~/.secrets/uptime_kuma ]] && source ~/.secrets/uptime_kuma && echo "Uptime Kuma vars loaded"; }
 [[ -f ~/.secrets/gitlab ]] && source ~/.secrets/gitlab
-export PROTON_PASS_KEY_PROVIDER=fs
 [[ -f ~/.bash/aliases.sh ]] && source ~/.bash/aliases.sh
 [[ -f ~/.bash/starship.sh ]] && source ~/.bash/starship.sh
 [[ -f ~/.bash/functions.sh ]] && source ~/.bash/functions.sh

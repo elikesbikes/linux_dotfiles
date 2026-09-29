@@ -7,6 +7,7 @@ TPM_HANDLE="0x81010001"
 VAULT="HOMELAB"
 SOCKET="$HOME/.ssh/proton-pass-agent.sock"
 
+export PROTON_PASS_KEY_PROVIDER=fs
 export PROTON_PASS_SESSION_DIR="/tmp/pass-agent-ssh"
 
 get_pat() {
@@ -22,6 +23,7 @@ get_pat() {
 }
 
 if ! "$PASS_CLI" info &>/dev/null; then
+    "$PASS_CLI" logout --force &>/dev/null || true
     PROTON_PASS_PERSONAL_ACCESS_TOKEN="$(get_pat)" "$PASS_CLI" login
 fi
 

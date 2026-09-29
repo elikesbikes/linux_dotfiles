@@ -4,12 +4,12 @@ root = /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
 
 # Filter Logic — sync .md everywhere, .html only under adastra/Homelab/
 ignore = Name {.*}
+ignore = Regex [^/]+\.[^/]+$
+ignorenot = Name *.md
+ignorenot = Regex adastra/Homelab/.*\.html$
 ignore = Regex elikesbikes\.com/.*
 ignore = Regex homelab/Monitoring/UptimeKuma/Claude/.+
 ignorenot = Regex homelab/Monitoring/UptimeKuma/Claude/[^/]+\.md
-ignorenot = Name *.md
-ignorenot = Regex adastra/Homelab/.*\.html$
-ignore = Name {*}
 
 # Bi-directional Sync Behavior
 batch = true

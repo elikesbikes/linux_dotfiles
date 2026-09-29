@@ -261,8 +261,7 @@ syncn() {
   && rsync -a --exclude=".git" --include="*/" --exclude="*" \
     $HOME/Documents/Obsidian/Loaiza/IT/github/ \
     $HOME/devops/github/ \
-  && unison obsidian_sync \
-  && find $HOME/devops/github -mindepth 1 -depth -type d -empty -delete
+  && unison obsidian_sync
 }
 
 

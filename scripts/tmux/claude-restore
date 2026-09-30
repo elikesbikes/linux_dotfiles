@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Called by tmux-resurrect on restore (see @resurrect-processes in tmux.conf).
+# Receives the arguments the pane's claude was saved with. If it was started
+# with --session-id <uuid>, resume that exact conversation; otherwise fall
+# back to the most recent conversation in the directory.
+args=()
+sid=""
+while (($#)); do
+  if [[ "$1" == "--session-id" && -n "${2:-}" ]]; then sid="$2"; shift 2
+  elif [[ "$1" == --session-id=* ]]; then sid="${1#*=}"; shift
+  else args+=("$1"); shift; fi
+done
+if [[ -n "$sid" ]]; then
+  exec claude --resume "$sid" "${args[@]}"
+else
+  exec claude --continue "${args[@]}"
+fi

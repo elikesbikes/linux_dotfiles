@@ -20,7 +20,10 @@ alias sudoers="$HOME/scripts/linux/install-sudoers.sh"
 # syncn moved to functions.sh (aliases don't expand inside functions)
 alias syncs='$HOME/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
-claudepower() { cd $HOME/devops/ubuntu && claude --enable-auto-mode --dangerously-skip-permissions "$@"; }
+# Fresh sessions get an explicit --session-id so tmux-resurrect can resume each pane's own conversation.
+# With arguments (e.g. --resume, --continue) run plain claude; those already pin a session.
+cc() { if (($#)); then claude "$@"; else claude --session-id "$(uuidgen)"; fi; }
+claudepower() { cd $HOME/devops/ubuntu && if (($#)); then claude --enable-auto-mode --dangerously-skip-permissions "$@"; else claude --enable-auto-mode --dangerously-skip-permissions --session-id "$(uuidgen)"; fi; }
 codexpower() { cd $HOME/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 alias claudemddocker='rm -f CLAUDE.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
 alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'

@@ -118,6 +118,12 @@ ensure_link "$HOME_DIR/.config/eza" "$REPO_DIR/.config/eza" || true
 ensure_link "$HOME_DIR/.config/fastfetch" "$REPO_DIR/.config/fastfetch" || true
 ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml" || true
 
+# tmux: symlink only tmux.conf, not the directory. plugins/ (TPM, resurrect,
+# continuum) stays local; install with `prefix + I` after cloning TPM to
+# ~/.config/tmux/plugins/tpm.
+mkdir -p "$HOME_DIR/.config/tmux"
+ensure_link "$HOME_DIR/.config/tmux/tmux.conf" "$REPO_DIR/.config/tmux/tmux.conf" || true
+
 # Unison: symlink only profile files, not the whole directory.
 # Runtime files (archives, fingerprints, logs) stay in the real ~/.unison/.
 mkdir -p "$HOME_DIR/.unison"

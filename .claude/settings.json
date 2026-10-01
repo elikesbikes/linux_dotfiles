@@ -1,5 +1,5 @@
 {
-  "model": "opus",
+  "model": "claude-sonnet-5",
   "hooks": {
     "PreToolUse": [
       {
@@ -104,6 +104,9 @@
     },
     "claude-sonnet-5-5": {
       "effortLevel": "high"
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "medium"
     }
   },
   "tui": "fullscreen",

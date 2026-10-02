@@ -83,6 +83,10 @@ Read the existing doc first (`--get`) to match its frontmatter and structure, th
 
 **HARD RULE (2026-10-02): NEVER store credentials in `.env` files** (or compose env files, shell rc files, or any plaintext on disk). Secrets come from Proton Pass at runtime (`start.sh` pattern below). The only exception is the Proton Pass PAT itself, and even that must be sealed to the vTPM/TPM (handle `0x81010001`), with a plaintext `~/.secrets/proton-pass-pat` only as a last-resort fallback where no TPM exists. When touching any service, migrate existing `.env` secrets to Proton Pass.
 
+**HARD RULE (2026-10-02): NEVER share a PAT between hosts. Every host gets its OWN PAT** (and its own per-user PAT where the host has multiple users), named for the host/user, so every Proton Pass access is traceable by host and, when available, by user. Never copy or reuse another host's PAT (including the TARS one) — create a new one and seal it to that host's vTPM.
+
+**Logging requirement (2026-10-02): every host must ship full syslog to Graylog** (hailmary), so PAT use and all other activity is auditable by host. See the Graylog syslog setup.
+
 ### Proton Pass
 
 - **Full documentation:** Obsidian vault at `IT/github/adastra/Homelab/Proton Pass Secrets.md`

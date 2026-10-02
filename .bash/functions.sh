@@ -579,7 +579,13 @@ gacp_tutorials_wcopy() {
     --exclude="dashboard.yaml" \
     --exclude="secrets/" \
     --exclude="*.htpasswd" \
+    --exclude="data/" \
+    --exclude="*_data/" \
+    --exclude=".credentials*" \
+    --exclude=".claude.json" \
     --include="*/" \
+    --include="Dockerfile" \
+    --include=".gitignore" \
     --include="*.yml" \
     --include="*.yaml" \
     --include="*.py" \

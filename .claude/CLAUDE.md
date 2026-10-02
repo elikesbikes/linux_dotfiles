@@ -81,6 +81,8 @@ Read the existing doc first (`--get`) to match its frontmatter and structure, th
 
 ## Security / Secrets Management
 
+**HARD RULE (2026-10-02): NEVER store credentials in `.env` files** (or compose env files, shell rc files, or any plaintext on disk). Secrets come from Proton Pass at runtime (`start.sh` pattern below). The only exception is the Proton Pass PAT itself, and even that must be sealed to the vTPM/TPM (handle `0x81010001`), with a plaintext `~/.secrets/proton-pass-pat` only as a last-resort fallback where no TPM exists. When touching any service, migrate existing `.env` secrets to Proton Pass.
+
 ### Proton Pass
 
 - **Full documentation:** Obsidian vault at `IT/github/adastra/Homelab/Proton Pass Secrets.md`

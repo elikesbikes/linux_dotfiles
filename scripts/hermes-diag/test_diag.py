@@ -219,3 +219,27 @@ def test_parser_accepts_only_the_known_shapes():
     assert diag.parse("component int-garmin") == ("component", ["int-garmin"])
     assert diag.parse("container-logs tars-mcc-bot") == ("container-logs", ["tars-mcc-bot"])
     assert diag.parse("service-journal mcc-runner.service") == ("service-journal", ["mcc-runner.service"])
+
+
+# ---------------------------------------------------------------- sudoers file must not drift from the allowlists
+
+def _repo_sudoers():
+    return os.path.join(os.path.dirname(__file__), "..", "..", "sudoers", "sudoers.d", "60-hermes-diag")
+
+
+def test_committed_sudoers_file_matches_the_allowlists():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gen_sudoers", os.path.join(os.path.dirname(__file__), "gen-sudoers.py"))
+    gen = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen)
+    assert open(_repo_sudoers()).read() == gen.render()
+
+
+def test_sudoers_rule_is_exact_host_restricted_and_has_no_wildcards():
+    text = open(_repo_sudoers()).read()
+    cmds = [l.strip().rstrip(",\\").strip() for l in text.splitlines() if l.startswith("    /usr/bin/")]
+    assert len(cmds) == len(diag.CONTAINERS) + len(diag.UNITS)
+    assert not any(c in text for c in ("*", "?", "[", "ALL=", "NOPASSWD: ALL"))
+    assert "hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG" in text
+    for name in diag.CONTAINERS:
+        assert f"/usr/bin/docker logs --tail 200 {name}" in cmds

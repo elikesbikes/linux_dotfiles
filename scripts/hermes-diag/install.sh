@@ -6,7 +6,7 @@
 #   /usr/local/lib/hermes-diag/diag.py                 the gate (copied from this directory)
 #   /etc/ssh/hermes-diag.authorized_keys               the ONE allowed key, pinned to a source address
 #   /etc/ssh/sshd_config.d/60-hermes-diag.conf         Match User hermes-diag: forced command, no tty/forwarding
-#   /etc/sudoers.d/60-hermes-diag                      EXACT commands only (docker logs / journalctl), no wildcards
+#   /etc/sudoers.d/60-hermes-diag                      EXACT commands only; also deployed by the dotfiles pipeline from the repo
 # Everything is validated BEFORE it is activated; uninstall.sh removes it all.
 #
 # Usage: sudo ./install.sh /path/to/hermes-diag.pub [allowed-source-ip]    (default source: 192.168.5.46 = endurance)
@@ -39,28 +39,21 @@ python3 -m py_compile "$HERE/diag.py"
 command -v sudo >/dev/null && command -v visudo >/dev/null || die "sudo/visudo missing"
 echo "key: $(ssh-keygen -lf "$PUBFILE")  allowed only from: $SRC_IP"
 
-# ---- 2. build the sudoers rules from the allowlists in diag.py (single source of truth) ----------
-say "Building sudoers rules from diag.py"
-mapfile -t CONTAINERS < <(python3 -c "import sys; sys.path.insert(0,'$HERE'); import diag; print('\n'.join(diag.CONTAINERS))")
-mapfile -t UNITS < <(python3 -c "import sys; sys.path.insert(0,'$HERE'); import diag; print('\n'.join(diag.UNITS))")
-DOCKER="$(python3 -c "import sys; sys.path.insert(0,'$HERE'); import diag; print(diag.DOCKER)")"
-JOURNALCTL="$(python3 -c "import sys; sys.path.insert(0,'$HERE'); import diag; print(diag.JOURNALCTL)")"
+# ---- 2. the sudoers rules: generated from diag.py, and must equal the file the pipeline deploys ------
+say "Generating the sudoers rules from diag.py"
+REPO_SUDOERS="$(cd "$HERE/../.." && pwd)/sudoers/sudoers.d/60-hermes-diag"
 TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
-{
-  echo "# Managed by scripts/hermes-diag/install.sh - EXACT commands only (no wildcards). Host-local; not synced."
-  echo "Cmnd_Alias HERMES_DIAG = \\"
-  rules=()
-  for c in "${CONTAINERS[@]}"; do [[ "$c" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || die "bad container name $c"; rules+=("$DOCKER logs --tail 200 $c"); done
-  for u in "${UNITS[@]}";      do [[ "$u" =~ ^[A-Za-z0-9][A-Za-z0-9._@-]*$ ]] || die "bad unit name $u";      rules+=("$JOURNALCTL -u $u -n 200 --no-pager -o short-iso"); done
-  for i in "${!rules[@]}"; do
-    sep=","; [[ $i -eq $((${#rules[@]}-1)) ]] && sep=""
-    echo "    ${rules[$i]}$sep \\"
-  done | sed '$ s/ \\$//'
-  echo "Defaults:$ACCOUNT !requiretty, logfile=/var/log/sudo-hermes-diag.log"
-  echo "$ACCOUNT ALL=(root) NOPASSWD: HERMES_DIAG"
-} > "$TMP"
+python3 "$HERE/gen-sudoers.py" > "$TMP"
 visudo -cf "$TMP" >/dev/null || { cat "$TMP"; die "generated sudoers failed validation"; }
-echo "sudoers OK ($((${#CONTAINERS[@]} + ${#UNITS[@]})) exact commands)"
+if [[ -f "$REPO_SUDOERS" ]]; then
+  python3 "$HERE/gen-sudoers.py" --check "$REPO_SUDOERS" || die "repo sudoers file is out of date with diag.py (see message above)"
+  echo "repo file sudoers/sudoers.d/60-hermes-diag matches diag.py"
+else
+  echo "NOTE: $REPO_SUDOERS not found; installing the generated rules only"
+fi
+SUDO_HOST_WANTED="$(python3 -c "import sys; sys.path.insert(0,'$HERE'); import importlib.util as u; s=u.spec_from_file_location('g','$HERE/gen-sudoers.py'); m=u.module_from_spec(s); s.loader.exec_module(m); print(m.SUDO_HOST)")"
+[[ "$(hostname -s)" == "$SUDO_HOST_WANTED" ]] || echo "WARNING: this host is '$(hostname -s)' but the sudoers rule only applies to host '$SUDO_HOST_WANTED'; sudo will not grant anything here."
+echo "sudoers OK"
 
 # ---- 3. apply ----------------------------------------------------------------------------------
 say "Creating account $ACCOUNT"

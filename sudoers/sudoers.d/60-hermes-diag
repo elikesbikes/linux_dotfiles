@@ -1,0 +1,9 @@
+# Managed by scripts/hermes-diag/gen-sudoers.py from the allowlists in diag.py. DO NOT EDIT BY HAND.
+# EXACT commands only (no wildcards). Deployed by the dotfiles pipeline; applies ONLY to host 'hailmary' and user 'hermes-diag'.
+Cmnd_Alias HERMES_DIAG = \
+    /usr/bin/docker logs --tail 200 tars-mcc-bot, \
+    /usr/bin/docker logs --tail 200 case-mcc-bot, \
+    /usr/bin/docker logs --tail 200 tars-n8n, \
+    /usr/bin/journalctl -u mcc-runner.service -n 200 --no-pager -o short-iso
+Defaults:hermes-diag !requiretty, logfile=/var/log/sudo-hermes-diag.log
+hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG

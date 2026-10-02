@@ -86,6 +86,14 @@ say "Installing sudoers (validated)"
 install -m 0440 -o root -g root "$TMP" "$SUDOERS"
 visudo -c >/dev/null
 
+say "Recording the effective sshd settings of OTHER users (to prove the drop-in does not leak)"
+OTHER_USERS=("${SUDO_USER:-root}" "nobody" "someone-else")
+declare -A BEFORE
+for u in "${OTHER_USERS[@]}"; do
+  BEFORE[$u]="$(sshd -T -C "user=$u,host=$SRC_IP,addr=$SRC_IP" 2>&1 | sort | sha256sum | cut -c1-16)"
+  echo "  $u: ${BEFORE[$u]}"
+done
+
 say "Installing sshd restrictions"
 cat > "$SSHD_DROPIN" <<EOF
 # Managed by scripts/hermes-diag/install.sh
@@ -107,6 +115,16 @@ Match User $ACCOUNT
 EOF
 chmod 0644 "$SSHD_DROPIN"
 if ! sshd -t; then rm -f "$SSHD_DROPIN"; die "sshd rejected the config; the drop-in was removed again"; fi
+
+say "Verifying that other users' effective sshd settings are UNCHANGED"
+for u in "${OTHER_USERS[@]}"; do
+  after="$(sshd -T -C "user=$u,host=$SRC_IP,addr=$SRC_IP" 2>&1 | sort | sha256sum | cut -c1-16)"
+  if [[ "$after" != "${BEFORE[$u]}" ]]; then
+    rm -f "$SSHD_DROPIN"
+    die "sshd settings for '$u' changed (${BEFORE[$u]} -> $after): the Match block leaked. Drop-in removed, sshd NOT reloaded."
+  fi
+  echo "  $u: unchanged"
+done
 
 say "Verifying the EFFECTIVE sshd settings for $ACCOUNT from $SRC_IP"
 EFF="$(sshd -T -C "user=$ACCOUNT,host=$SRC_IP,addr=$SRC_IP" 2>&1)"

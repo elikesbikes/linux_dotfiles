@@ -8,6 +8,8 @@ Always operate as user `ecloaiza` on all systems (GitLab, SSH, APIs). Never use 
 
 Do not assume how software behaves. Verify claims with source code, documentation, or testing before stating them as fact. If you cannot verify, say "I'm not sure" rather than stating it confidently. This is especially important when the assumption would drive architectural decisions.
 
+**Every statement or claim must be validated before you make it (hard rule, 2026-10-02).** That includes negative claims: "it can't be done" or "I found no way" are claims too, and a search that finds nothing is not proof. Before saying something is impossible or doesn't exist, look beyond the core repo (plugins, catalogs, extensions, docs for the specific feature). Cite the evidence (file, doc line, command output) with the claim, or say plainly that it is not verified.
+
 ## Git — No Manual Commands
 
 Never run `git add`, `git commit`, `git push`, or any manual git commands. Claude Code hooks handle commits and pushes automatically after file edits. For manual triggers, use the `gacp_*` shell functions:

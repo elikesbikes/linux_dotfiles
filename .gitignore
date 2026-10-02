@@ -1,2 +1,4 @@
 *.log
 .secrets/
+__pycache__/
+*.pyc

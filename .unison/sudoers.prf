@@ -12,6 +12,8 @@ prefer = /home/ecloaiza/devops/github/linux_dotfiles/sudoers/sudoers.d
 
 # Ignore patterns
 ignore = Name README
+# Host-local drop-in created by scripts/hermes-diag/install.sh on hailmary only; must never sync to the repo or other hosts
+ignore = Name 60-hermes-diag
 ignore = Name .git*
 
 perms = 0

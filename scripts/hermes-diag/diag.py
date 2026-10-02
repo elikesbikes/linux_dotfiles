@@ -43,8 +43,8 @@ DOCKER = "/usr/bin/docker"
 JOURNALCTL = "/usr/bin/journalctl"
 
 # The whole request may only use these characters. No quotes, ;, |, &, $, `, <, >, \, newline, /.
-REQUEST_RE = re.compile(r"^[A-Za-z0-9._ -]{1,120}$")
-NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+REQUEST_RE = re.compile(r"[A-Za-z0-9._ -]{1,120}")   # used with fullmatch: "$" would accept a trailing newline
+NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")   # used with fullmatch
 
 REDACTIONS = [
     (re.compile(r"pst_[0-9a-f]{16,}(::[A-Za-z0-9_-]+)?"), "<redacted:proton-pat>"),
@@ -81,7 +81,7 @@ def parse(request):
     """Return (subcommand, [args]) or raise Rejected. Nothing is executed here."""
     if request is None or request.strip() == "":
         return "help", []
-    if not REQUEST_RE.match(request):
+    if not REQUEST_RE.fullmatch(request):
         raise Rejected("request contains characters that are not allowed")
     parts = request.split()
     cmd, args = parts[0], parts[1:]
@@ -92,7 +92,7 @@ def parse(request):
     if cmd in ("component", "container-logs", "service-journal"):
         if len(args) != 1:
             raise Rejected(f"{cmd} takes exactly one argument")
-        if not NAME_RE.match(args[0]):
+        if not NAME_RE.fullmatch(args[0]):
             raise Rejected("argument is not a valid name")
         return cmd, args
     raise Rejected("unknown subcommand (try: help)")

@@ -11,7 +11,7 @@ Foundational system setup. **Run this category first** — it refreshes apt and 
 | `install_flatpak.sh` | Flatpak + Flathub remote | apt |
 | `install_kitty.sh` | Kitty terminal + `kitty-terminfo` + `imagemagick` | apt |
 | `install_node.sh` | Node.js + npm | apt |
-| `install_motd.sh` | Disables Ubuntu's dynamic MOTD (news/ads, ESM/Pro nags, sysinfo block) on SSH login | `/etc/update-motd.d`, `/etc/default/motd-news` |
+| `install_motd.sh` | Removes the whole Ubuntu SSH-login banner (welcome line, help text, sysinfo, news/ads, ESM/Pro nags) and keeps it off across upgrades | `/etc/update-motd.d`, `/etc/default/motd-news`, `/etc/apt/apt.conf.d/99-no-motd` |
 
 Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternative
 (`cli/install_zz_default_editor.sh`) live in the `cli` category, not here — see
@@ -31,9 +31,10 @@ Sudoers drop-ins (`cli/install_zz_sudoers.sh`) and the default-editor alternativ
   (kitty's own optional dependency for `kitten icat`, needed for image rendering
   in the terminal — e.g. fastfetch's `kitty-icat` logo type shells out to it)
 - Install Node.js and npm
-- Disable Ubuntu's dynamic MOTD (`update-motd.d` fragments + `motd-news`) so SSH logins
-  show only the static "Welcome to Ubuntu ..." line, not the load/memory/IP block, news
-  fetch, or ESM/Pro ads. Debian/Ubuntu-only; a clean no-op elsewhere (e.g. tars/Omarchy).
+- Remove the entire Ubuntu SSH-login banner (`update-motd.d` fragments incl. the
+  "Welcome to Ubuntu ..." header, plus `motd-news`) so a login prints nothing before the
+  shell. An apt post-invoke hook re-applies it after package upgrades. Debian/Ubuntu-only;
+  a clean no-op elsewhere (e.g. tars/Omarchy).
 
 Sudoers drop-in deployment and the default-editor alternative are handled later in the
 `cli` category (they depend on `unison` and `nvim`, both installed there) — see

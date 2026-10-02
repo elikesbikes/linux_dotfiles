@@ -23,7 +23,17 @@ alias sync_claude='unison claude_skills'
 # Fresh sessions get an explicit --session-id so tmux-resurrect can resume each pane's own conversation.
 # With arguments (e.g. --resume, --continue) run plain claude; those already pin a session.
 cc() { if (($#)); then claude "$@"; else claude --session-id "$(uuidgen)"; fi; }
-claudepower() { cd $HOME/devops/ubuntu && if (($#)); then claude --enable-auto-mode --dangerously-skip-permissions "$@"; else claude --enable-auto-mode --dangerously-skip-permissions --session-id "$(uuidgen)"; fi; }
+claudepower() {
+  # Usage: claudepower [session name] [extra claude args...]
+  cd "$HOME/devops/ubuntu" || return
+  local name=()
+  if [[ -n "$1" && "$1" != -* ]]; then name=(--name "$1"); shift; fi
+  if (($#)); then
+    claude --enable-auto-mode --dangerously-skip-permissions "${name[@]}" "$@"
+  else
+    claude --enable-auto-mode --dangerously-skip-permissions --session-id "$(uuidgen)" "${name[@]}"
+  fi
+}
 codexpower() { cd $HOME/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 alias claudemddocker='rm -f CLAUDE.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
 alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'

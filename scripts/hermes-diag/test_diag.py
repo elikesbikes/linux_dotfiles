@@ -237,7 +237,7 @@ def test_committed_sudoers_file_matches_the_allowlists():
 
 def test_sudoers_rule_is_exact_host_restricted_and_has_no_wildcards():
     text = open(_repo_sudoers()).read()
-    cmds = [l.strip().rstrip(",\\").strip() for l in text.splitlines() if l.startswith("    /usr/bin/")]
+    cmds = [l.strip().rstrip("\\").strip().rstrip(",") for l in text.splitlines() if l.startswith("    /usr/bin/")]
     assert len(cmds) == len(diag.CONTAINERS) + len(diag.UNITS)
     assert not any(c in text for c in ("*", "?", "[", "ALL=", "NOPASSWD: ALL"))
     assert "hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG" in text

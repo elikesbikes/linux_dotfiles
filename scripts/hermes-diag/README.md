@@ -1,6 +1,6 @@
 ---
-revision: 1
-updated: 2026-10-02 15:10
+revision: 2
+updated: 2026-10-02 16:05
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -26,7 +26,7 @@ Hermes is an AI agent, so nothing here depends on it behaving. Enforcement is on
 | Source pin and key restrictions | `/etc/ssh/hermes-diag.authorized_keys` (root-owned) | `from="<endurance ip>",restrict,command=…`: one key, one source address, no tty, no forwarding |
 | sshd `Match User hermes-diag` | `/etc/ssh/sshd_config.d/60-hermes-diag.conf` | `ForceCommand` to the gate, public key only, no tty or forwarding, root-owned key file |
 | The gate | `/usr/local/lib/hermes-diag/diag.py` (root-owned) | allowlisted subcommands, exact-match arguments, no shell, secrets redacted, output capped, every request logged |
-| sudo | `/etc/sudoers.d/60-hermes-diag` | the account may run only four EXACT commands (no wildcards) as root: `docker logs --tail 200 <container>` and `journalctl -u mcc-runner.service …` |
+| sudo | `/etc/sudoers.d/60-hermes-diag`, from `sudoers/sudoers.d/60-hermes-diag` in this repo | the account may run only four EXACT commands (no wildcards) as root: `docker logs --tail 200 <container>` and `journalctl -u mcc-runner.service …`. The rule names the host (`hermes-diag hailmary=…`), so it does nothing on any other machine |
 | Account | `hermes-diag` | not in `docker`, `sudo`, `adm` or `systemd-journal`; no password |
 
 ## 2. What Hermes can ask
@@ -48,7 +48,9 @@ On the target host, as a user who can use `sudo`:
     sudo scripts/hermes-diag/install.sh /path/to/hermes-diag.pub [allowed-source-ip]
     sudo scripts/hermes-diag/uninstall.sh
 
-`install.sh` validates the key, the sudoers rules (`visudo -cf`) and the sshd config (`sshd -t`, then `sshd -T -C user=hermes-diag…` to confirm the settings are really in effect) before it reloads sshd, and removes its sshd drop-in again if the checks fail. The sudoers drop-in is host-local: `.unison/sudoers.prf` ignores `60-hermes-diag` so the sudoers sync never copies it into the repo or to other hosts.
+The sudoers rule is **not** written by hand: `gen-sudoers.py` generates it from the allowlists in `diag.py`, the result is committed as `sudoers/sudoers.d/60-hermes-diag`, and the dotfiles pipeline deploys it to rocky and hailmary (`sync-sudoers-ci.sh`). After changing an allowlist run `python3 scripts/hermes-diag/gen-sudoers.py --write sudoers/sudoers.d/60-hermes-diag` and commit it **as the newest commit of the push**: the CI step only checks whether the last commit touched `sudoers/`. `install.sh` refuses to run if the repo file is out of date with `diag.py`.
+
+`install.sh` validates the key, the sudoers rules (`visudo -cf`) and the sshd config (`sshd -t`, then `sshd -T -C user=hermes-diag…` to confirm the settings are really in effect) before it reloads sshd, and removes its sshd drop-in again if the checks fail. The pipeline reaches only rocky and hailmary (tars and endurance do not run it).
 
 ## 4. Traceability and logging
 
@@ -66,10 +68,11 @@ On the target host, as a user who can use `sudo`:
 
     python3 -m pytest scripts/hermes-diag/test_diag.py
 
-75 tests cover hostile requests, each validation layer on its own, exact commands, redaction, the output cap and the audit log. The gate was also mutation-tested (each protection deliberately broken in a copy and the tests required to fail).
+77 tests cover hostile requests, each validation layer on its own, exact commands, redaction, the output cap, the audit log and the committed sudoers file (no drift from the allowlists, no wildcards, host-restricted). The gate was also mutation-tested (each protection deliberately broken in a copy and the tests required to fail).
 
 ## 7. Revision History
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
-| 1 | 2026-10-02 15:10 | (this revision) | Initial version: gate, installer, uninstaller, tests. |
+| 2 | 2026-10-02 16:05 | (this revision) | Sudoers rule moved into the repo (generated, host-restricted, deployed by the pipeline); drift tests. |
+| 1 | 2026-10-02 15:10 | 5d8636d | Initial version: gate, installer, uninstaller, tests. |

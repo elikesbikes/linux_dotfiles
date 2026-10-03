@@ -8,6 +8,13 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 import diag  # noqa: E402
 
+@pytest.fixture(autouse=True)
+def _as_hailmary(monkeypatch):
+    """The legacy tests describe hailmary's profile; pin it so they pass on any build host."""
+    monkeypatch.setattr(diag, "detect_profile", lambda: diag.PROFILES["hailmary"])
+    monkeypatch.setattr(diag, "detect_os", lambda: "linux")
+
+
 API = {"components": [
     {"name": "runner", "status": "ok", "severity": "critical", "host": "hailmary", "detail": "fine"},
     {"name": "int-garmin", "status": "fail", "severity": "warn", "host": "hailmary", "since": 1,
@@ -243,3 +250,93 @@ def test_sudoers_rule_is_exact_host_restricted_and_has_no_wildcards():
     assert "hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG" in text
     for name in diag.CONTAINERS:
         assert f"/usr/bin/docker logs --tail 200 {name}" in cmds
+
+
+# ---------------------------------------------------------------- multi-host generic commands
+ALL_BIN = {c for cands in diag.BIN.values() for c in cands}
+
+
+def _gen(cmd, osname, profile=None, exists=lambda p: True):
+    spy = Spy("L1\nL2\n")
+    code, text, outcome = diag.handle(cmd, run=spy, profile=profile or diag.DEFAULT_PROFILE,
+                                      osname=osname, exists=exists)
+    return code, text, spy
+
+
+@pytest.mark.parametrize("osname", ["linux", "darwin"])
+def test_generic_commands_use_absolute_fixed_argv_no_sudo_no_shell(osname):
+    for cmd, per_os in diag.GENERIC.items():
+        if osname not in per_os:
+            continue
+        code, text, spy = _gen(cmd, osname)
+        assert code == 0, (cmd, text)
+        for argv in spy.calls:
+            assert argv[0] in ALL_BIN and argv[0].startswith("/"), argv
+            assert "sudo" not in argv
+
+
+def test_failed_units_is_linux_only():
+    assert _gen("failed-units", "linux")[0] == 0
+    code, text, spy = _gen("failed-units", "darwin")
+    assert code == 2 and spy.calls == []
+
+
+def test_processes_never_requests_full_command_lines():
+    for osname in ("linux", "darwin"):
+        _, _, spy = _gen("processes", osname)
+        flat = " ".join(spy.calls[0])
+        assert "comm" in flat and "args" not in flat and "command" not in flat.replace("comm", "")
+
+
+def test_processes_output_is_truncated_to_16_lines():
+    spy = Spy("\n".join(str(i) for i in range(100)) + "\n")
+    _, text, _ = diag.handle("processes", run=spy, profile=diag.DEFAULT_PROFILE, osname="linux",
+                             exists=lambda p: True)
+    assert len(text.strip().splitlines()) <= 17
+
+
+def test_macos_hardware_overview_drops_identifiers():
+    spy = Spy("Model Name: Mac mini\nSerial Number (system): ABC123\nHardware UUID: X\nChip: M2\n")
+    _, text, _ = diag.handle("hostinfo", run=spy, profile=diag.DEFAULT_PROFILE, osname="darwin",
+                             exists=lambda p: True)
+    assert "Mac mini" in text and "M2" in text
+    assert "ABC123" not in text and "Hardware UUID" not in text
+
+
+def test_missing_program_is_reported_not_crashed():
+    code, text, spy = _gen("hostinfo", "linux", exists=lambda p: False)
+    assert code == 0 and "not installed" in text and spy.calls == []
+
+
+def test_listening_is_linux_only():
+    # macOS netstat prints no TCP rows and lsof only shows the caller's own processes, so it is not offered there.
+    assert _gen("listening", "linux")[0] == 0
+    assert _gen("listening", "darwin")[0] == 2
+
+
+def test_default_profile_has_no_mcc_or_logs_commands():
+    for req in ("status", "component runner", "container-logs tars-n8n", "service-journal mcc-runner.service"):
+        code, text, spy = _gen(req, "linux")
+        assert code == 2 and spy.calls == [], req
+
+
+def test_help_lists_only_what_the_host_offers():
+    _, text, _ = _gen("help", "darwin")
+    assert "hostinfo" in text and "failed-units" not in text and "container-logs" not in text
+    _, text, _ = _gen("help", "linux", profile=diag.PROFILES["hailmary"])
+    assert "container-logs <name>" in text and "status" in text
+
+
+@pytest.mark.parametrize("bad", ["hostinfo extra", "disk /etc", "memory; id", "load\n", "os $(id)"])
+def test_generic_commands_reject_arguments_and_metacharacters(bad):
+    code, _, spy = _gen(bad, "linux")
+    assert code == 2 and spy.calls == []
+
+
+def test_unknown_hostname_gets_default_profile(monkeypatch):
+    monkeypatch.setattr(diag.socket, "gethostname", lambda: "Kipp.local")
+    monkeypatch.undo()  # fixture patch is undone; real detect_profile runs below
+    monkeypatch.setattr(diag.socket, "gethostname", lambda: "kipp.local")
+    assert diag.detect_profile() is diag.DEFAULT_PROFILE
+    monkeypatch.setattr(diag.socket, "gethostname", lambda: "HailMary.home")
+    assert diag.detect_profile() is diag.PROFILES["hailmary"]

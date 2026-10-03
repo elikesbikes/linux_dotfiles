@@ -74,7 +74,6 @@ BIN = {
     "vm_stat": ["/usr/bin/vm_stat"],
     "sysctl": ["/usr/sbin/sysctl"],
     "ifconfig": ["/sbin/ifconfig"],
-    "netstat": ["/usr/sbin/netstat"],
 }
 
 # Generic read-only commands. A step is (program, [fixed args], post-filter-or-None); ("osrelease",) reads a file.
@@ -110,7 +109,6 @@ GENERIC = {
     },
     "listening": {
         "linux": [("ss", ["-ltn"], None)],
-        "darwin": [("netstat", ["-an", "-p", "tcp"], "listen")],
     },
     "failed-units": {
         "linux": [("systemctl", ["--failed", "--no-legend", "--no-pager"], None)],
@@ -222,9 +220,6 @@ def _resolve(name, exists):
 def _post(kind, text):
     if kind == "head16":
         return "\n".join(text.splitlines()[:16]) + "\n"
-    if kind == "listen":
-        lines = text.splitlines()
-        return "\n".join(l for i, l in enumerate(lines) if i < 2 or "LISTEN" in l) + "\n"
     if kind == "hwscrub":
         return "\n".join(l for l in text.splitlines() if not HW_DROP.search(l)) + "\n"
     return text
@@ -255,7 +250,10 @@ def _generic(cmd, run, osname, exists):
             out.append("(%s is not installed on this host)\n" % name)
             continue
         out.append("$ %s %s\n" % (name, " ".join(args)))
-        out.append(_post(post, run([path] + args)))
+        text = _post(post, run([path] + args))
+        if osname == "darwin":   # defence in depth: no macOS identifiers in any output
+            text = _post("hwscrub", text)
+        out.append(text)
     return "".join(out)
 
 

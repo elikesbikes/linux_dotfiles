@@ -43,11 +43,6 @@
       ],
       "right": [
         {
-          "id": "io.github.p145085.uptime-kuma",
-          "baseUrl": "https://uptime.home.elikesbikes.com",
-          "slug": "omarchy"
-        },
-        {
           "id": "akshar.radio-atlas"
         },
         {
@@ -86,6 +81,11 @@
         },
         {
           "id": "omarchy.monitor"
+        },
+        {
+          "id": "io.github.p145085.uptime-kuma",
+          "baseUrl": "https://uptime.home.elikesbikes.com",
+          "slug": "omarchy"
         }
       ]
     },

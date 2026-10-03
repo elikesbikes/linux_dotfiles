@@ -1,6 +1,6 @@
 ---
-revision: 2
-updated: 2026-10-02 16:05
+revision: 3
+updated: 2026-10-02 17:30
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -31,6 +31,8 @@ Hermes is an AI agent, so nothing here depends on it behaving. Enforcement is on
 
 ## 2. What Hermes can ask
 
+The same `diag.py` runs on every target; the host's profile (by short hostname) and OS decide what it offers. **Generic, no privileges, every host:** `hostinfo`, `os`, `disk`, `memory`, `load`, `processes` (names only), `network`; **Linux only:** `listening`, `failed-units`. macOS output drops serial numbers/hardware UUID. Python 3.9 compatible (macOS). Hermes calls them as `hdiag <host> <command>`. The hailmary-only MCC commands:
+
 | Request | Result |
 |---|---|
 | `status` | MCC components that are not ok (from MCC's local API) |
@@ -42,6 +44,8 @@ Hermes is an AI agent, so nothing here depends on it behaving. Enforcement is on
 The allowlists live in `diag.py` (`CONTAINERS`, `UNITS`); `install.sh` generates the sudoers rules from the same file, so they cannot drift apart. Output is sent to the AI provider as part of the conversation, which is why secret-looking text is redacted first. Redaction is pattern-based and cannot be perfect.
 
 ## 3. Install and remove
+
+**macOS (kipp):** `sudo ./install-macos.sh <pubkey> [source-ip]` and `sudo ./uninstall-macos.sh`. It makes a hidden standard user with `dscl`, adds it to `com.apple.access_ssh` (macOS only allows SSH for that group; here the nested `admin` group), installs the sshd drop-in and checks other users' sshd settings are unchanged. No sudoers there. Linux instructions follow.
 
 On the target host, as a user who can use `sudo`:
 
@@ -74,5 +78,6 @@ The sudoers rule is **not** written by hand: `gen-sudoers.py` generates it from 
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
-| 2 | 2026-10-02 16:05 | (this revision) | Sudoers rule moved into the repo (generated, host-restricted, deployed by the pipeline); drift tests. |
+| 3 | 2026-10-02 17:30 | (this revision) | Multi-host: generic commands, Linux/macOS profiles, macOS installer (93 tests). |
+| 2 | 2026-10-02 16:05 | (see git) | Sudoers rule moved into the repo (generated, host-restricted, deployed by the pipeline); drift tests. |
 | 1 | 2026-10-02 15:10 | 5d8636d | Initial version: gate, installer, uninstaller, tests. |

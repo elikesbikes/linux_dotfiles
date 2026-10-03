@@ -23,7 +23,7 @@ run cmk-agent-ctl delete-all --enable-insecure-connections
 say "4. Local checks for tars"
 install -d -m 0755 /etc/check_mk /usr/lib/check_mk_agent/local
 install -m 0644 "$HERE/docker-expected.tars.conf" /etc/check_mk/docker-expected.conf
-install -m 0755 "$HERE/docker_containers" "$HERE/gpu_nvidia" "$HERE/ollama_local" /usr/lib/check_mk_agent/local/
+install -m 0755 "$HERE/docker_containers" "$HERE/gpu_nvidia" /usr/lib/check_mk_agent/local/
 say "5. Self-test (agent output, local section)"
 check_mk_agent 2>/dev/null | sed -n '/<<<local/,/<<</p' | head -20
 say "6. Listening on 6556?"

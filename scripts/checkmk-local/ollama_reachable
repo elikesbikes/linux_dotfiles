@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# CheckMK local check (endurance): the Ollama model server on tars (used by Honcho) answers, and the two models are installed.
-# Goes through Traefik exactly like Honcho does (allowlist: endurance only).
-URL=https://tarsai.home.elikesbikes.com
+# CheckMK local check (endurance): the Ollama model server on nvr-prod-2 (used by Honcho) answers, and the two models are installed.
+# Goes through hailmary Traefik exactly like Honcho does (allowlist: endurance, tars, hailmary).
+URL=https://ai.home.elikesbikes.com
 start=$(date +%s.%N)
-tags="$(curl -s -m 8 -f $URL/api/tags 2>/dev/null)" || { echo "2 \"Ollama (tars)\" - not reachable from endurance at $URL"; exit 0; }
+tags="$(curl -s -m 8 -f $URL/api/tags 2>/dev/null)" || { echo "2 \"Ollama (nvr-prod-2)\" - not reachable from endurance at $URL"; exit 0; }
 ms=$(awk -v s="$start" -v e="$(date +%s.%N)" 'BEGIN{printf "%d",(e-s)*1000}')
 miss=""; for m in qwen3:4b nomic-embed-text; do echo "$tags" | grep -q "\"$m" || miss="$miss $m"; done
-if [ -n "$miss" ]; then echo "1 \"Ollama (tars)\" response_ms=$ms reachable but missing model(s):$miss"; else echo "0 \"Ollama (tars)\" response_ms=$ms reachable, models present, answered in ${ms} ms"; fi
+if [ -n "$miss" ]; then echo "1 \"Ollama (nvr-prod-2)\" response_ms=$ms reachable but missing model(s):$miss"; else echo "0 \"Ollama (nvr-prod-2)\" response_ms=$ms reachable, models present, answered in ${ms} ms"; fi

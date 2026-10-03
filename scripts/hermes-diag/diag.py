@@ -260,7 +260,7 @@ def _generic(cmd, run, osname, exists):
 
 
 def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists):
-    profile = DEFAULT_PROFILE if profile is None and False else (profile if profile is not None else detect_profile())
+    profile = profile if profile is not None else detect_profile()
     osname = osname or detect_os()
 
     if cmd == "help":

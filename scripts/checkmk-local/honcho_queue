@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# CheckMK local check (endurance): Honcho memory queue backlog and API health. WARN above 50 pending work units, CRIT above 500 or API down.
+docker inspect -f '{{.State.Running}}' honcho-api 2>/dev/null | grep -q true || exit 0
+res="$(docker exec honcho-api /app/.venv/bin/python -c '
+import json,urllib.request
+try:
+    urllib.request.urlopen("http://localhost:8000/health",timeout=5).read()
+    d=json.load(urllib.request.urlopen("http://localhost:8000/v3/workspaces/hermes/queue/status",timeout=10))
+    print(d["pending_work_units"],d["in_progress_work_units"],d["completed_work_units"])
+except Exception as e:
+    print("ERR",type(e).__name__)
+' 2>/dev/null)"
+case "$res" in
+  ERR*|"") echo "2 \"Honcho API\" - not answering ($res)"; exit 0 ;;
+esac
+read -r pending inprog done <<<"$res"
+st=0; [ "$pending" -gt 50 ] && st=1; [ "$pending" -gt 500 ] && st=2
+echo "$st \"Honcho memory queue\" pending=$pending;50;500|in_progress=$inprog|completed=$done pending $pending, in progress $inprog, completed $done"

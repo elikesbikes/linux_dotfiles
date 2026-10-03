@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# CheckMK local check (tars): NVIDIA GPU health. Temperature WARN 88 / CRIT 95 C, video memory WARN 90% / CRIT 97%.
+# Utilization is reported as a metric only (a busy GPU is normal while Honcho is working).
+command -v nvidia-smi >/dev/null || exit 0
+out="$(nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv,noheader,nounits 2>/dev/null)" \
+  || { echo '2 "GPU NVIDIA" - nvidia-smi failed (driver problem?)'; exit 0; }
+IFS=',' read -r name util mused mtotal temp power <<<"$out"
+name="${name# }"; util="${util// /}"; mused="${mused// /}"; mtotal="${mtotal// /}"; temp="${temp// /}"; power="${power// /}"
+pct=$(( mused * 100 / mtotal ))
+st=0; [ "$temp" -ge 88 ] && st=1; [ "$temp" -ge 95 ] && st=2
+[ "$pct" -ge 90 ] && [ "$st" -lt 1 ] && st=1; [ "$pct" -ge 97 ] && st=2
+echo "$st \"GPU NVIDIA\" temp=$temp;88;95|gpu_util=$util|vram_used_mb=$mused;;;0;$mtotal|vram_pct=$pct;90;97|power_w=$power $name: ${temp}C, GPU ${util}%, video memory ${mused}/${mtotal} MiB (${pct}%), ${power} W"

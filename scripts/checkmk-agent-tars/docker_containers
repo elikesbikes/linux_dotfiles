@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# CheckMK local check: every container listed in /etc/check_mk/docker-expected.conf must be running (and healthy, if it has a healthcheck).
+# One service per container: "Docker container <name>". Output format: <state> <service name> - <text>   (0 OK, 1 WARN, 2 CRIT)
+# Read-only: uses `docker inspect` only. Runs as root through the CheckMK agent.
+CONF=/etc/check_mk/docker-expected.conf
+[ -r "$CONF" ] || exit 0
+command -v docker >/dev/null || { echo "2 \"Docker daemon\" - docker command not found"; exit 0; }
+docker info >/dev/null 2>&1 || { echo "2 \"Docker daemon\" - not responding"; exit 0; }
+echo "0 \"Docker daemon\" - running"
+grep -v -E '^\s*(#|$)' "$CONF" | while read -r name; do
+  out="$(docker inspect --format '{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}|{{.RestartCount}}|{{.State.StartedAt}}' "$name" 2>/dev/null)"
+  if [ -z "$out" ]; then echo "2 \"Docker container $name\" - does not exist"; continue; fi
+  IFS='|' read -r status health restarts started <<<"$out"
+  if [ "$status" != running ]; then echo "2 \"Docker container $name\" - $status"
+  elif [ "$health" = unhealthy ]; then echo "2 \"Docker container $name\" - running but UNHEALTHY"
+  elif [ "$health" = starting ]; then echo "1 \"Docker container $name\" - starting (health check pending)"
+  else echo "0 \"Docker container $name\" - running, health $health, restarts $restarts, since $started"
+  fi
+done

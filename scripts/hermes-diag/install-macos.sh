@@ -104,9 +104,9 @@ done
 
 say "Verifying the EFFECTIVE sshd settings for $ACCOUNT from $SRC_IP"
 EFF="$(sshd -T -C "user=$ACCOUNT,host=$SRC_IP,addr=$SRC_IP" 2>&1)"
-echo "$EFF" | grep -E '^(forcecommand|authorizedkeysfile|permittty|allowtcpforwarding|allowagentforwarding|passwordauthentication|authenticationmethods) ' || true
-grep -q "^forcecommand $LIB/diag.py" <<<"$EFF" || { rm -f "$DROPIN"; die "ForceCommand is not in effect; drop-in removed"; }
-grep -q "^permittty no" <<<"$EFF" || { rm -f "$DROPIN"; die "PermitTTY is not 'no'; drop-in removed"; }
+echo "$EFF" | grep -i -E '^(forcecommand|authorizedkeysfile|permittty|allowtcpforwarding|allowagentforwarding|passwordauthentication|authenticationmethods) ' || true
+grep -qi "^forcecommand $LIB/diag.py" <<<"$EFF" || { rm -f "$DROPIN"; die "ForceCommand is not in effect; drop-in removed"; }
+grep -qi "^permittty no" <<<"$EFF" || { rm -f "$DROPIN"; die "PermitTTY is not 'no'; drop-in removed"; }
 echo "(sshd on macOS is started on demand by launchd, so there is nothing to reload)"
 
 say "Self-test of the gate as $ACCOUNT"

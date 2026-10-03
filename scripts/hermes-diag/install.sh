@@ -125,9 +125,9 @@ done
 
 say "Verifying the EFFECTIVE sshd settings for $ACCOUNT from $SRC_IP"
 EFF="$(sshd -T -C "user=$ACCOUNT,host=$SRC_IP,addr=$SRC_IP" 2>&1)"
-echo "$EFF" | grep -E '^(forcecommand|authorizedkeysfile|permittty|allowtcpforwarding|allowagentforwarding|x11forwarding|passwordauthentication|authenticationmethods|permituserrc) ' || true
-grep -q "^forcecommand $LIB/diag.py" <<<"$EFF" || { rm -f "$SSHD_DROPIN"; die "ForceCommand is not in effect; drop-in removed, sshd NOT reloaded"; }
-grep -q "^permittty no" <<<"$EFF" || { rm -f "$SSHD_DROPIN"; die "PermitTTY is not 'no'; drop-in removed"; }
+echo "$EFF" | grep -i -E '^(forcecommand|authorizedkeysfile|permittty|allowtcpforwarding|allowagentforwarding|x11forwarding|passwordauthentication|authenticationmethods|permituserrc) ' || true
+grep -qi "^forcecommand $LIB/diag.py" <<<"$EFF" || { rm -f "$SSHD_DROPIN"; die "ForceCommand is not in effect; drop-in removed, sshd NOT reloaded"; }
+grep -qi "^permittty no" <<<"$EFF" || { rm -f "$SSHD_DROPIN"; die "PermitTTY is not 'no'; drop-in removed"; }
 
 say "Reloading sshd (existing sessions are kept)"
 systemctl reload ssh 2>/dev/null || systemctl reload sshd

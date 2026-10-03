@@ -52,7 +52,9 @@ else
   echo "NOTE: $REPO_SUDOERS not found; installing the generated rules only"
 fi
 SUDO_HOST_WANTED="$(python3 -c "import sys; sys.path.insert(0,'$HERE'); import importlib.util as u; s=u.spec_from_file_location('g','$HERE/gen-sudoers.py'); m=u.module_from_spec(s); s.loader.exec_module(m); print(m.SUDO_HOST)")"
-[[ "$(hostname -s)" == "$SUDO_HOST_WANTED" ]] || echo "WARNING: this host is '$(hostname -s)' but the sudoers rule only applies to host '$SUDO_HOST_WANTED'; sudo will not grant anything here."
+# Only the host that has allowlisted containers/units (hailmary) gets the sudoers rule. Every other host offers just the
+# generic no-privilege commands, so no sudoers is installed there at all (least privilege).
+if [[ "$(hostname -s)" == "$SUDO_HOST_WANTED" ]]; then WITH_SUDOERS=1; else WITH_SUDOERS=0; echo "host '$(hostname -s)' is not '$SUDO_HOST_WANTED': generic commands only, no sudoers will be installed"; fi
 echo "sudoers OK"
 
 # ---- 3. apply ----------------------------------------------------------------------------------
@@ -75,9 +77,11 @@ say "Installing the authorized key (root-owned, pinned to $SRC_IP)"
 printf 'from="%s",restrict,command="%s/diag.py" %s\n' "$SRC_IP" "$LIB" "$KEYLINE" > "$AUTH"
 chown root:root "$AUTH"; chmod 0644 "$AUTH"
 
-say "Installing sudoers (validated)"
-install -m 0440 -o root -g root "$TMP" "$SUDOERS"
-visudo -c >/dev/null
+if [[ $WITH_SUDOERS -eq 1 ]]; then
+  say "Installing sudoers (validated)"
+  install -m 0440 -o root -g root "$TMP" "$SUDOERS"
+  visudo -c >/dev/null
+fi
 
 say "Recording the effective sshd settings of OTHER users (to prove the drop-in does not leak)"
 OTHER_USERS=("${SUDO_USER:-root}" "nobody" "someone-else")
@@ -129,9 +133,9 @@ say "Reloading sshd (existing sessions are kept)"
 systemctl reload ssh 2>/dev/null || systemctl reload sshd
 
 say "Self-test of the gate as $ACCOUNT"
-sudo -u "$ACCOUNT" env SSH_ORIGINAL_COMMAND="status" SSH_CLIENT="127.0.0.1 1 22" "$LIB/diag.py" | head -3 || true
+sudo -u "$ACCOUNT" env SSH_ORIGINAL_COMMAND="os" SSH_CLIENT="127.0.0.1 1 22" "$LIB/diag.py" | head -4 || true
 sudo -u "$ACCOUNT" env SSH_ORIGINAL_COMMAND="cat /etc/shadow" SSH_CLIENT="127.0.0.1 1 22" "$LIB/diag.py" || true
-sudo -u "$ACCOUNT" -- sudo -n -l 2>&1 | sed -n '/may run/,$p' | head -8
+if [[ $WITH_SUDOERS -eq 1 ]]; then sudo -u "$ACCOUNT" -- sudo -n -l 2>&1 | sed -n '/may run/,$p' | head -8; else echo "no sudo rights granted (generic commands only)"; fi
 
 echo
 echo "DONE. Remove with: sudo $HERE/uninstall.sh"

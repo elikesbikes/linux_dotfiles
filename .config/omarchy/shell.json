@@ -21,9 +21,6 @@
           "id": "omarchy.weather"
         },
         {
-          "id": "ecloaiza.zone"
-        },
-        {
           "id": "ecloaiza.proton-drive"
         },
         {
@@ -42,6 +39,9 @@
         }
       ],
       "right": [
+        {
+          "id": "ecloaiza.zone"
+        },
         {
           "id": "omarchy.agents"
         },

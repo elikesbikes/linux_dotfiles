@@ -567,6 +567,13 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
+  # traefik is never copied or deployed through git (the hosts differ: per-host allowlists,
+  # hailmary's extra mail ports). Its real configs are snapshotted instead.
+  if [[ "${PROJECT_NAME}" == "traefik" ]]; then
+    echo "ERROR: traefik is not deployed from git. Save a read-only snapshot instead: ~/devops/github/tutorials/scripts/snapshot-traefik.sh (see infra-snapshots/traefik/README.md)"
+    return 1
+  fi
+
   # endurance accepts only these projects (same list as scripts/deploy-endurance.sh);
   # refuse BEFORE pushing anything.
   if [[ "${DEPLOY_HOST}" == "endurance" ]]; then

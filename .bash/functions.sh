@@ -642,9 +642,10 @@ _gitlab_deploy_tutorials() {
   local JOB_NAMES=()
   case "${HOST}" in
     hailmary) JOB_NAMES=("deploy:hailmary") ;;
+    endurance) JOB_NAMES=("deploy:endurance") ;;
     all)      JOB_NAMES=("deploy:hailmary") ;;
     *)
-      echo "ERROR: Unknown host '${HOST}'. Use hailmary (ranger0/endurance/docker-prod-1/ranger1 retired)"
+      echo "ERROR: Unknown host '${HOST}'. Use hailmary or endurance (ranger0/docker-prod-1/ranger1 retired)"
       return 1
       ;;
   esac

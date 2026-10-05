@@ -536,14 +536,17 @@ gpull_tutorials() {
 # Usage:
 #   gacp_tutorials_wcopy <project> "Commit message" [host]
 #
-#   host: hailmary   (omit to push only)
-#   Historically also supported ranger0/endurance/docker-prod-1/ranger1 —
-#   all four are retired/decommissioned (Project Exodus, 2026-07); hailmary
-#   is now the sole deploy target in .gitlab-ci.yml.
+#   host: hailmary | endurance   (omit to push only)
+#   hailmary: the usual prod deploy.
+#   endurance: since 2026-10-05, only for hermes, honcho and open-webui. Plays the
+#   deploy:endurance job (runner "endurance-shell" on endurance; see
+#   tutorials/scripts/deploy-endurance.sh). Typing "endurance" is the approval.
+#   ranger0/docker-prod-1/ranger1 are retired (Project Exodus, 2026-07).
 #
 # Examples:
 #   gacp_tutorials_wcopy restic "update config"
 #   gacp_tutorials_wcopy restic "update config" hailmary
+#   gacp_tutorials_wcopy open-webui "change title settings" endurance
 # ------------------------------------------------------------
 gacp_tutorials_wcopy() {
   local PROJECT_NAME="$1"

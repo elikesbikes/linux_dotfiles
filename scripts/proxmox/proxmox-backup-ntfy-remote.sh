@@ -84,6 +84,22 @@ if [[ "$TASK_STATUS" == "OK" ]]; then
 🕒 Started:  $START_TIME
 🏁 Finished: $END_TIME
 ⏱ Duration: $DURATION_FMT"
+elif [[ "$TASK_STATUS" == WARNINGS:* ]]; then
+  # The job ran to the end; Proxmox flags a guest/step with a warning. Not a
+  # failure, so do not page at high priority (a weekly "FAILED" for a warning
+  # trains you to ignore the real ones).
+  curl -s -X POST "$NTFY_URL/$NTFY_TOPIC" \
+    -H "Title: Proxmox Backup finished with warnings" \
+    -H "Priority: default" \
+    -d "⚠️ Backup job completed with warnings
+
+🖥 Node:     $TASK_NODE
+🕒 Started:  $START_TIME
+🏁 Finished: $END_TIME
+⏱ Duration: $DURATION_FMT
+
+Status: $TASK_STATUS
+Check the Proxmox task log for which guest warned."
 else
   curl -s -X POST "$NTFY_URL/$NTFY_TOPIC" \
     -H "Title: Proxmox Backup FAILED" \

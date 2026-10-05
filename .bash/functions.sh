@@ -593,6 +593,7 @@ gacp_tutorials_wcopy() {
     --include="*.[mM][dD]" \
     --include="*.json" \
     --include="*.example" \
+    --include="honcho.env" \
     --include="*.png" \
     --include="*.txt" \
     --exclude="*" \

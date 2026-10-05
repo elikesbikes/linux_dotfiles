@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# CheckMK local check (endurance): the GitLab shell runner that deploys hermes/honcho/open-webui for the tutorials pipeline.
+# It runs as a systemd USER service of ecloaiza. CRIT if not running; WARN if its config file (holds the runner token) is not
+# mode 600, or if the runner reported "Failed to process runner" 3+ times in the last 10 minutes.
+U=ecloaiza
+if ! pgrep -u "$U" -f "gitlab-runner run" >/dev/null 2>&1; then
+  echo "2 \"GitLab runner\" - not running (user service gitlab-runner of $U)"; exit 0
+fi
+mode="$(stat -c %a "/home/$U/.gitlab-runner/config.toml" 2>/dev/null)"
+fails="$(journalctl "_UID=$(id -u "$U")" --since "-10min" -q --no-pager 2>/dev/null | grep -c "Failed to process runner")"
+st=0; msg="running, config mode ${mode:-?}, ${fails} processing failures in 10 min"
+[ "$mode" != "600" ] && { st=1; msg="$msg - config.toml must be mode 600"; }
+[ "${fails:-0}" -ge 3 ] && { st=1; msg="$msg - jobs are failing to start"; }
+echo "$st \"GitLab runner\" failures=${fails:-0};3 $msg"

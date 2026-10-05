@@ -567,6 +567,15 @@ gacp_tutorials_wcopy() {
     return 1
   fi
 
+  # endurance accepts only these projects (same list as scripts/deploy-endurance.sh);
+  # refuse BEFORE pushing anything.
+  if [[ "${DEPLOY_HOST}" == "endurance" ]]; then
+    case " hermes honcho open-webui " in
+      *" ${PROJECT_NAME} "*) ;;
+      *) echo "ERROR: '${PROJECT_NAME}' cannot be deployed to endurance (allowed: hermes honcho open-webui)"; return 1 ;;
+    esac
+  fi
+
   echo "Copying filtered files (.yml, .py, .sh, .md) to destination..."
 
   mkdir -p "${DEST_PATH}"

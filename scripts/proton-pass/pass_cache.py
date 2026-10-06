@@ -58,7 +58,7 @@ def _host_key(create):
     """The host's AES key (hex), unsealed into memory. create=True makes one on first use."""
     d = cache_dir()
     pub, priv = d / "key.pub", d / "key.priv"
-    with open(d / ".key.lock", "w") as lock:
+    with os.fdopen(os.open(d / ".key.lock", os.O_WRONLY | os.O_CREAT, 0o600), "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)              # two first-time writers must not make two keys
         with tempfile.TemporaryDirectory(prefix="pp-tpm-") as tmp:
             primary = _primary(tmp)

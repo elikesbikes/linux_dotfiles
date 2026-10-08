@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(ssh hailmary:*)",
+      "Bash(scp:*)"
+    ]
+  },
   "model": "opus",
   "hooks": {
     "PreToolUse": [

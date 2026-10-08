@@ -26,6 +26,11 @@ cc() { if (($#)); then claude "$@"; else claude --session-id "$(uuidgen)"; fi; }
 claudepower() {
   # Usage: claudepower [session name] [extra claude args...]
   cd "$HOME/devops/ubuntu" || return
+  claudepowerlocal "$@"
+}
+claudepowerlocal() {
+  # Same as claudepower, but runs in the current directory.
+  # Usage: claudepowerlocal [session name] [extra claude args...]
   local name=()
   if [[ -n "$1" && "$1" != -* ]]; then name=(--name "$1"); shift; fi
   if (($#)); then

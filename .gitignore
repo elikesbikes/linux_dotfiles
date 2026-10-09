@@ -2,3 +2,6 @@
 .secrets/
 __pycache__/
 *.pyc
+
+# certbot state (private keys, ACME account) lives in ~/.secrets/certbot/config, never in this public repo
+scripts/certbot/config/

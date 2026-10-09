@@ -109,7 +109,8 @@ All hosts use TPM handle `0x81010001` to seal the Proton Pass PAT.
 
 ### Certbot / TLS
 
-- **Scripts:** `~/scripts/certbot/`
+- **Scripts:** `~/scripts/certbot/` (hooks only)
+- **State (keys, ACME account, renewal conf):** `~/.secrets/certbot/config` — never in the public dotfiles repo (moved out 2026-10-09)
 - **Cloudflare token:** `~/.secrets/certbot/cloudflare.ini`
 - **Target:** `router.home.elikesbikes.com` (UniFi router), DNS-01 via Cloudflare
 - **Deploy hook:** copies cert to router via SSH agent (not automated, manual renewal)

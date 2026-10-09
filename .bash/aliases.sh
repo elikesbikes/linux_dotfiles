@@ -51,3 +51,4 @@ hermescli() {
   if [[ "$(hostname -s)" == "endurance" ]]; then docker exec -it -u hermes hermes hermes "$@"
   else ssh -t endurance "docker exec -it -u hermes hermes hermes $(printf '%q ' "$@")"; fi
 }
+alias hermess='ssh -t endurance "docker exec -it -u hermes hermes hermes"'

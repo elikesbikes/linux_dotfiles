@@ -45,3 +45,9 @@ alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra
 alias cleanupdotfiles='rm -rf $HOME/devops/github/linux_dotfiles/ && cd $HOME/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
 alias upgraderustdesk='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o '\''https://[^"]*x86_64\.deb'\'' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'
 alias repopullforce='git fetch --all && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD) && git pull'
+# Hermes CLI on endurance, from any host. Runs as the container's hermes user (never root: root re-owns its credentials).
+# Usage: hermescli [hermes args]   e.g. hermescli  |  hermescli chat  |  hermescli --continue
+hermescli() {
+  if [[ "$(hostname -s)" == "endurance" ]]; then docker exec -it -u hermes hermes hermes "$@"
+  else ssh -t endurance "docker exec -it -u hermes hermes hermes $(printf '%q ' "$@")"; fi
+}

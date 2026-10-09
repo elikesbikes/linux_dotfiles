@@ -1,0 +1,11 @@
+[Unit]
+Description=Check the Proton Pass SSH agent session every 5 minutes
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=5min
+# spread hosts apart: they share one public IP and Proton rate-limits logins
+RandomizedDelaySec=2min
+
+[Install]
+WantedBy=timers.target

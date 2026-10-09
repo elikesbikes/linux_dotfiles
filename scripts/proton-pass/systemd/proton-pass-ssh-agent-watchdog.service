@@ -1,0 +1,7 @@
+[Unit]
+Description=Restart the Proton Pass SSH agent if it lost its Proton session
+After=proton-pass-ssh-agent.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/scripts/proton-pass/ssh-agent-watchdog.sh

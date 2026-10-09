@@ -26,9 +26,9 @@ Standard CI/CD flow for all projects:
 
 ## Active Hosts
 
-Live hosts: **tars** (desktop/sandbox), **rocky** (dev), **hailmary** (prod), **kipp** (macOS/iOS), and **endurance** (Hermes agent host, VM on proxmox-prod-1 — back in service 2026-10-02; details in `IT/github/adastra/Homelab/infra/endurance.md`).
+Live hosts: **tars** (desktop/sandbox), **rocky** (dev), **hailmary** (prod), **kipp** (macOS/iOS), **endurance** (Hermes agent host, VM on proxmox-prod-1 — back in service 2026-10-02; details in `IT/github/adastra/Homelab/infra/endurance.md`), and **gargantua** (owner's test laptop, 192.168.5.109 — back in service 2026-10-09; details in `IT/github/adastra/Homelab/infra/gargantua.md`).
 
-Retired hostnames: `ranger0`, `ranger1`, `docker-prod-1/2/3`, `gargantua`, `case`. A live machine may reuse a retired hostname — do not assume a successful SSH means the original host is still in service. If a doc or skill references a retired host, treat it as stale. (The *old* physical `endurance` is retired; the name now belongs to the new Hermes VM.)
+Retired hostnames: `ranger0`, `ranger1`, `docker-prod-1/2/3`, `case`. A live machine may reuse a retired hostname — do not assume a successful SSH means the original host is still in service. If a doc or skill references a retired host, treat it as stale. (The *old* physical `endurance` is retired; the name now belongs to the new Hermes VM.) (`gargantua`'s old dev role moved to rocky; the name now belongs to the owner's test laptop.)
 
 ## Network Infrastructure
 

@@ -1,0 +1,6 @@
+[Unit]
+Description=Consistent database copies of the endurance stack (Honcho, Hermes, Open WebUI) for restic
+
+[Service]
+Type=oneshot
+ExecStart=%h/scripts/hermes-db-dump/hermes-db-dump.sh

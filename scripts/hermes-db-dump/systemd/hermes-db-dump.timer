@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily database copies on endurance (15 min before the restic job)
+
+[Timer]
+OnCalendar=*-*-* 11:45:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

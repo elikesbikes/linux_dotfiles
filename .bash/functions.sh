@@ -681,7 +681,7 @@ gpull_tutorials() {
 #
 #   host: hailmary | endurance   (omit to push only)
 #   hailmary: the usual prod deploy.
-#   endurance: since 2026-10-05, only for hermes, honcho and open-webui. Plays the
+#   endurance: since 2026-10-05, only for hermes, honcho, open-webui and restic (restic added 2026-10-09). Plays the
 #   deploy:endurance job (runner "endurance-shell" on endurance; see
 #   tutorials/scripts/deploy-endurance.sh). Typing "endurance" is the approval.
 #   ranger0/docker-prod-1/ranger1 are retired (Project Exodus, 2026-07).
@@ -720,9 +720,9 @@ gacp_tutorials_wcopy() {
   # endurance accepts only these projects (same list as scripts/deploy-endurance.sh);
   # refuse BEFORE pushing anything.
   if [[ "${DEPLOY_HOST}" == "endurance" ]]; then
-    case " hermes honcho open-webui " in
+    case " hermes honcho open-webui restic " in
       *" ${PROJECT_NAME} "*) ;;
-      *) echo "ERROR: '${PROJECT_NAME}' cannot be deployed to endurance (allowed: hermes honcho open-webui)"; return 1 ;;
+      *) echo "ERROR: '${PROJECT_NAME}' cannot be deployed to endurance (allowed: hermes honcho open-webui restic)"; return 1 ;;
     esac
   fi
 

@@ -334,7 +334,8 @@ gacp_hermes_config() {
     echo "REFUSED: hermes-config has a github.com remote; it must stay private (GitLab only)."
     popd > /dev/null; return 1
   fi
-  CHANGED="$(git ls-files --modified --others --exclude-standard)"
+  # The scanner holds the patterns themselves, so it is the one file not scanned.
+  CHANGED="$(git ls-files --modified --others --exclude-standard | grep -v '^scripts/secret-scan\.sh$')"
   if [ -n "$CHANGED" ] && ! echo "$CHANGED" | xargs -d '\n' "$DIR/scripts/secret-scan.sh"; then
     echo "REFUSED: secret-looking content in the changed files above; nothing was committed."
     popd > /dev/null; return 1

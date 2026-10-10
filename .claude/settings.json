@@ -109,6 +109,16 @@
             "statusMessage": "Auto-committing adastra..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/hermes-config gacp_hermes_config --stop",
+            "timeout": 30,
+            "statusMessage": "Auto-committing hermes-config..."
+          }
+        ]
       }
     ]
   },

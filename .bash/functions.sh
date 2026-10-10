@@ -314,6 +314,60 @@ gacp_cooper() {
 
 
 # ------------------------------------------------------------
+# gacp_hermes_config
+# ------------------------------------------------------------
+# gacp workflow inside the PRIVATE hermes-config repo (GitLab only:
+# ecloaiza/hermes-config). It holds Hermes' personal files (SOUL.md, config.yaml,
+# custom skills), so two guards run before anything is committed:
+#   1. the repo must have no github.com remote (it must never go public);
+#   2. every changed file is scanned for secret-looking content
+#      (scripts/secret-scan.sh, the same pattern list as snapshot-hermes.sh).
+# Also called by the Claude Code auto-commit hook (settings.json).
+#
+# Usage:
+#   gacp_hermes_config "Commit message"
+# ------------------------------------------------------------
+gacp_hermes_config() {
+  local DIR="$HOME/devops/projects/hermes-config" CHANGED RC
+  pushd "$DIR" > /dev/null || return 1
+  if git remote -v 2>/dev/null | grep -qi 'github\.com'; then
+    echo "REFUSED: hermes-config has a github.com remote; it must stay private (GitLab only)."
+    popd > /dev/null; return 1
+  fi
+  CHANGED="$(git ls-files --modified --others --exclude-standard)"
+  if [ -n "$CHANGED" ] && ! echo "$CHANGED" | xargs -d '\n' "$DIR/scripts/secret-scan.sh"; then
+    echo "REFUSED: secret-looking content in the changed files above; nothing was committed."
+    popd > /dev/null; return 1
+  fi
+  gacp "$@"
+  RC=$?
+  popd > /dev/null
+  return $RC
+}
+
+
+# ------------------------------------------------------------
+# hermes_config_snapshot
+# ------------------------------------------------------------
+# Copy Hermes' own files from endurance into hermes-config (scripts/snapshot-hermes.sh,
+# read-only on endurance) and commit + push when anything changed. Run daily by the
+# user timer hermes-config-snapshot.timer; safe to run by hand.
+# ------------------------------------------------------------
+hermes_config_snapshot() {
+  local DIR="$HOME/devops/projects/hermes-config"
+  "$DIR/scripts/snapshot-hermes.sh" || { logger -t hermes-config-snapshot "snapshot FAILED"; return 1; }
+  if [ -z "$(git -C "$DIR" status --porcelain)" ]; then
+    echo "hermes-config: no changes"
+    logger -t hermes-config-snapshot "no changes"
+    return 0
+  fi
+  gacp_hermes_config "hermes-config: snapshot $(date '+%Y-%m-%d %H:%M')" \
+    && logger -t hermes-config-snapshot "committed and pushed" \
+    || { logger -t hermes-config-snapshot "commit/push FAILED"; return 1; }
+}
+
+
+# ------------------------------------------------------------
 # gacp_dotfiles
 # ------------------------------------------------------------
 # Runs the gacp workflow inside the linux_dotfiles repository.

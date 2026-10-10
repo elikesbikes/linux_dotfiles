@@ -348,15 +348,44 @@ gacp_hermes_config() {
 
 
 # ------------------------------------------------------------
+# Hermes config: what is in git vs. what runs on endurance
+# ------------------------------------------------------------
+# hermes-config/hermes/{config.yaml,SOUL.md} are the files Hermes reads from its data folder on endurance.
+# The repo marker  .deployed-sha256  records the checksums of those two files at the last moment the repo
+# and endurance were known to be identical (after a snapshot or a deploy). Comparing three checksums
+# (repo now, endurance now, marker) tells which side changed, so a snapshot never overwrites edits made
+# in the repo, and a deploy never overwrites a change Hermes made on endurance.
+_hermes_cfg_dir() { echo "$HOME/devops/projects/hermes-config"; }
+_hermes_cfg_remote_dir="devops/docker/hermes/data"
+_hermes_cfg_hash_local()  { ( cd "$(_hermes_cfg_dir)/hermes" && sha256sum config.yaml SOUL.md | awk '{print $1}' | paste -sd' ' ); }
+_hermes_cfg_hash_remote() { ssh -o BatchMode=yes endurance "cd $_hermes_cfg_remote_dir && sha256sum config.yaml SOUL.md" | awk '{print $1}' | paste -sd' '; }
+_hermes_cfg_marker()      { cat "$(_hermes_cfg_dir)/.deployed-sha256" 2>/dev/null; }
+
+
+# ------------------------------------------------------------
 # hermes_config_snapshot
 # ------------------------------------------------------------
 # Copy Hermes' own files from endurance into hermes-config (scripts/snapshot-hermes.sh,
 # read-only on endurance) and commit + push when anything changed. Run daily by the
 # user timer hermes-config-snapshot.timer; safe to run by hand.
+# Skips (and says so) when the repo holds config.yaml/SOUL.md edits that were not deployed yet,
+# because the snapshot would overwrite them with endurance's older copy.
 # ------------------------------------------------------------
 hermes_config_snapshot() {
-  local DIR="$HOME/devops/projects/hermes-config"
+  local DIR; DIR="$(_hermes_cfg_dir)"
+  local L R M
+  L="$(_hermes_cfg_hash_local)"; R="$(_hermes_cfg_hash_remote)"; M="$(_hermes_cfg_marker)"
+  if [ -z "$R" ]; then echo "hermes-config: cannot read endurance, snapshot skipped"; logger -t hermes-config-snapshot "endurance unreadable, skipped"; return 1; fi
+  if [ -n "$M" ] && [ "$L" != "$R" ] && [ "$L" != "$M" ]; then
+    if [ "$R" = "$M" ]; then
+      echo "hermes-config: the repo has config.yaml/SOUL.md edits not deployed yet - snapshot SKIPPED (deploy first: hermes_config_deploy)"
+      logger -t hermes-config-snapshot "skipped: undeployed repo edits"; return 0
+    fi
+    echo "hermes-config: CONFLICT - repo and endurance both changed since the last sync; snapshot SKIPPED, resolve by hand"
+    logger -t hermes-config-snapshot "CONFLICT: both sides changed, skipped"; return 1
+  fi
   "$DIR/scripts/snapshot-hermes.sh" || { logger -t hermes-config-snapshot "snapshot FAILED"; return 1; }
+  _hermes_cfg_hash_local > "$DIR/.deployed-sha256"
   if [ -z "$(git -C "$DIR" status --porcelain)" ]; then
     echo "hermes-config: no changes"
     logger -t hermes-config-snapshot "no changes"
@@ -365,6 +394,65 @@ hermes_config_snapshot() {
   gacp_hermes_config "hermes-config: snapshot $(date '+%Y-%m-%d %H:%M')" \
     && logger -t hermes-config-snapshot "committed and pushed" \
     || { logger -t hermes-config-snapshot "commit/push FAILED"; return 1; }
+}
+
+
+# ------------------------------------------------------------
+# hermes_config_deploy
+# ------------------------------------------------------------
+# Put the repo's hermes/config.yaml and hermes/SOUL.md onto endurance (the repo is the source of truth).
+#
+#   hermes_config_deploy            PLAN: show the diff, change nothing
+#   hermes_config_deploy --apply    APPLY: back up the files on endurance, copy, check, record the marker
+#
+# Safety: refuses when the repo has uncommitted or unpushed changes (what runs must be in git), when
+# config.yaml does not parse, or when endurance changed since the last sync (run hermes_config_snapshot
+# first so Hermes' own change is kept in git). The copy is atomic (temp file + rename). Hermes is NOT
+# restarted: config.yaml and SOUL.md are read when a session or the gateway starts, so a new
+# `hermescli` session picks them up and Discord/Open WebUI need `docker restart hermes` (a short
+# interruption). The Claude Code hook never calls this function.
+# ------------------------------------------------------------
+hermes_config_deploy() {
+  local DIR; DIR="$(_hermes_cfg_dir)"
+  local MODE="${1:-plan}" L R M TS F
+  case "$MODE" in plan|--apply) ;; *) echo "usage: hermes_config_deploy [--apply]"; return 2;; esac
+  [ -z "$(git -C "$DIR" status --porcelain)" ] || { echo "REFUSED: hermes-config has uncommitted changes (commit them first: gacp_hermes_config)"; return 1; }
+  git -C "$DIR" fetch -q origin 2>/dev/null
+  [ "$(git -C "$DIR" rev-parse HEAD)" = "$(git -C "$DIR" rev-parse origin/main)" ] || { echo "REFUSED: hermes-config is not in sync with GitLab (unpushed or unpulled commits)"; return 1; }
+  python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" "$DIR/hermes/config.yaml" 2>/dev/null \
+    || { echo "REFUSED: hermes/config.yaml does not parse as YAML"; return 1; }
+  L="$(_hermes_cfg_hash_local)"; R="$(_hermes_cfg_hash_remote)"; M="$(_hermes_cfg_marker)"
+  [ -n "$R" ] || { echo "REFUSED: cannot read endurance"; return 1; }
+  if [ "$L" = "$R" ]; then echo "hermes_config_deploy: endurance already matches the repo, nothing to do"; return 0; fi
+  if [ "$R" != "$M" ]; then
+    echo "REFUSED: endurance's config.yaml/SOUL.md changed since the last sync (Hermes or a hand edit)."
+    echo "         Run hermes_config_snapshot first so that change is saved in git, then redo your edit on top of it."
+    return 1
+  fi
+  for F in config.yaml SOUL.md; do
+    echo "=== $F (- on endurance now, + in the repo)"
+    diff -u --label "endurance:$F" --label "repo:$F" <(ssh -o BatchMode=yes endurance "cat $_hermes_cfg_remote_dir/$F") "$DIR/hermes/$F" || true
+  done
+  if [ "$MODE" = "plan" ]; then echo; echo "PLAN ONLY - nothing was written. Re-run with --apply."; return 0; fi
+
+  TS="$(date +%Y%m%d-%H%M%S)"
+  ssh -o BatchMode=yes endurance "mkdir -p $_hermes_cfg_remote_dir/.config-backups/$TS && cp -p $_hermes_cfg_remote_dir/config.yaml $_hermes_cfg_remote_dir/SOUL.md $_hermes_cfg_remote_dir/.config-backups/$TS/" \
+    || { echo "FAILED: could not back up on endurance; nothing changed"; return 1; }
+  for F in config.yaml SOUL.md; do
+    scp -q "$DIR/hermes/$F" "endurance:$_hermes_cfg_remote_dir/.$F.new" \
+      && ssh -o BatchMode=yes endurance "chmod --reference=$_hermes_cfg_remote_dir/$F $_hermes_cfg_remote_dir/.$F.new && mv $_hermes_cfg_remote_dir/.$F.new $_hermes_cfg_remote_dir/$F" \
+      || { echo "FAILED copying $F; restore with: ssh endurance 'cp -p $_hermes_cfg_remote_dir/.config-backups/$TS/* $_hermes_cfg_remote_dir/'"; return 1; }
+  done
+  if ! ssh -o BatchMode=yes endurance "docker exec -u hermes hermes /opt/hermes/.venv/bin/python -c 'import yaml;yaml.safe_load(open(\"/opt/data/config.yaml\"))'"; then
+    ssh -o BatchMode=yes endurance "cp -p $_hermes_cfg_remote_dir/.config-backups/$TS/* $_hermes_cfg_remote_dir/"
+    echo "FAILED: config.yaml did not parse on endurance - the backup was put back"; return 1
+  fi
+  _hermes_cfg_hash_remote > "$DIR/.deployed-sha256"
+  logger -t hermes-config-deploy "deployed config.yaml+SOUL.md to endurance (repo $(git -C "$DIR" rev-parse --short HEAD)), backup $TS"
+  gacp_hermes_config "hermes-config: deployed to endurance $(date '+%Y-%m-%d %H:%M')" >/dev/null
+  echo "DEPLOYED. Backup on endurance: $_hermes_cfg_remote_dir/.config-backups/$TS"
+  echo "New 'hermescli' sessions use it now. For Discord and Open WebUI:  ssh endurance 'docker restart hermes'  (a short interruption)."
+  echo "Roll back:  ssh endurance 'cp -p $_hermes_cfg_remote_dir/.config-backups/$TS/* $_hermes_cfg_remote_dir/'  then restart."
 }
 
 

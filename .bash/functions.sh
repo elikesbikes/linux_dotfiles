@@ -791,10 +791,11 @@ _gitlab_deploy_tutorials() {
   local SHA="$3"
   local GL_URL="${GITLAB_URL:-https://gitlab.home.elikesbikes.com}"
   local GL_PROJECT="ecloaiza%2Ftutorials"
+  declare -F load_gitlab >/dev/null && load_gitlab
   local TOKEN="${GITLAB_TOKEN:-}"
 
   if [[ -z "${TOKEN}" ]]; then
-    echo "ERROR: GITLAB_TOKEN not set — source ~/.secrets/gitlab or set it manually"
+    echo "ERROR: GITLAB_TOKEN not set — run load_gitlab or set it manually"
     return 1
   fi
 

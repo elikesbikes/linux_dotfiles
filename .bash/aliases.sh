@@ -49,5 +49,9 @@ alias repopullforce='git fetch --all && git reset --hard origin/$(git rev-parse 
 # Usage: hermescli [hermes args]   e.g. hermescli  |  hermescli chat  |  hermescli --continue
 hermescli() {
   if [[ "$(hostname -s)" == "endurance" ]]; then docker exec -it -u hermes hermes hermes "$@"
-  else ssh -t endurance "docker exec -it -u hermes hermes hermes $(printf '%q ' "$@")"; fi
+  else
+    # printf '%q ' with no arguments prints '' (an empty argument that Hermes rejects as a command), so quote only when there are args
+    local args=""; (( $# )) && args="$(printf '%q ' "$@")"
+    ssh -t endurance "docker exec -it -u hermes hermes hermes ${args}"
+  fi
 }

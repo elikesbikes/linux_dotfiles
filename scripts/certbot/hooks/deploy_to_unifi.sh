@@ -36,17 +36,15 @@ fi
 
 # 1. Upload Certificate and Key to UniFi Gateway
 echo "Uploading certificates to /tmp/..."
-scp -o StrictHostKeyChecking=no -q "$CERT_PATH" "${UNIFI_USER}@${UNIFI_HOST}:/tmp/unifi-core.crt"
-scp -o StrictHostKeyChecking=no -q "$KEY_PATH" "${UNIFI_USER}@${UNIFI_HOST}:/tmp/unifi-core.key"
-
-if [ $? -ne 0 ]; then
+if ! scp "${SSH_OPTS[@]}" -q "$CERT_PATH" "${UNIFI_USER}@${UNIFI_HOST}:/tmp/unifi-core.crt" \
+   || ! scp "${SSH_OPTS[@]}" -q "$KEY_PATH" "${UNIFI_USER}@${UNIFI_HOST}:/tmp/unifi-core.key"; then
   echo "Error: SCP upload failed. Check SSH connectivity and keys."
   exit 1
 fi
 
 # 2. Move files to correct location and restart service
 echo "Installing certificates and restarting UniFi Core..."
-ssh -o StrictHostKeyChecking=no "${UNIFI_USER}@${UNIFI_HOST}" "bash -s" <<EOF
+ssh "${SSH_OPTS[@]}" "${UNIFI_USER}@${UNIFI_HOST}" "bash -s" <<EOF
 
     # Define the target directory (Standard for UniFi OS 1.x, 2.x, 3.x)
     TARGET_DIR="/data/unifi-core/config"

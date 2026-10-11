@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {

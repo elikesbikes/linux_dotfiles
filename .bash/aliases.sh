@@ -48,6 +48,11 @@ alias repopullforce='git fetch --all && git reset --hard origin/$(git rev-parse 
 # Hermes CLI on endurance, from any host. Runs as the container's hermes user (never root: root re-owns its credentials).
 # Usage: hermescli [hermes args]   e.g. hermescli  |  hermescli chat  |  hermescli --continue
 hermescli() {
+  # Model shortcuts for this run only (config.yaml default stays Claude): hermescli --codex | --claude [more args]
+  case "${1:-}" in
+    --codex)  shift; set -- --provider openai-codex -m gpt-6-luna "$@" ;;
+    --claude) shift; set -- --provider claude-subscription-directsdk-experimental -m claude-sonnet-5-5 "$@" ;;
+  esac
   if [[ "$(hostname -s)" == "endurance" ]]; then docker exec -it -u hermes hermes hermes "$@"
   else
     # printf '%q ' with no arguments prints '' (an empty argument that Hermes rejects as a command), so quote only when there are args

@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "opus",
+  "model": "claude-fable-5",
   "hooks": {
     "PreToolUse": [
       {

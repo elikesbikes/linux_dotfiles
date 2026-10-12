@@ -132,3 +132,12 @@ Defined in `~/devops/github/linux_dotfiles/.bash/`:
 - **Plugin sync:** bidirectional rsync between tars and case
 - **Plugin edits:** require full shell restart (`killall quickshell`)
 - **Bar toggle:** `~/.local/state/omarchy/toggles/bar-off` hides bar (persists across reboots)
+
+## App Theme — Interstellar (ALWAYS)
+
+**Every app I build (iOS, web, watchOS, anything with a UI) uses my "Interstellar console" theme.** Don't invent a new look or ask which theme to use.
+
+- **Canonical sources:** iOS `~/devops/projects/ios/cooper/Shared/ThemeColors.swift` + `Cooper/Theme.swift` (refined, wins on conflicts); web `~/devops/projects/mcc/runner/cooper/src/style.css` (`:root`); rules in `~/devops/projects/mcc/docs/UX.md`.
+- **Colors:** bg `#06080b` · panel `#161a21` · raised `#212731` · border `#2b313b` · accent amber `#f0a23b` (dim `#b87723`) · data `#9fc4e8` · teal `#5fb3a1` · text `#e6e8ec` · muted `#8a909c` · ok `#5fb37a` · warn = accent · alert `#d9534f`.
+- **Type:** Inter for prose; IBM Plex Mono (iOS `.monospaced`) uppercase + wide tracking for labels, data, tabs, badges; amber mono card titles and wordmark.
+- **Rules:** dark only, amber tint; surface ladder bg → panel → raised (no 4th shade); faint fixed amber/blue radial glows on web body; translucent blurred sticky nav; loading, empty and failed states look different.

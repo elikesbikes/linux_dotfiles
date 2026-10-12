@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "claude-sonnet-5",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -130,10 +130,10 @@
       "effortLevel": "low"
     },
     "claude-sonnet-5-5": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-sonnet-5": {
-      "effortLevel": "medium"
+      "effortLevel": "high"
     },
     "claude-fable-5": {
       "effortLevel": "medium"

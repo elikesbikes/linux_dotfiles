@@ -24,6 +24,13 @@ trap 'shred -u "$CF_INI" 2>/dev/null || rm -f "$CF_INI"' EXIT
 printf '%s\n' "$CF_INI_CONTENT" > "$CF_INI"
 unset CF_INI_CONTENT
 
+# Daily canary (warning only): the deploy hook needs this host's key in the router's /root/.ssh/authorized_keys.
+# A UniFi OS reset of that file would otherwise go unnoticed until the next renewal fails to deploy.
+if ! ssh -o IdentityAgent="$HOME/.ssh/proton-pass-agent.sock" -o IdentitiesOnly=yes -i "$HOME/.ssh/id_ed25519.pub" \
+        -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no root@192.168.5.1 true 2>/dev/null; then
+    echo "WARNING: router SSH check failed (root@192.168.5.1 with $(hostname -s)'s key): the certificate deploy hook will fail. Check /root/.ssh/authorized_keys on the router." >&2
+fi
+
 /usr/bin/certbot renew \
     --config-dir "$CERTBOT_DIR/config" \
     --work-dir "$CERTBOT_DIR/work" \

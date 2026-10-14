@@ -1,0 +1,26 @@
+#!/bin/sh
+# sshtars broker: forced command for SSHTars device keys on hailmary.
+# authorized_keys:  restrict,port-forwarding,permitopen="…",command="/home/ecloaiza/scripts/sshtars/broker <device>" ecdsa-sha2-nistp256 AAAA… sshtars-<device>
+#
+# Allowed requests (SSH_ORIGINAL_COMMAND):
+#   agent   pipe to the Proton Pass SSH agent (HOMELAB vault): list keys + sign. No key export.
+# Anything else, including a shell, is refused. Every request is logged to syslog
+# (forwarded to Graylog) with the device name, so each use is traceable per device.
+# Source: sshtars-ios repo tools/broker/broker. Design: docs/proton-and-host-catalog.md.
+set -eu
+SOCK="$HOME/.ssh/proton-pass-agent.sock"
+DEVICE="${1:-unknown-device}"
+REQ="${SSH_ORIGINAL_COMMAND:-}"
+FROM="${SSH_CLIENT%% *}"
+
+logger -t sshtars-broker -p auth.info "device=$DEVICE request=${REQ:-<shell>} from=${FROM:-?}"
+case "$REQ" in
+  agent)
+    exec socat - "UNIX-CONNECT:$SOCK"
+    ;;
+  *)
+    logger -t sshtars-broker -p auth.warning "device=$DEVICE DENIED request=${REQ:-<shell>} from=${FROM:-?}"
+    echo "sshtars-broker: not allowed: ${REQ:-<shell>}" >&2
+    exit 1
+    ;;
+esac

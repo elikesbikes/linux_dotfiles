@@ -20,7 +20,7 @@ import re
 import subprocess
 import sys
 
-NOTE = "IT/github/adastra/Homelab/sshtars/hosts.md"
+NOTE = "IT/github/adastra/Homelab/projects/SSHTars hosts.md"
 MCC = os.path.expanduser("~/devops/projects/mcc")
 
 GROUP_KEYS = {"name", "parent", "username", "port", "key", "via_hailmary"}

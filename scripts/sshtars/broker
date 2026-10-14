@@ -4,6 +4,7 @@
 #
 # Allowed requests (SSH_ORIGINAL_COMMAND):
 #   agent   pipe to the Proton Pass SSH agent (HOMELAB vault): list keys + sign. No key export.
+#   catalog print the SSHTars host catalog (Obsidian note) as JSON (catalog.py)
 # Anything else, including a shell, is refused. Every request is logged to syslog
 # (forwarded to Graylog) with the device name, so each use is traceable per device.
 # Source: sshtars-ios repo tools/broker/broker. Design: docs/proton-and-host-catalog.md.
@@ -11,12 +12,15 @@ set -eu
 SOCK="$HOME/.ssh/proton-pass-agent.sock"
 DEVICE="${1:-unknown-device}"
 REQ="${SSH_ORIGINAL_COMMAND:-}"
-FROM="${SSH_CLIENT%% *}"
+FROM="${SSH_CLIENT:-?}"; FROM="${FROM%% *}"
 
 logger -t sshtars-broker -p auth.info "device=$DEVICE request=${REQ:-<shell>} from=${FROM:-?}"
 case "$REQ" in
   agent)
     exec socat - "UNIX-CONNECT:$SOCK"
+    ;;
+  catalog)
+    exec python3 "$(dirname "$0")/catalog.py"
     ;;
   *)
     logger -t sshtars-broker -p auth.warning "device=$DEVICE DENIED request=${REQ:-<shell>} from=${FROM:-?}"

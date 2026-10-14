@@ -94,12 +94,48 @@ _sync_repo_to_remotes() {
 # Usage:
 #   gacp "Commit message"
 # ------------------------------------------------------------
+# Refuse to commit into a repo that is mid-rebase/merge or on a detached HEAD. On 2026-10-06 a failed
+# 'git pull --rebase' left the adastra checkout half-rebased; hooks kept committing onto the detached HEAD
+# for a week and nothing was pushed. Reports to stderr and Graylog (tag gacp, GIT_STUCK).
+_gacp_report() {
+    echo "ERROR: $1" >&2
+    logger -n 192.168.5.25 -P 514 --udp -t gacp -p local0.warning \
+        "GIT_STUCK: repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)") host=$(hostname -s) $1" 2>/dev/null || true
+}
+
+_gacp_repo_ok() {
+    local gd
+    gd="$(git rev-parse --git-dir 2>/dev/null)" || { echo "ERROR: not a git repository" >&2; return 1; }
+    if [ -d "$gd/rebase-merge" ] || [ -d "$gd/rebase-apply" ]; then
+        _gacp_report "a rebase is in progress; finish it ('git rebase --continue') or abort it ('git rebase --abort') first"
+        return 1
+    fi
+    if [ -f "$gd/MERGE_HEAD" ]; then
+        _gacp_report "a merge is in progress; finish or abort it first"
+        return 1
+    fi
+    if ! git symbolic-ref -q HEAD >/dev/null; then
+        _gacp_report "HEAD is detached (not on a branch); check out main first"
+        return 1
+    fi
+}
+
+# Pull with rebase; on failure abort the rebase so the repo stays on its branch (local commit kept, unpushed).
+_gacp_pull_rebase() {
+    git pull --rebase "$@" && return 0
+    git rebase --abort 2>/dev/null || true
+    _gacp_report "'git pull --rebase $*' failed (conflict?); rebase aborted, local commit kept but NOT pushed. Resolve manually: git pull --rebase $*"
+    return 1
+}
+
 gacp() {
     if [ -z "$1" ]; then
         echo "Error: You must provide a commit message."
         echo "Usage: gacp \"Your descriptive message\""
         return 1
     fi
+
+    _gacp_repo_ok || return 1
 
     echo "--> Running: git add ."
     git add . || return 1
@@ -109,10 +145,7 @@ gacp() {
     git commit -m "$MESSAGE" || return 1
 
     echo "--> Running: git pull --rebase origin main"
-    git pull --rebase origin main || {
-        echo "ERROR: Rebase failed. Resolve conflicts, then run 'git rebase --continue'."
-        return 1
-    }
+    _gacp_pull_rebase origin main || return 1
 
     # Some repos (e.g. linux_dotfiles) mirror to GitLab via a second
     # pushurl on 'origin' rather than a separately-named 'gitlab' remote.
@@ -127,18 +160,12 @@ gacp() {
         [ -z "$PUSH_URL" ] && continue
         [ "$PUSH_URL" = "$FETCH_URL" ] && continue
         echo "--> Running: git pull --rebase $PUSH_URL main"
-        git pull --rebase "$PUSH_URL" main || {
-            echo "ERROR: Rebase against $PUSH_URL failed. Resolve conflicts, then run 'git rebase --continue'."
-            return 1
-        }
+        _gacp_pull_rebase "$PUSH_URL" main || return 1
     done < <(git remote get-url --all origin 2>/dev/null)
 
     if git remote get-url gitlab &>/dev/null; then
         echo "--> Running: git pull --rebase gitlab main"
-        git pull --rebase gitlab main || {
-            echo "ERROR: GitLab rebase failed. Resolve conflicts, then run 'git rebase --continue'."
-            return 1
-        }
+        _gacp_pull_rebase gitlab main || return 1
     fi
 
     echo "--> Running: git push -u origin main"
@@ -180,6 +207,8 @@ gcap() {
         echo "Error: You must provide a commit message."
         return 1
     fi
+
+    _gacp_repo_ok || return 1
 
     echo "--> Running: git add ."
     git add . || return 1

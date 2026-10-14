@@ -28,8 +28,17 @@ fi
 
 cd "$REPO_DIR" || exit 0
 
+# Detached HEAD or a half-finished rebase/merge: do NOT commit (that is how adastra silently stopped
+# pushing for a week after 2026-10-06). Report it so someone fixes the repo.
+GIT_DIR_PATH=$(git rev-parse --git-dir 2>/dev/null)
 CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
-if [ -n "$CURRENT_BRANCH" ] && [ "$CURRENT_BRANCH" != "main" ]; then
+if [ -z "$CURRENT_BRANCH" ] || [ -d "$GIT_DIR_PATH/rebase-merge" ] || [ -d "$GIT_DIR_PATH/rebase-apply" ] || [ -f "$GIT_DIR_PATH/MERGE_HEAD" ]; then
+    MSG_STUCK="GIT_STUCK: repo=$(basename "$REPO_DIR") host=$(hostname -s) is detached or mid-rebase/merge; auto-commit skipped. Fix the repo (finish or abort the rebase, check out main)."
+    echo "$MSG_STUCK" >&2
+    logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.warning "$MSG_STUCK" 2>/dev/null || true
+    exit 0
+fi
+if [ "$CURRENT_BRANCH" != "main" ]; then
     exit 0
 fi
 

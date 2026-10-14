@@ -343,6 +343,21 @@ gacp_cooper() {
 
 
 # ------------------------------------------------------------
+# gacp_sshtars
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the sshtars-ios repository.
+#
+# Usage:
+#   gacp_sshtars "Commit message"
+# ------------------------------------------------------------
+gacp_sshtars() {
+  pushd $HOME/devops/projects/ios/sshtars > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
+
+# ------------------------------------------------------------
 # gacp_hermes_config
 # ------------------------------------------------------------
 # gacp workflow inside the PRIVATE hermes-config repo (GitLab only:

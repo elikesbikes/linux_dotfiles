@@ -369,6 +369,16 @@ gacp_sshtars() {
 # ------------------------------------------------------------
 gacp_gittars() {
   pushd $HOME/devops/projects/ios/gittars > /dev/null || return 1
+  # Every push bumps the build number (CURRENT_PROJECT_VERSION, both configs) in the
+  # committed project, so each TestFlight upload is a new build and the pipeline
+  # archives exactly what the repo says. Only when there is something to commit.
+  if [ -n "$(git status --porcelain)" ]; then
+    local PBX="GitTars.xcodeproj/project.pbxproj" CUR NEXT
+    CUR=$(grep -m1 -oE 'CURRENT_PROJECT_VERSION = [0-9]+' "$PBX" | grep -oE '[0-9]+$')
+    NEXT=$(( ${CUR:-0} + 1 ))
+    sed -i -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = $NEXT;/g" "$PBX"
+    echo "--> Build number: ${CUR:-0} -> $NEXT"
+  fi
   gacp "$@"
   popd > /dev/null
 }

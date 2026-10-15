@@ -358,6 +358,23 @@ gacp_sshtars() {
 
 
 # ------------------------------------------------------------
+# gacp_gittars
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the gittars-ios repository
+# (GitLab ecloaiza/gittars-ios, project id 16). Also called by the
+# Claude Code auto-commit hook (settings.json).
+#
+# Usage:
+#   gacp_gittars "Commit message"
+# ------------------------------------------------------------
+gacp_gittars() {
+  pushd $HOME/devops/projects/ios/gittars > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
+
+# ------------------------------------------------------------
 # gacp_hermes_config
 # ------------------------------------------------------------
 # gacp workflow inside the PRIVATE hermes-config repo (GitLab only:

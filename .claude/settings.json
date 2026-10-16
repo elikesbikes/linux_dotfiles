@@ -115,6 +115,17 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/ios/checkmktars gacp_checkmktars --stdin",
+            "timeout": 30,
+            "statusMessage": "Auto-committing checkmktars-ios..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
             "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/hermes-config gacp_hermes_config --stdin",
             "timeout": 30,
             "statusMessage": "Auto-committing hermes-config..."

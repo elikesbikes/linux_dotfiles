@@ -7,3 +7,5 @@ ssh: connect to host proxmox-prod-2s port 22: No route to host
 {"id":"oPKMDHYINQCB","time":1791154804,"expires":1791198004,"event":"message","topic":"backups","title":"Proxmox Backup FAILED","message":"❌ Backup job failed\n\n🖥 Node:     proxmox-prod-1\n🕒 Started:  2026-10-04 11:30:09\n🏁 Finished: 2026-10-04 13:05:10\n⏱ Duration: 01h:35m:01s\n\nStatus: WARNINGS: 1\nCheck the Proxmox task log for details.","priority":4}
 Received disconnect from 192.168.5.71 port 22:2: Too many authentication failures
 Disconnected from 192.168.5.71 port 22
+Received disconnect from 192.168.5.71 port 22:2: Too many authentication failures
+Disconnected from 192.168.5.71 port 22

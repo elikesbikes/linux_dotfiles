@@ -22,8 +22,8 @@ $st=0; $w=""; if ($temp -ge 85) {$st=1;$w=" - hot"}; if ($temp -ge 92) {$st=2;$w
 $st=0; if ($pct -ge 90) {$st=1}; if ($pct -ge 97) {$st=2}
 "{0} `"GPU video memory`" vram_used_mb={1};;;0;{2}|vram_used_pct={3};90;97 {1}/{2} MiB used ({3}%)" -f $st,[int]$mu,[int]$mt,$pct
 # 4. power
-$st=0; if ($ppct -ge 98) {$st=1}
-"{0} `"GPU power`" power_w={1}|power_limit_w={2}|power_pct={3};98 {1} W of {2} W limit ({3}%)" -f $st,$pd,$pl,$ppct
+$st=0  # informational: sitting at the power limit while busy is normal (2026-10-20: dropped the 98% WARN)
+"{0} `"GPU power`" power_w={1}|power_limit_w={2}|power_pct={3} {1} W of {2} W limit ({3}%)" -f $st,$pd,$pl,$ppct
 # 5. clocks and throttling (flags: 0x1 idle, 0x4 sw power cap, 0x20 sw thermal, 0x8 hw slowdown, 0x40 hw thermal, 0x80 hw power brake)
 $why=@(); $st=0
 if ($mask -band 0x4)  { $why+="software power cap" }

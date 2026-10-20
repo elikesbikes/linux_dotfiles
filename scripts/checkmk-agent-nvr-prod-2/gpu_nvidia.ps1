@@ -27,7 +27,7 @@ $st=0  # informational: sitting at the power limit while busy is normal (2026-10
 # 5. clocks and throttling (flags: 0x1 idle, 0x4 sw power cap, 0x20 sw thermal, 0x8 hw slowdown, 0x40 hw thermal, 0x80 hw power brake)
 $why=@(); $st=0
 if ($mask -band 0x4)  { $why+="software power cap" }
-if ($mask -band 0x20) { $why+="software thermal slowdown"; $st=1 }
+if ($mask -band 0x20) { $why+="software thermal slowdown" }  # text only: the driver holding its heat target under load is normal; GPU temperature (85/92 C) and HW slowdown (CRIT) cover real heat problems (2026-10-20)
 if ($mask -band (0x8 -bor 0x40 -bor 0x80)) { $why+="HARDWARE slowdown (thermal/power brake)"; $st=2 }
 $idle = if ($mask -band 0x1) { "idle" } else { "active" }
 $wtxt = if ($why.Count) { " - throttling: " + ($why -join ", ") } else { "" }

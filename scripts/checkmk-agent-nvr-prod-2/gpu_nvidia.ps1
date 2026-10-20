@@ -34,7 +34,7 @@ $wtxt = if ($why.Count) { " - throttling: " + ($why -join ", ") } else { "" }
 "{0} `"GPU clocks`" clock_sm_mhz={1};;;0;{2}|clock_mem_mhz={3};;;0;{4}|clock_graphics_mhz={5} SM {1}/{2} MHz, memory {3}/{4} MHz, state {6} ({7}){8}" -f $st,[int]$csm,[int]$cmx,[int]$cmem,[int]$cmemx,[int]$cgr,$ps,$idle,$wtxt
 # 6. PCIe link (passthrough health): width below maximum means a degraded link; generation drops at idle by design
 $st=0; $n=""
-if ($pw -lt $pwm) { $st=2; $n=" - LINK WIDTH DEGRADED" } elseif ($busy -and $pg -lt $pgm) { $st=1; $n=" - generation below maximum while busy" }
+if ($pw -lt $pwm) { $st=2; $n=" - LINK WIDTH DEGRADED" } elseif ($busy -and $pg -lt $pgm) { $n=" - generation below maximum while busy" }  # text only, no WARN: the link renegotiates generation as load ramps (2026-10-20)
 "{0} `"GPU PCIe link`" pcie_gen={1};;;0;{2}|pcie_width={3};;;0;{4} generation {1}/{2}, width x{3}/x{4}{5}" -f $st,[int]$pg,[int]$pgm,[int]$pw,[int]$pwm,$n
 # 7. video encoder sessions (Blue Iris hardware encode, if used)
 "0 `"GPU encoder sessions`" encoder_sessions={0}|encoder_fps={1}|encoder_latency_us={2} {0} session(s), {1} fps average, {2} us latency (driver {3})" -f [int]$es,[int]$ef,[int]$el,$drv

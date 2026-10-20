@@ -29,7 +29,6 @@ $why=@(); $st=0
 if ($mask -band 0x4)  { $why+="software power cap" }
 if ($mask -band 0x20) { $why+="software thermal slowdown"; $st=1 }
 if ($mask -band (0x8 -bor 0x40 -bor 0x80)) { $why+="HARDWARE slowdown (thermal/power brake)"; $st=2 }
-if (($mask -band 0x4) -and $busy -and $st -lt 1) { $st=1 }
 $idle = if ($mask -band 0x1) { "idle" } else { "active" }
 $wtxt = if ($why.Count) { " - throttling: " + ($why -join ", ") } else { "" }
 "{0} `"GPU clocks`" clock_sm_mhz={1};;;0;{2}|clock_mem_mhz={3};;;0;{4}|clock_graphics_mhz={5} SM {1}/{2} MHz, memory {3}/{4} MHz, state {6} ({7}){8}" -f $st,[int]$csm,[int]$cmx,[int]$cmem,[int]$cmemx,[int]$cgr,$ps,$idle,$wtxt

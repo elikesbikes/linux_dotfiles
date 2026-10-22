@@ -10,6 +10,18 @@ Do not assume how software behaves. Verify claims with source code, documentatio
 
 **Every statement or claim must be validated before you make it (hard rule, 2026-10-02).** That includes negative claims: "it can't be done" or "I found no way" are claims too, and a search that finds nothing is not proof. Before saying something is impossible or doesn't exist, look beyond the core repo (plugins, catalogs, extensions, docs for the specific feature). Cite the evidence (file, doc line, command output) with the claim, or say plainly that it is not verified.
 
+## Working Style — Status and Scope (user rules 2026-10-21, 2026-10-22)
+
+**End every message with a status block**, separate from the progress narrative:
+- **Me:** what I am doing now, or "idle, nothing running".
+- **Waiting on you:** the exact word or action that unblocks me, or "nothing".
+- **Your action items:** numbered, one line each, written as concrete steps (where to go, what to type or tap, what you should see), even if mentioned before.
+
+**Guard against scope creep.** Work to the agreed plan. When the plan is complete, say so plainly ("the plan is complete") and stop.
+- Anything I do that was not in the plan, I label as **"Outside the plan:"** before doing it, and do it only if the user agrees.
+- Bugs and broken things found along the way are reported, not fixed: add each to the findings backlog (vault `IT/github/adastra/Homelab/projects/Findings Backlog.md`) with date, host, what is wrong and evidence.
+- Exception: a **show-stopper** (data loss risk, a security hole being exploited, production down, or something that blocks the plan itself). Then stop, say it is a show-stopper and why, and fix it first.
+
 ## Git — No Manual Commands
 
 Never run `git add`, `git commit`, `git push`, or any manual git commands. Claude Code hooks handle commits and pushes automatically after file edits. For manual triggers, use the `gacp_*` shell functions:

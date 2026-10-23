@@ -8,6 +8,7 @@ alias l="eza -lgho --sort=modified --icons --git --git-repos"
 alias ls="eza -lgho --sort=modified  --icons --git --git-repos"
 alias ll="eza -lgho --sort=modified --icons --git --git-repos"
 alias pp="ping -c 3 google.com"
+alias flushdns="resolvectl flush-caches && echo 'DNS cache flushed'"
 alias space="sudo du -h --max-depth=1 -t 1G"
 alias dot="yadm pull"
 alias docker-restart='docker restart $(docker ps -a -q)'

@@ -195,7 +195,8 @@
       "effortLevel": "medium"
     },
     "claude-fable-5-1": {
-      "effortLevel": "high"
+      "effortLevel": "high",
+      "autoCompactWindow": 400000
     },
     "claude-opus-5-5": {
       "effortLevel": "high",

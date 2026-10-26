@@ -821,7 +821,8 @@ gpull_tutorials() {
 # Usage:
 #   gacp_tutorials_wcopy <project> "Commit message" [host]
 #
-#   host: hailmary | endurance   (omit to push only)
+#   host: hailmary | rocky | endurance   (omit to push only)
+#   rocky: dev deploy (deploy:rocky, added 2026-10-26); per-host differences go in docker-compose.rocky.yml.
 #   hailmary: the usual prod deploy.
 #   endurance: since 2026-10-05, only for hermes, honcho, open-webui and restic (restic added 2026-10-09). Plays the
 #   deploy:endurance job (runner "endurance-shell" on endurance; see
@@ -944,10 +945,11 @@ _gitlab_deploy_tutorials() {
   local JOB_NAMES=()
   case "${HOST}" in
     hailmary) JOB_NAMES=("deploy:hailmary") ;;
+    rocky)    JOB_NAMES=("deploy:rocky") ;;
     endurance) JOB_NAMES=("deploy:endurance") ;;
     all)      JOB_NAMES=("deploy:hailmary") ;;
     *)
-      echo "ERROR: Unknown host '${HOST}'. Use hailmary or endurance (ranger0/docker-prod-1/ranger1 retired)"
+      echo "ERROR: Unknown host '${HOST}'. Use hailmary, rocky or endurance (ranger0/docker-prod-1/ranger1 retired)"
       return 1
       ;;
   esac

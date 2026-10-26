@@ -185,6 +185,16 @@
             "statusMessage": "Auto-committing hermes-config..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/elikesbikes.com gacp_elikesbikes --stop",
+            "timeout": 60,
+            "statusMessage": "Auto-committing elikesbikes.com..."
+          }
+        ]
       }
     ]
   },

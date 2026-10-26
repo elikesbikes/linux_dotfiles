@@ -29,3 +29,4 @@
 -- o.bind("SUPER + PERIOD", nil, "omarchy-shell shell toggle omarchy.emojis")
 o.bind("SUPER + ALT + + CTRL + P", "Screenshot", "omarchy-capture-screenshot")
 o.bind("SUPER + ALT + + CTRL + T", "Extract text (OCR) from screenshot", "omarchy-capture-text")
+o.bind("SUPER + ALT + A", "ChatTARS", { webapp = "https://chattars.home.elikesbikes.com/", focus = true })

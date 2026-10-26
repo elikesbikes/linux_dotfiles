@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -220,7 +220,7 @@
       "autoCompactWindow": 400000
     },
     "claude-opus-5-5": {
-      "effortLevel": "high",
+      "effortLevel": "low",
       "autoCompactWindow": 400000
     }
   },

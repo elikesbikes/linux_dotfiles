@@ -1169,3 +1169,22 @@ clone_tutorials() {
 
 
 echo "Git helper functions loaded (gacp, gcap, gcpp, dotfiles, tutorials, ssh)."
+
+
+# ------------------------------------------------------------
+# gacp_elikesbikes
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the elikesbikes.com website repo
+# (~/devops/projects/elikesbikes.com). 'origin' has two push URLs, so one
+# push lands on both github.com/elikesbikes/elikesbikes.com (primary,
+# Cloudflare deploys from it) and gitlab.home.elikesbikes.com/ecloaiza/
+# elikesbikes.com (secondary, local copy). Added 2026-10-25.
+#
+# Usage:
+#   gacp_elikesbikes "Commit message"
+# ------------------------------------------------------------
+gacp_elikesbikes() {
+  pushd $HOME/devops/projects/elikesbikes.com > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}

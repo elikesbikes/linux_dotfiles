@@ -260,6 +260,206 @@ gacp_mcc() {
 
 
 # ------------------------------------------------------------
+# gacp_worktree / gacp_worktree_done
+# ------------------------------------------------------------
+# Two Claude sessions in one checkout share the same files and the same
+# branch, so they overwrite each other's edits. Each session gets its own
+# git worktree (own folder, own branch wt/<name>) instead. The mcc repo's
+# PreToolUse hook (.claude/hooks/require-worktree.sh) blocks Edit/Write in
+# the main checkout and points back here.
+#
+# gacp() cannot be used from a worktree: it pushes 'origin main'. Land the
+# work with gacp_worktree_done instead.
+#
+# Env overrides (for testing against a scratch repo):
+#   GACP_WORKTREE_REPO   main checkout (default ~/devops/projects/mcc)
+#   GACP_WORKTREE_ROOT   where worktrees live (default <repo>-worktrees)
+#
+# Usage:
+#   gacp_worktree [name] [claude args...]   create (or resume) and launch Claude in it
+#   gacp_worktree_done [-y] ["message"]     commit, merge main in, push to main, clean up
+#                                           (run from a plain shell inside the worktree,
+#                                           after exiting Claude)
+# ------------------------------------------------------------
+
+# Gitignored files the project needs to run tests; linked, never copied (no second copy of .env).
+_gwt_links() {
+    printf '%s\n' .env .venv runner/cooper/node_modules runner/dashboard/node_modules .claude/settings.local.json
+}
+
+_gwt_log() {
+    logger -n 192.168.5.25 -P 514 --udp -t gacp -p local0.info \
+        "$1: repo=$(basename "${2:-unknown}") host=$(hostname -s) ${3:-}" 2>/dev/null || true
+}
+
+gacp_worktree() {
+    local repo root name wt branch rel src dst behind exclude
+    repo="${GACP_WORKTREE_REPO:-$HOME/devops/projects/mcc}"
+    root="${GACP_WORKTREE_ROOT:-${repo}-worktrees}"
+
+    if [ -n "$1" ] && [[ "$1" != -* ]]; then
+        name="$1"; shift
+    else
+        name="wt-$(date +%m%d-%H%M)"
+    fi
+    if ! [[ "$name" =~ ^[a-z0-9][a-z0-9._-]*$ ]]; then
+        echo "ERROR: worktree name '$name' must be lowercase letters, digits, '.', '_' or '-'" >&2
+        return 1
+    fi
+    git -C "$repo" rev-parse --git-dir >/dev/null 2>&1 || { echo "ERROR: $repo is not a git repository" >&2; return 1; }
+
+    wt="$root/$name"
+    branch="wt/$name"
+
+    if [ -d "$wt" ]; then
+        echo "--> Worktree exists, resuming: $wt"
+    else
+        echo "--> Running: git fetch origin main"
+        git -C "$repo" fetch -q origin main || echo "WARN: fetch failed; starting from local main" >&2
+        behind="$(git -C "$repo" rev-list --count main..origin/main 2>/dev/null)"
+        if [ "${behind:-0}" -gt 0 ]; then
+            echo "WARN: local main is $behind commit(s) behind origin/main; the worktree starts from local main (gacp_worktree_done merges origin/main in)" >&2
+        fi
+        git -C "$repo" worktree prune
+        mkdir -p "$root" || return 1
+        if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+            echo "--> Running: git worktree add $wt $branch (existing branch)"
+            git -C "$repo" worktree add -q "$wt" "$branch" || return 1
+        else
+            echo "--> Running: git worktree add -b $branch $wt main"
+            git -C "$repo" worktree add -q -b "$branch" "$wt" main || return 1
+        fi
+        _gwt_log WORKTREE_CREATE "$repo" "name=$name"
+    fi
+
+    # Keep the links out of 'git status' / 'git add .' (info/exclude is shared by all worktrees of the repo).
+    exclude="$(git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude)"
+    mkdir -p "$(dirname "$exclude")"
+    while IFS= read -r rel; do
+        grep -qxF "/$rel" "$exclude" 2>/dev/null || echo "/$rel" >> "$exclude"
+        src="$repo/$rel"; dst="$wt/$rel"
+        [ -e "$src" ] || continue
+        [ -e "$dst" ] || [ -L "$dst" ] && continue
+        mkdir -p "$(dirname "$dst")" && ln -s "$src" "$dst"
+    done < <(_gwt_links)
+
+    echo "--> Launching Claude in $wt (branch $branch)"
+    ( cd "$wt" && claudepowerlocal "$name" "$@" )
+}
+
+gacp_worktree_done() {
+    local yes=0 msg="" top gd common main_repo branch rel unmerged ahead ans
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -y|--yes) yes=1 ;;
+            *) msg="$1" ;;
+        esac
+        shift
+    done
+
+    top="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not in a git repository" >&2; return 1; }
+    gd="$(cd "$(git rev-parse --absolute-git-dir)" && pwd -P)"
+    common="$(cd "$(git rev-parse --path-format=absolute --git-common-dir)" && pwd -P)"
+    if [ "$gd" = "$common" ]; then
+        echo "ERROR: this is the main checkout, not a worktree. Run gacp_worktree_done from inside a worktree." >&2
+        return 1
+    fi
+    main_repo="$(dirname "$common")"
+    branch="$(git symbolic-ref -q --short HEAD)"
+    case "$branch" in
+        wt/*) ;;
+        *) echo "ERROR: worktree branch is '${branch:-detached}', expected wt/<name>" >&2; return 1 ;;
+    esac
+
+    # Resuming after a conflict: the merge is still open; finish it once nothing is unmerged.
+    if [ -f "$gd/MERGE_HEAD" ]; then
+        unmerged="$(git diff --name-only --diff-filter=U)"
+        if [ -n "$unmerged" ]; then
+            echo "ERROR: merge conflicts still unresolved in:" >&2
+            echo "$unmerged" | sed 's/^/    /' >&2
+            return 1
+        fi
+        echo "--> Running: git commit --no-edit (completing the merge)"
+        git add -A && git commit --no-edit || return 1
+    fi
+
+    _gacp_repo_ok || return 1
+
+    if [ -n "$(git status --porcelain)" ]; then
+        if [ -z "$msg" ]; then
+            echo "ERROR: uncommitted changes; pass a commit message: gacp_worktree_done \"message\"" >&2
+            return 1
+        fi
+        echo "--> Running: git add ."
+        git add . || return 1
+        echo "--> Running: git commit -m \"$msg\""
+        git commit -m "$msg" || return 1
+    fi
+
+    echo "--> Running: git fetch origin main"
+    git fetch -q origin main || { _gacp_report "git fetch origin main failed; nothing pushed"; return 1; }
+
+    echo "--> Running: git merge origin/main"
+    if ! git merge --no-edit origin/main; then
+        echo "" >&2
+        echo "CONFLICT: main moved under this branch and the same lines changed. Files:" >&2
+        git diff --name-only --diff-filter=U | sed 's/^/    /' >&2
+        echo "Nothing was pushed. Review them, have Claude resolve them in this worktree, then rerun gacp_worktree_done." >&2
+        _gwt_log WORKTREE_CONFLICT "$main_repo" "branch=$branch"
+        return 1
+    fi
+
+    ahead="$(git rev-list --count origin/main..HEAD)"
+    if [ "$ahead" -gt 0 ]; then
+        echo ""
+        git log --oneline origin/main..HEAD
+        git diff --stat origin/main HEAD
+        echo ""
+        if [ "$yes" != 1 ]; then
+            if [ ! -t 0 ]; then
+                echo "ERROR: no terminal to confirm on; refusing to push to main without -y" >&2
+                return 1
+            fi
+            read -r -p "Push $ahead commit(s) to main (auto-deploys to rocky)? [y/N] " ans
+            case "$ans" in
+                y|Y) ;;
+                *) echo "Not pushed. Branch and worktree kept; rerun gacp_worktree_done to retry."; return 1 ;;
+            esac
+        fi
+
+        echo "--> Running: git push origin HEAD:main"
+        if ! git push origin HEAD:main; then
+            echo "--> Push rejected (main moved); merging origin/main once more"
+            git fetch -q origin main && git merge --no-edit origin/main || {
+                echo "CONFLICT on retry; nothing pushed. Resolve and rerun gacp_worktree_done." >&2
+                return 1
+            }
+            git push origin HEAD:main || { _gacp_report "push to main rejected twice; nothing pushed, worktree kept"; return 1; }
+        fi
+    else
+        echo "--> Nothing to land (branch has no commits beyond origin/main)."
+    fi
+
+    # Bring the main checkout up to date, then remove this worktree and its branch.
+    cd "$main_repo" || return 1
+    if [ "$(git symbolic-ref -q --short HEAD)" = "main" ]; then
+        git fetch -q origin main
+        git merge --ff-only origin/main || echo "WARN: could not fast-forward the main checkout (local changes in the way?); do it once it is clean" >&2
+    else
+        echo "WARN: main checkout is not on 'main'; left it alone" >&2
+    fi
+    while IFS= read -r rel; do
+        [ -L "$top/$rel" ] && rm -f "$top/$rel"
+    done < <(_gwt_links)
+    git worktree remove "$top" || { echo "WARN: worktree not removed (untracked files left in $top?); remove it by hand once checked" >&2; return 1; }
+    git branch -d "$branch" || echo "WARN: branch $branch kept (not fully merged into local main)" >&2
+
+    _gwt_log WORKTREE_DONE "$main_repo" "branch=$branch commits=$ahead"
+    echo "SUCCESS: $branch landed on main; worktree removed. You are now in $main_repo"
+}
+
+
+# ------------------------------------------------------------
 # gacp_groceries
 # ------------------------------------------------------------
 # Runs the standard gacp workflow inside the groceries project.

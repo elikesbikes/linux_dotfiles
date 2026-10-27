@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -241,7 +241,7 @@
       "autoCompactWindow": 400000
     },
     "claude-opus-5-5": {
-      "effortLevel": "low",
+      "effortLevel": "high",
       "autoCompactWindow": 400000
     }
   },

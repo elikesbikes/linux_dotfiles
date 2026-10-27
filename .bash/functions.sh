@@ -347,8 +347,11 @@ gacp_worktree() {
         mkdir -p "$(dirname "$dst")" && ln -s "$src" "$dst"
     done < <(_gwt_links)
 
+    # cd in the caller's shell (not a subshell) so that after Claude exits you are already in the
+    # worktree and can run gacp_worktree_done straight away.
     echo "--> Launching Claude in $wt (branch $branch)"
-    ( cd "$wt" && claudepowerlocal "$name" "$@" )
+    cd "$wt" || return 1
+    claudepowerlocal "$name" "$@"
 }
 
 gacp_worktree_done() {

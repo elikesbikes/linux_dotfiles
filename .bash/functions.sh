@@ -348,10 +348,11 @@ gacp_worktree() {
 }
 
 gacp_worktree_done() {
-    local yes=0 msg="" top gd common main_repo branch rel unmerged ahead ans
+    local yes=0 keep=0 msg="" top gd common main_repo branch rel unmerged ahead ans
     while [ $# -gt 0 ]; do
         case "$1" in
             -y|--yes) yes=1 ;;
+            --keep) keep=1 ;;
             *) msg="$1" ;;
         esac
         shift

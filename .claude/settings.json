@@ -9,6 +9,27 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/ecloaiza/devops/projects/mcc/.claude/hooks/require-worktree.sh",
+            "timeout": 10,
+            "statusMessage": "Checking MCC worktree guard..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/ecloaiza/devops/projects/mcc/.claude/hooks/block-landing-yes.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Read|Edit|Write",
         "hooks": [
           {

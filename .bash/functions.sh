@@ -440,14 +440,19 @@ gacp_worktree_done() {
         echo "--> Nothing to land (branch has no commits beyond origin/main)."
     fi
 
-    # Bring the main checkout up to date, then remove this worktree and its branch.
-    cd "$main_repo" || return 1
-    if [ "$(git symbolic-ref -q --short HEAD)" = "main" ]; then
-        git fetch -q origin main
-        git merge --ff-only origin/main || echo "WARN: could not fast-forward the main checkout (local changes in the way?); do it once it is clean" >&2
+    # Bring the main checkout up to date, then (unless --keep) remove this worktree and its branch.
+    if [ "$(git -C "$main_repo" symbolic-ref -q --short HEAD)" = "main" ]; then
+        git -C "$main_repo" fetch -q origin main
+        git -C "$main_repo" merge --ff-only origin/main || echo "WARN: could not fast-forward the main checkout (local changes in the way?); do it once it is clean" >&2
     else
         echo "WARN: main checkout is not on 'main'; left it alone" >&2
     fi
+    if [ "$keep" = 1 ]; then
+        _gwt_log WORKTREE_LANDED "$main_repo" "branch=$branch commits=$ahead"
+        echo "SUCCESS: $branch landed on main ($ahead commit(s)). Worktree kept: keep working here, then run gacp_worktree_done again (add --keep to stay open again)."
+        return 0
+    fi
+    cd "$main_repo" || return 1
     while IFS= read -r rel; do
         [ -L "$top/$rel" ] && rm -f "$top/$rel"
     done < <(_gwt_links)

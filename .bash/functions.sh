@@ -277,9 +277,13 @@ gacp_mcc() {
 #
 # Usage:
 #   gacp_worktree [name] [claude args...]   create (or resume) and launch Claude in it
-#   gacp_worktree_done [-y] ["message"]     commit, merge main in, push to main, clean up
-#                                           (run from a plain shell inside the worktree,
-#                                           after exiting Claude)
+#   gacp_worktree_done [-y] [--keep] ["message"]
+#                                           commit, merge main in, push to main, clean up
+#                                           (run from a plain shell inside the worktree).
+#                                           --keep lands but leaves the worktree, branch and a
+#                                           running Claude session in place, so you can see the
+#                                           change live and iterate: run it from a second terminal,
+#                                           then run it again (without --keep) when the feature is done.
 # ------------------------------------------------------------
 
 # Gitignored files the project needs to run tests; linked, never copied (no second copy of .env).

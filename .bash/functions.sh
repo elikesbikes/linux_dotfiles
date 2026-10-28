@@ -486,6 +486,21 @@ gacp_groceries() {
   popd > /dev/null
 }
 
+# ------------------------------------------------------------
+# gacp_comp666
+# ------------------------------------------------------------
+# Runs the standard gacp workflow inside the COMP 666 coursework
+# repo (private, GitLab only).
+#
+# Usage:
+#   gacp_comp666 "Commit message"
+# ------------------------------------------------------------
+gacp_comp666() {
+  pushd $HOME/devops/projects/school/comp666 > /dev/null || return 1
+  gacp "$@"
+  popd > /dev/null
+}
+
 
 # ------------------------------------------------------------
 # syncn

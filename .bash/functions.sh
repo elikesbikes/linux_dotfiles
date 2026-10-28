@@ -813,7 +813,8 @@ hermes_config_deploy() {
       && ssh -o BatchMode=yes endurance "chmod --reference=$_hermes_cfg_remote_dir/$F $_hermes_cfg_remote_dir/.$F.new && mv $_hermes_cfg_remote_dir/.$F.new $_hermes_cfg_remote_dir/$F" \
       || { echo "FAILED copying $F; restore with: ssh endurance 'cp -p $_hermes_cfg_remote_dir/.config-backups/$TS/* $_hermes_cfg_remote_dir/'"; return 1; }
   done
-  if ! ssh -o BatchMode=yes endurance "docker exec -u hermes hermes /opt/hermes/.venv/bin/python -c 'import yaml;yaml.safe_load(open(\"/opt/data/config.yaml\"))'"; then
+  # Parse with Hermes' own loader (hermes_yaml, ruamel-based): the image has no PyYAML since 2026-10 (found 2026-10-28)
+  if ! ssh -o BatchMode=yes endurance "docker exec -u hermes hermes /opt/hermes/.venv/bin/python -c 'from hermes_yaml import safe_load;safe_load(open(\"/opt/data/config.yaml\").read())'"; then
     ssh -o BatchMode=yes endurance "cp -p $_hermes_cfg_remote_dir/.config-backups/$TS/* $_hermes_cfg_remote_dir/"
     echo "FAILED: config.yaml did not parse on endurance - the backup was put back"; return 1
   fi

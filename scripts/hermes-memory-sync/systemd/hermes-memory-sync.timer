@@ -1,0 +1,10 @@
+[Unit]
+Description=Claude Code memory -> Hermes, every 15 min from 08:00 to 17:00 (owner's choice 2026-10-28)
+
+[Timer]
+OnCalendar=*-*-* 08..16:00/15:00
+OnCalendar=*-*-* 17:00:00
+Persistent=false
+
+[Install]
+WantedBy=timers.target

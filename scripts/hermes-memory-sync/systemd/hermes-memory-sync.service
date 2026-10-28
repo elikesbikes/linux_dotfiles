@@ -1,0 +1,6 @@
+[Unit]
+Description=Copy Claude Code memory to endurance as Hermes' read-only owner-context skill
+
+[Service]
+Type=oneshot
+ExecStart=%h/scripts/hermes-memory-sync/sync.sh

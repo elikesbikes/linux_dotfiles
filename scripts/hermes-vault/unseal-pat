@@ -1,0 +1,5 @@
+#!/bin/sh
+# Root-only helper for the hermes-vault gate: print the gate's OWN Proton Pass PAT, sealed at TPM handle 0x81010002.
+# Reached only through one exact sudo rule (no arguments). The hermes-vault account is NOT in the tss group, so this
+# is its only way to the TPM, and it can never unseal the owner's PAT at 0x81010001.
+exec /usr/bin/tpm2_unseal -c 0x81010002

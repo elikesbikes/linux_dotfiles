@@ -1,0 +1,4 @@
+# Managed by scripts/hermes-vault (see its README). ONE exact command, no arguments ("" = none allowed).
+# Deployed by the dotfiles pipeline; applies ONLY to host 'hailmary' and user 'hermes-vault'.
+Defaults:hermes-vault !requiretty, logfile=/var/log/sudo-hermes-vault.log
+hermes-vault hailmary=(root) NOPASSWD: /usr/local/lib/hermes-vault/unseal-pat ""

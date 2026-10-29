@@ -340,3 +340,104 @@ def test_unknown_hostname_gets_default_profile(monkeypatch):
     assert diag.detect_profile() is diag.DEFAULT_PROFILE
     monkeypatch.setattr(diag.socket, "gethostname", lambda: "HailMary.home")
     assert diag.detect_profile() is diag.PROFILES["hailmary"]
+
+
+# ---------------------------------------------------------------- fit: owner's fitness/health data (MCC /api/life)
+
+class FitSpy:
+    """Records every URL the gate asks the MCC runner for."""
+    def __init__(self, data=None):
+        self.urls, self.data = [], data if data is not None else {"ok": 1}
+
+    def __call__(self, url):
+        self.urls.append(url)
+        return self.data
+
+
+def fit(request, data=None, profile=None):
+    spy = FitSpy(data)
+    code, text, outcome = diag.handle(request, api_fetch=lambda: API, run=Spy(), profile=profile, fit_fetch=spy)
+    return code, text, spy
+
+
+@pytest.mark.parametrize("request_text,url", [
+    ("fit activities", "fitness/activities?days=28&limit=2000"),
+    ("fit rides 90", "fitness/activities?days=90&limit=2000"),
+    ("fit pmc 365", "fitness/pmc?days=365"),
+    ("fit readiness", "fitness/readiness"),
+    ("fit labs", "medical/labs"),
+    ("fit anxiety", "health/anxiety"),
+    ("fit activity-compare 24894506646", "fitness/activity/24894506646/compare"),
+])
+def test_fit_fetches_exactly_one_fixed_local_url(request_text, url):
+    code, _, spy = fit(request_text)
+    assert code == 0 and spy.urls == ["http://127.0.0.1:5679/api/life/" + url]
+
+
+@pytest.mark.parametrize("request_text", [
+    "fit", "fit nope", "fit activities 0", "fit activities 121", "fit activities 99999", "fit activities -5",
+    "fit activities 28 extra", "fit activities 1e3", "fit readiness 7", "fit labs 1", "fit activity-compare",
+    "fit activity-compare 12", "fit activity-compare abc123456", "fit activity-compare 24894506646 1",
+    "fit activities 28&limit=1", "fit activities?days=1", "fit ../status", "fit activities/../../status",
+    "fit streams 24894506646", "fit sync", "fit ACTIVITIES", "fit activities 28;id",
+])
+def test_fit_rejects_everything_else_and_fetches_nothing(request_text):
+    code, _, spy = fit(request_text)
+    assert code == 2 and spy.urls == [], request_text
+
+
+def test_every_fit_url_is_local_get_with_only_digits_from_the_caller():
+    for name, (path, query, default, most) in diag.FIT.items():
+        arg = "24894506646" if name == "activity-compare" else (str(most) if most else None)
+        url = diag.fit_url(name, arg)
+        assert url.startswith("http://127.0.0.1:5679/api/life/") and "streams" not in url and "sync" not in url
+
+
+def test_fit_is_hailmary_only():
+    code, _, spy = fit("fit activities", profile=diag.DEFAULT_PROFILE)
+    assert code == 2 and spy.urls == []
+    _, text, _ = fit("help", profile=diag.DEFAULT_PROFILE)
+    assert "fit <name>" not in text
+    _, text, _ = fit("help")
+    assert "fit <name>" in text and "labs" in text
+
+
+ROWS = {"days": 28, "activities": [
+    {"id": "2", "date": "2026-10-29", "type": "road_biking", "name": "Ride\twith\ntabs", "avg_power": 180,
+     "hr_zones": {"z1": 10.0, "z2": 20.5, "z3": 0.0}, "power_zones": {"z1": None, "z2": 3.0}, "power_curve": [1] * 999},
+    {"id": "1", "date": "2026-10-28", "type": "walking", "name": "Walk"},
+    {"id": "0", "date": "2026-10-27", "type": "indoor_cycling", "name": "Pettit"},
+]}
+
+
+def test_activities_are_a_compact_table_without_power_curves():
+    _, text, _ = fit("fit activities", data=ROWS)
+    lines = text.splitlines()
+    assert lines[0].startswith("3 activities") and lines[1].split("\t") == list(diag.ACTIVITY_COLS)
+    first = lines[2].split("\t")
+    assert len(first) == len(diag.ACTIVITY_COLS) and "Ride with tabs" in first
+    assert "10/20.5/0" in first and "/3" in first and "power_curve" not in text and "999" not in text
+
+
+def test_rides_keep_only_cycling():
+    _, text, _ = fit("fit rides", data=ROWS)
+    assert text.splitlines()[0].startswith("2 rides") and "Walk" not in text and "Pettit" in text
+
+
+def test_labs_drop_the_point_history():
+    data = {"summary": {"analyte_count": 1}, "analytes": [{"analyte": "ALT", "latest": 19.0, "points": [{"v": 61}]}],
+            "qualitative": [{"analyte": "Appearance", "latest": "Clear", "values": [{"v": "Clear"}]}]}
+    _, text, _ = fit("fit labs", data=data)
+    assert '"latest":19.0' in text and "points" not in text and "values" not in text
+
+
+def test_fit_output_is_still_redacted_and_capped():
+    _, text, _ = fit("fit coach-report", data={"markdown": "token=" + FAKE_PAT, "pad": "y " * 40000})
+    assert FAKE_PAT not in text and "truncated" in text
+
+
+def test_fit_fetch_failure_is_reported_without_traceback():
+    def boom(url):
+        raise OSError("connection refused to http://127.0.0.1:5679/secret-path")
+    code, text, outcome = diag.handle("fit pmc", fit_fetch=boom)
+    assert code == 3 and text == "hermes-diag: error: OSError\n"

@@ -21,6 +21,9 @@ its OS (Linux or macOS):
   profile-specific (hailmary today):    status, component <name>      the MCC runner's own /api/status
                                         container-logs <name>         allowlisted containers
                                         service-journal <unit>        allowlisted units
+                                        fit <name> [n]                the owner's fitness/health/labs data: fixed
+                                                                      GETs on the MCC runner's local /api/life API
+                                                                      (owner OK 2026-10-29, incl. anxiety + labs)
 Python 3.9 compatible on purpose (macOS ships 3.9).
 """
 
@@ -37,6 +40,57 @@ import urllib.request
 MAX_BYTES = 64 * 1024
 TIMEOUT_S = 15
 MCC_API = "http://127.0.0.1:5679/api/status"
+LIFE_API = "http://127.0.0.1:5679/api/life/"
+
+# `fit <name> [n]`: name -> (path under LIFE_API, query with {n}, default n, max n). n=None: takes no number.
+# Every URL is built from these constants plus a validated integer: no caller text ever reaches the URL.
+# Only GET routes that read MCC's local data files (no Garmin/TrainerRoad call, no writes). Not offered:
+# activity streams (fetches from Garmin), anything that POSTs.
+FIT = {
+    "activities":         ("fitness/activities", "days={n}&limit=2000", 28, 120),
+    "rides":              ("fitness/activities", "days={n}&limit=2000", 28, 365),
+    "activity-compare":   ("fitness/activity/{n}/compare", "", None, None),   # n = Garmin activity id
+    "tss-weekly":         ("fitness/tss-weekly", "weeks={n}", 12, 104),
+    "zones-weekly":       ("fitness/zones-weekly", "weeks={n}", 12, 52),
+    "pmc":                ("fitness/pmc", "days={n}", 90, 365),
+    "readiness":          ("fitness/readiness", "", None, None),
+    "training-readiness": ("fitness/training-readiness", "days={n}", 30, 365),
+    "training-status":    ("fitness/training-status", "days={n}", 30, 365),
+    "insights":           ("fitness/insights", "days={n}", 120, 365),
+    "ef-trend":           ("fitness/ef-trend", "days={n}&category=all", 180, 365),
+    "power-profile":      ("fitness/power-profile", "ranges=all,ytd,d90&category=all", None, None),
+    "power-records":      ("fitness/power-records", "category=all", None, None),
+    "power-prs":          ("fitness/power-prs", "limit=8&category=all", None, None),
+    "prs":                ("fitness/prs", "days={n}", 42, 365),
+    "coach-report":       ("fitness/coach-report", "", None, None),
+    "fitness-age":        ("fitness/fitness-age", "days={n}", 365, 730),
+    "vo2max":             ("fitness/vo2max", "days={n}", 365, 730),
+    "endurance":          ("fitness/endurance", "days={n}", 365, 730),
+    "ftp":                ("health/ftp", "months={n}", 12, 36),
+    "health-flags":       ("health/flags", "", None, None),
+    "hrv":                ("health/hrv", "days={n}", 14, 365),
+    "rhr":                ("health/rhr", "days={n}", 30, 365),
+    "respiration":        ("health/respiration", "days={n}", 56, 365),
+    "body-battery":       ("health/body-battery", "days={n}", 30, 365),
+    "stress":             ("health/stress", "days={n}", 30, 365),
+    "sleep":              ("health/sleep", "days={n}", 7, 30),
+    "sleep-trend":        ("health/sleep-trend", "days={n}", 30, 365),
+    "apple-sleep":        ("health/apple-sleep", "days={n}", 14, 365),
+    "apple-sleep-score":  ("health/apple-sleep-score", "days={n}", 30, 365),
+    "apple-hrv":          ("health/apple-hrv", "days={n}", 14, 365),
+    "apple-sleep-rhr":    ("health/apple-sleep-rhr", "days={n}", 14, 365),
+    "weight":             ("health/weight", "days={n}", 90, 730),
+    "blood-pressure":     ("health/blood-pressure", "days={n}", 90, 730),
+    "anxiety":            ("health/anxiety", "", None, None),
+    "labs":               ("medical/labs", "", None, None),
+}
+FIT_ID_RE = re.compile(r"[0-9]{6,15}")      # Garmin activity id (fullmatch)
+FIT_N_RE = re.compile(r"[0-9]{1,4}")        # day/week/month count (fullmatch)
+# Columns of the `activities`/`rides` table (the raw rows carry ~50 fields + a power curve: 76 KB for 4 weeks).
+ACTIVITY_COLS = ("id", "date", "start_time", "type", "name", "duration", "distance_km", "elevation_gain_m",
+                 "avg_power", "norm_power", "max_power", "max20min_power", "intensity_factor", "tss", "avg_hr",
+                 "max_hr", "avg_cadence", "aerobic_te", "anaerobic_te", "training_effect_label",
+                 "activity_training_load", "work_kj", "hr_zones", "power_zones")
 
 # --------------------------------------------------------------------------------------------------------
 # Per-host profiles. Exact names only. Adding a container/unit here ALSO needs the matching exact line in
@@ -44,11 +98,12 @@ MCC_API = "http://127.0.0.1:5679/api/status"
 PROFILES = {
     "hailmary": {
         "mcc": True,
+        "fitness": True,
         "containers": ("tars-mcc-bot", "case-mcc-bot", "tars-n8n"),
         "units": ("mcc-runner.service",),
     },
 }
-DEFAULT_PROFILE = {"mcc": False, "containers": (), "units": ()}
+DEFAULT_PROFILE = {"mcc": False, "fitness": False, "containers": (), "units": ()}
 
 # Names kept for the sudoers generator and existing callers (hailmary's lists).
 CONTAINERS = PROFILES["hailmary"]["containers"]
@@ -170,6 +225,9 @@ def available_commands(profile, osname):
         cmds.append("container-logs <name>")
     if profile.get("units"):
         cmds.append("service-journal <unit>")
+    if profile.get("fitness"):
+        cmds += ["fit <name> [n]   names: " + ", ".join(sorted(FIT)),
+                 "                 n = days/weeks/months (activity-compare: a Garmin activity id)"]
     return cmds
 
 
@@ -189,6 +247,22 @@ def parse(request):
         if args:
             raise Rejected("%s takes no arguments" % cmd)
         return cmd, []
+    if cmd == "fit":
+        if not 1 <= len(args) <= 2:
+            raise Rejected("usage: fit <name> [n]")
+        if args[0] not in FIT:
+            raise Rejected("unknown fit name (try: help)")
+        path, query, default, most = FIT[args[0]]
+        if args[0] == "activity-compare":
+            if len(args) != 2 or not FIT_ID_RE.fullmatch(args[1]):
+                raise Rejected("usage: fit activity-compare <garmin activity id>")
+            return cmd, args
+        if len(args) == 2:
+            if default is None:
+                raise Rejected("fit %s takes no number" % args[0])
+            if not FIT_N_RE.fullmatch(args[1]) or not 1 <= int(args[1]) <= most:
+                raise Rejected("n must be 1..%d for fit %s" % (most, args[0]))
+        return cmd, args
     if cmd in ONE_ARG:
         if len(args) != 1:
             raise Rejected("%s takes exactly one argument" % cmd)
@@ -201,6 +275,48 @@ def parse(request):
 def _api_fetch():
     with urllib.request.urlopen(MCC_API, timeout=TIMEOUT_S) as resp:
         return json.load(resp)
+
+
+def _fit_fetch(url):
+    with urllib.request.urlopen(url, timeout=TIMEOUT_S) as resp:
+        return json.load(resp)
+
+
+def fit_url(name, arg=None):
+    """URL for a parsed `fit` request: constants + a validated integer only."""
+    path, query, default, most = FIT[name]
+    if name == "activity-compare":
+        return LIFE_API + path.format(n=int(arg))
+    n = int(arg) if arg is not None else default
+    return LIFE_API + path + ("?" + query.format(n=n) if query else "")
+
+
+def _cell(v):
+    if isinstance(v, dict):   # zones: {"z1": 91.0, ...} -> 91/42/0/0/0 (z1..zN, seconds)
+        return "/".join("" if v[k] is None else ("%g" % v[k] if isinstance(v[k], (int, float)) else str(v[k]))
+                        for k in sorted(v))
+    if v is None:
+        return ""
+    return " ".join(str(v).split())   # no tabs/newlines inside a cell
+
+
+def _is_ride(row):
+    t = str(row.get("type", ""))
+    return "cycling" in t or "biking" in t or t == "virtual_ride"
+
+
+def _fit_format(name, data):
+    if name in ("activities", "rides") and isinstance(data, dict):
+        rows = [r for r in data.get("activities", []) if name == "activities" or _is_ride(r)]
+        out = ["%d %s in the last %s days (newest first). hr_zones/power_zones = SECONDS in z1/z2/... "
+               "(HR z1-z5, power z1-z7)" % (len(rows), name, data.get("days")), "\t".join(ACTIVITY_COLS)]
+        out += ["\t".join(_cell(r.get(c)) for c in ACTIVITY_COLS) for r in rows]
+        return "\n".join(out) + "\n"
+    if name == "labs" and isinstance(data, dict):   # latest value per analyte; full point history is 106 KB
+        data = {"summary": data.get("summary"),
+                "analytes": [{k: v for k, v in a.items() if k != "points"} for a in data.get("analytes", [])],
+                "qualitative": [{k: v for k, v in a.items() if k != "values"} for a in data.get("qualitative", [])]}
+    return json.dumps(data, separators=(",", ":"), sort_keys=True, default=str) + "\n"
 
 
 def _run(argv):
@@ -257,7 +373,8 @@ def _generic(cmd, run, osname, exists):
     return "".join(out)
 
 
-def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists):
+def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists,
+            fit_fetch=_fit_fetch):
     profile = profile if profile is not None else detect_profile()
     osname = osname or detect_os()
 
@@ -285,6 +402,11 @@ def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None
             raise Rejected("no such component")
         return json.dumps(comps[args[0]], indent=2, sort_keys=True, default=str) + "\n"
 
+    if cmd == "fit":
+        if not profile.get("fitness"):
+            raise Rejected("fit is not available on this host")
+        return _fit_format(args[0], fit_fetch(fit_url(args[0], args[1] if len(args) > 1 else None)))
+
     if cmd == "container-logs":
         allowed = profile.get("containers", ())
         if args[0] not in allowed:
@@ -300,11 +422,12 @@ def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None
     raise Rejected("unknown subcommand")  # unreachable: parse() already filtered
 
 
-def handle(request, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists):
+def handle(request, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists,
+           fit_fetch=_fit_fetch):
     """Full pipeline for one request. Returns (exit_code, text, outcome)."""
     try:
         cmd, args = parse(request)
-        out = execute(cmd, args, api_fetch, run, profile, osname, exists)
+        out = execute(cmd, args, api_fetch, run, profile, osname, exists, fit_fetch)
         return 0, cap(redact(out)), "ok"
     except Rejected as e:
         return 2, "hermes-diag: rejected: %s\n" % e, "rejected"

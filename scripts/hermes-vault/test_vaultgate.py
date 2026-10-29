@@ -101,3 +101,29 @@ def test_help_needs_no_secrets(monkeypatch):
     monkeypatch.setattr(vg, "load_secrets", lambda: (_ for _ in ()).throw(AssertionError()))
     code, out, outcome, _ = vg.handle("help", io.BytesIO())
     assert code == 0 and "create-only" in out
+
+
+def test_secrets_by_item_share(monkeypatch):
+    """Item-scoped PAT: share ids come from `share list` by title, then `item view --share-id` (no vault name)."""
+    import json
+    import subprocess
+    calls = []
+
+    def fake_pp(args, extra_env=None):
+        calls.append(args)
+        if args[:2] == ["share", "list"]:
+            out = json.dumps({"shares": [{"id": f"S-{t}", "name": t} for t in vg.SECRETS.values()]})
+        else:
+            out = "v-" + args[args.index("--share-id") + 1]
+        return subprocess.CompletedProcess(args, 0, out.encode(), b"")
+    monkeypatch.setattr(vg, "_pp", fake_pp)
+    values = vg._view_all()
+    assert values == {var: f"v-S-{title}" for var, title in vg.SECRETS.items()}
+    assert not any("--vault-name" in c for c in calls)
+
+
+def test_secrets_missing_share_fails_closed(monkeypatch):
+    import subprocess
+    monkeypatch.setattr(vg, "_pp", lambda args, extra_env=None: subprocess.CompletedProcess(
+        args, 0, b'{"shares": [{"id": "x", "name": "MCC - COUCHDB_USER"}]}', b""))
+    assert vg._view_all() is None

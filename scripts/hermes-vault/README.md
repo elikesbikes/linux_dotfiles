@@ -1,5 +1,5 @@
 ---
-revision: 1
+revision: 2
 updated: 2026-10-28
 ---
 
@@ -33,7 +33,7 @@ Never: overwrite, delete, rename, write outside `Career/Courses/`, invent a new 
 
 ## 3. Secrets
 
-- Its **own** Proton Pass PAT `hailmary-hermes-vault` (owner's rule: one PAT per host and user), granted **Viewer on three items only**: `MCC - COUCHDB_USER`, `MCC - COUCHDB_PASSWORD`, `MCC - VAULT_PASSPHRASE`. Expires 2027-10-28 (renew: `pass-cli personal-access-token renew`).
+- Its **own** Proton Pass PAT `hailmary-hermes-vault` (owner's rule: one PAT per host and user), granted **Viewer on three items only**: `MCC - COUCHDB_USER`, `MCC - COUCHDB_PASSWORD`, `MCC - VAULT_PASSPHRASE`. Expires 2027-10-29 (renew: `pass-cli personal-access-token renew`). Item-only grants mean the PAT sees **no vault**: each item is its own share, so the gate finds the share id by title (`share list --only-items true --output json`) and reads with `item view --share-id` (`--vault-name HOMELAB` fails with "Could not find vault").
 - Sealed in the TPM at handle **0x81010002**. The account is **not** in `tss`; it reaches the TPM only through `unseal-pat` via one exact sudo rule with no arguments (`sudoers/sudoers.d/60-hermes-vault`). Why: the owner's PAT at `0x81010001` is sealed without an auth value, so any `tss` member could unseal it. `install.sh` proves the account cannot.
 - The pass-cli session is kept in `~hermes-vault/.pp-session` (mode 700) so a note does not cost a Proton login (Proton rate-limits logins). Compromise runbook: delete that folder, revoke the PAT, rotate the three items.
 - SSH key: the same Hermes container key hermes-diag trusts (both accounts are used by the same container, so a second key would not reduce exposure).
@@ -61,4 +61,5 @@ sudo ~/scripts/hermes-vault/uninstall.sh
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
-| 1 | 2026-10-28 | (this revision) | Initial gate: create-only school notes, own TPM-sealed per-item PAT. |
+| 1 | 2026-10-28 | 3fb6d1d | Initial gate: create-only school notes, own TPM-sealed per-item PAT. |
+| 2 | 2026-10-28 | (this revision) | Read secrets by item share id (item-scoped PAT sees no vault); 38 tests. |

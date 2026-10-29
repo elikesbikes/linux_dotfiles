@@ -20,6 +20,7 @@ only as data in $SSH_ORIGINAL_COMMAND and, for `create`, the note text on stdin.
 """
 
 import fcntl
+import json
 import os
 import pwd
 import re
@@ -46,7 +47,6 @@ AUDIT_SYSLOG = "tcp://hailmary.home.elikesbikes.com:1514"
 LIB = "/usr/local/lib/hermes-vault"
 UNSEAL = f"{LIB}/unseal-pat"
 PASS_CLI = f"{LIB}/pass-cli"
-PP_VAULT = "HOMELAB"
 HOME = Path(pwd.getpwuid(os.getuid()).pw_dir)   # not $HOME: under `sudo -u` it can still be root's
 SECRETS = {   # env var -> Proton Pass item title (field "note"); the PAT can read these three items and nothing else
     "COUCHDB_USER": "MCC - COUCHDB_USER",
@@ -141,9 +141,20 @@ def _pp(args, extra_env=None):
 
 
 def _view_all():
+    # The PAT is granted single ITEMS, not the vault: it sees no vault by name (--vault-name fails), each item is its
+    # own share. So: share id by item title from `share list`, then view by share id (verified 2026-10-28).
+    r = _pp(["share", "list", "--only-items", "true", "--output", "json"])
+    if r.returncode != 0:
+        return None
+    try:
+        shares = {s["name"]: s["id"] for s in json.loads(r.stdout)["shares"]}
+    except (ValueError, KeyError, TypeError):
+        return None
     values = {}
     for var, title in SECRETS.items():
-        r = _pp(["item", "view", "--vault-name", PP_VAULT, "--item-title", title, "--field", "note"])
+        if title not in shares:
+            return None
+        r = _pp(["item", "view", "--share-id", shares[title], "--item-title", title, "--field", "note"])
         if r.returncode != 0 or not r.stdout.strip():
             return None
         values[var] = r.stdout.decode().strip()

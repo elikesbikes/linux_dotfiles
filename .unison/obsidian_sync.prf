@@ -15,7 +15,10 @@ ignorenot = Path *
 batch = true
 auto = true
 times = true
-prefer = newer
+# The vault wins any conflict: it is the source of truth. Never use "newer" here: an aborted
+# git rebase rewrites repo files with a fresh mtime and old content, so stale repo copies looked
+# newest and overwrote 35 vault notes on 2026-10-30.
+prefer = /home/ecloaiza/Documents/Obsidian/Loaiza/IT/github
 
 # Protect devops from any deletions that originate on the Obsidian side.
 nodeletion = /home/ecloaiza/devops/github

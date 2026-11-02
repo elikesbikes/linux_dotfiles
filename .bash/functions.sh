@@ -660,6 +660,29 @@ gacp_checkmktars() {
 }
 
 # ------------------------------------------------------------
+# gacp_rsstars
+# ------------------------------------------------------------
+# gacp workflow inside the RSSTars iOS repo (GitLab only: ecloaiza/rsstars-ios).
+# Bumps the committed build number before every push, exactly like gacp_checkmktars.
+# Also called by the Claude Code auto-commit hook (settings.json).
+#
+# Usage:
+#   gacp_rsstars "Commit message"
+# ------------------------------------------------------------
+gacp_rsstars() {
+  pushd $HOME/devops/projects/ios/rsstars > /dev/null || return 1
+  if [ -n "$(git status --porcelain)" ]; then
+    local PBX="RSSTars.xcodeproj/project.pbxproj" CUR NEXT
+    CUR=$(grep -m1 -oE 'CURRENT_PROJECT_VERSION = [0-9]+' "$PBX" | grep -oE '[0-9]+$')
+    NEXT=$(( ${CUR:-0} + 1 ))
+    sed -i -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = $NEXT;/g" "$PBX"
+    echo "--> Build number: ${CUR:-0} -> $NEXT"
+  fi
+  gacp "$@"
+  popd > /dev/null
+}
+
+# ------------------------------------------------------------
 # gacp_openldap
 # ------------------------------------------------------------
 # gacp workflow inside the LDAPTars iOS repo (GitLab only: ecloaiza/openldap-ios).

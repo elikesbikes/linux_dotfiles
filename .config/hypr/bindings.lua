@@ -32,3 +32,5 @@ o.bind("SUPER + ALT + + CTRL + T", "Extract text (OCR) from screenshot", "omarch
 -- Unbind existing SUPER+SHIFT+A (was: ChatGPT webapp)
 hl.unbind("SUPER + SHIFT + A")
 o.bind("SUPER + SHIFT + A", "ChatTARS", { webapp = "https://chattars.home.elikesbikes.com/", focus = true })
+-- ChatTARS webapp always opens on workspace 2 (Brave webapp class)
+o.window("^brave-chattars\\.home\\.elikesbikes\\.com__.*", { workspace = "2" })

@@ -5,6 +5,7 @@
       "Bash(scp:*)"
     ]
   },
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -326,6 +327,5 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
-  },
-  "model": "fable"
+  }
 }

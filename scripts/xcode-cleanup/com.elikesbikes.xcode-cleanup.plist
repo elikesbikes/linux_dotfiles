@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Daily Xcode leftover cleanup on kipp (see xcode-cleanup.sh).
+  Install: copy to ~/Library/LaunchAgents/, then
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.elikesbikes.xcode-cleanup.plist
+  Run now: launchctl kickstart gui/$(id -u)/com.elikesbikes.xcode-cleanup
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.elikesbikes.xcode-cleanup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/ecloaiza/.local/bin/xcode-cleanup.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/ecloaiza/Library/Logs/xcode-cleanup.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/ecloaiza/Library/Logs/xcode-cleanup.log</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>Nice</key>
+  <integer>10</integer>
+</dict>
+</plist>

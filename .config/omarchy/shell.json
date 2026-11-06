@@ -27,7 +27,7 @@
           "id": "omarchy.system-update"
         },
         {
-          "id": "ecloaiza.pomodoro"
+          "id": "ecloaiza.zone"
         }
       ],
       "left": [
@@ -40,7 +40,7 @@
       ],
       "right": [
         {
-          "id": "ecloaiza.zone"
+          "id": "ecloaiza.pomodoro"
         },
         {
           "id": "omarchy.agents"

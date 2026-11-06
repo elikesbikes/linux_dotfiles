@@ -124,6 +124,18 @@ ensure_link "$HOME_DIR/.config/starship.toml" "$REPO_DIR/.config/starship.toml" 
 mkdir -p "$HOME_DIR/.config/tmux"
 ensure_link "$HOME_DIR/.config/tmux/tmux.conf" "$REPO_DIR/.config/tmux/tmux.conf" || true
 
+# herdr: two programs share the name. The terminal manager (`herdr`, tmux
+# replacement) reads ~/.config/herdr/config.toml. The desktop app
+# (herdr-app + herdr-core) reads ~/.config/herdr-app/. Symlink only the
+# config files, never the directories: herdr-app keeps runtime state
+# (telemetry/, layouts/.state/, view.json, *.sock) beside them, and it
+# rewrites the shipped themes/*.json on start.
+mkdir -p "$HOME_DIR/.config/herdr" "$HOME_DIR/.config/herdr-app/themes"
+ensure_link "$HOME_DIR/.config/herdr/config.toml" "$REPO_DIR/.config/herdr/config.toml" || true
+ensure_link "$HOME_DIR/.config/herdr-app/keys.json" "$REPO_DIR/.config/herdr-app/keys.json" || true
+ensure_link "$HOME_DIR/.config/herdr-app/settings.json" "$REPO_DIR/.config/herdr-app/settings.json" || true
+ensure_link "$HOME_DIR/.config/herdr-app/themes/catppuccin.json" "$REPO_DIR/.config/herdr-app/themes/catppuccin.json" || true
+
 # Unison: symlink only profile files, not the whole directory.
 # Runtime files (archives, fingerprints, logs) stay in the real ~/.unison/.
 mkdir -p "$HOME_DIR/.unison"

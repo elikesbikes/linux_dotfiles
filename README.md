@@ -54,6 +54,8 @@ This repo is meant to be **read**, not just cloned.
 ├── .bashrc                 # Main bash entry point (minimal, sourced logic)
 ├── .config/                # Application configuration
 │   ├── alacritty/          # Alacritty terminal
+│   ├── herdr/              # herdr terminal manager (tmux replacement): config.toml
+│   ├── herdr-app/          # herdr desktop app: keys.json, settings.json, themes/catppuccin.json
 │   ├── kitty/              # Kitty terminal
 │   ├── nvim/               # Neovim (Lazy.nvim, Lua)
 │   ├── fastfetch/          # fastfetch system info

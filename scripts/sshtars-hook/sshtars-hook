@@ -12,6 +12,10 @@ the per-approval watcher below.
                                       1 denied, 3 expired, 4 error (falls back to a terminal y/N unless
                                       --require-remote)
   sshtars-hook doctor                 check URL, token and the route; prints no secret
+  sshtars-hook status [--json]        version, Claude Code wiring, token source, last log line (the app's probe)
+  sshtars-hook sessions [--json]      recent Claude Code sessions here, with the terminal each one runs in
+  sshtars-hook transcript SESSION     the session's conversation reduced to chat rows (the app's Chat View)
+  sshtars-hook prompt SESSION TEXT    type TEXT into the session's terminal and press Enter
   sshtars-hook install-claude         add its hooks to ~/.claude/settings.json (keeps every other hook)
   sshtars-hook uninstall-claude       remove only its own hooks
 
@@ -30,7 +34,13 @@ desk), the approval is closed on MCC.
 Credentials: the host's own MCC caller token (`sshtars-hook-<host>`), read at run time from Proton Pass
 item "MCC - MCC_TOKEN_SSHTARS_HOOK_<HOST>" through ~/scripts/proton-pass/pass-secrets.sh (TPM-sealed PAT
 and cache, every read logged to syslog → Graylog). SSHTARS_HOOK_TOKEN in the environment overrides it
-for tests. Nothing is written to disk but a log of outcomes (~/.local/state/sshtars-hook/hook.log).
+for tests. Nothing is written to disk but a log of outcomes (~/.local/state/sshtars-hook/hook.log) and,
+per Claude Code session, which terminal it runs in (~/.local/state/sshtars-hook/sessions/<id>.json: the
+session id, transcript path, cwd and terminal address; no conversation text).
+
+Chat View (Moshi's, §6): the app reads `transcript` (Claude Code's own JSONL under ~/.claude/projects,
+reduced to prompts, answers and one line per tool call) and sends with `prompt`, which types into the
+pane like a person would. There is no second channel to the agent.
 
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
@@ -47,7 +57,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -391,6 +401,7 @@ def claude_hook(stdin_text: str):
     cwd = data.get("cwd") or os.getcwd()
     project = Path(cwd).name or cwd
     target = terminal()
+    record_session(data, target)
 
     if event == "Notification":
         kind = data.get("notification_type", "")
@@ -505,6 +516,244 @@ def cmd_doctor(_args):
     return 0
 
 
+# ------------------------------------------------------------------ Chat View: sessions, transcript, prompt
+
+SESSIONS = STATE / "sessions"
+PROJECTS = Path.home() / ".claude/projects"
+SESSION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{7,79}$")
+RECENT_S = 3 * 86400
+
+
+def record_session(data, target):
+    """Remember which terminal a Claude Code session runs in, so `prompt` can type into it later."""
+    sid = data.get("session_id") or ""
+    if not SESSION_RE.match(sid) or data.get("agent_id"):
+        return
+    try:
+        SESSIONS.mkdir(parents=True, exist_ok=True)
+        tmp = SESSIONS / f".{sid}.tmp"
+        tmp.write_text(json.dumps({"session": sid, "transcript": data.get("transcript_path"), "cwd": data.get("cwd"),
+                                   "terminal": target, "ts": round(time.time(), 3)}))
+        tmp.replace(SESSIONS / f"{sid}.json")
+    except OSError as e:
+        log("session-record-failed", error=str(e))
+
+
+def registry() -> dict:
+    out = {}
+    for f in SESSIONS.glob("*.json") if SESSIONS.exists() else []:
+        try:
+            entry = json.loads(f.read_text())
+            out[entry["session"]] = entry
+        except (OSError, ValueError, KeyError):
+            continue
+    return out
+
+
+def transcript_path(sid: str, reg=None):
+    entry = (reg if reg is not None else registry()).get(sid) or {}
+    path = entry.get("transcript")
+    if path and Path(path).is_file():
+        return Path(path)
+    for p in PROJECTS.glob(f"*/{sid}.jsonl"):
+        return p
+    return None
+
+
+def tail_rows(path: Path, max_bytes: int) -> list:
+    """The JSONL's last max_bytes as parsed rows (the first, partial line dropped when cut)."""
+    with open(path, "rb") as f:
+        f.seek(0, os.SEEK_END)
+        size = f.tell()
+        f.seek(max(0, size - max_bytes))
+        lines = f.read().split(b"\n")
+    if size > max_bytes:
+        lines = lines[1:]
+    rows = []
+    for line in lines:
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue
+    return rows
+
+
+REMINDER_RE = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
+
+
+def tool_summary(name: str, value) -> str:
+    """One line for a tool call: the command, path, pattern or URL it was given."""
+    value = value if isinstance(value, dict) else {}
+    keys = {"Bash": "command", "Read": "file_path", "Edit": "file_path", "Write": "file_path", "MultiEdit": "file_path",
+            "NotebookEdit": "notebook_path", "Grep": "pattern", "Glob": "pattern", "WebFetch": "url", "WebSearch": "query",
+            "Task": "description", "Agent": "description", "Skill": "skill", "TodoWrite": None}
+    key = keys.get(name, "")
+    text = value.get(key) if key else None
+    if text is None and key == "":
+        text = next((v for v in value.values() if isinstance(v, str)), "")
+    return " ".join(str(text or "").split())[:200]
+
+
+def reduce_transcript(rows: list, limit: int) -> dict:
+    """Claude Code JSONL rows → title, model, branch, state and the last `limit` chat rows."""
+    msgs, tools = [], {}
+    title = prompt_title = model = branch = cwd = None
+    state = "idle"
+    for r in rows:
+        kind = r.get("type")
+        if kind == "custom-title":
+            title = r.get("customTitle") or title
+            continue
+        if kind == "last-prompt":
+            prompt_title = r.get("lastPrompt") or prompt_title
+            continue
+        if kind not in ("user", "assistant") or r.get("isSidechain"):
+            continue
+        cwd = r.get("cwd") or cwd
+        branch = r.get("gitBranch") or branch
+        message = r.get("message") or {}
+        content = message.get("content")
+        ts = r.get("timestamp")
+        uid = r.get("uuid") or str(len(msgs))
+        if kind == "user":
+            if r.get("isMeta"):
+                continue
+            blocks = content if isinstance(content, list) else []
+            for b in blocks:
+                if isinstance(b, dict) and b.get("type") == "tool_result":
+                    tool = tools.get(b.get("tool_use_id"))
+                    if tool is not None:
+                        tool["ok"] = not b.get("is_error")
+                    state = "working"
+            text = content if isinstance(content, str) else "\n".join(
+                b.get("text", "") for b in blocks if isinstance(b, dict) and b.get("type") == "text")
+            text = REMINDER_RE.sub("", text).strip()
+            if text and not text.startswith("<"):
+                msgs.append({"id": uid, "role": "user", "text": text[:4000], "ts": ts})
+                state = "working"
+            continue
+        model = message.get("model") or model
+        for i, b in enumerate(content if isinstance(content, list) else []):
+            if not isinstance(b, dict):
+                continue
+            if b.get("type") == "text" and b.get("text", "").strip():
+                text = REMINDER_RE.sub("", b["text"]).strip()
+                if msgs and msgs[-1]["role"] == "assistant" and msgs[-1].get("mid") == message.get("id"):
+                    msgs[-1]["text"] = (msgs[-1]["text"] + "\n\n" + text)[:8000]
+                else:
+                    msgs.append({"id": f"{uid}.{i}", "role": "assistant", "text": text[:8000], "ts": ts, "mid": message.get("id")})
+            elif b.get("type") == "tool_use":
+                row = {"id": f"{uid}.{i}", "role": "tool", "tool": b.get("name") or "tool",
+                       "text": tool_summary(b.get("name") or "", b.get("input")), "ok": None, "ts": ts}
+                tools[b.get("id")] = row
+                msgs.append(row)
+        stop = message.get("stop_reason")
+        if stop:
+            state = "working" if stop == "tool_use" else "idle"
+    for m in msgs:
+        m.pop("mid", None)
+    if model and model.startswith("<"):
+        model = None
+    first_prompt = next((m["text"] for m in msgs if m["role"] == "user"), None)
+    return {"title": title or prompt_title or first_prompt, "model": model, "branch": branch, "cwd": cwd,
+            "state": state, "messages": msgs[-limit:]}
+
+
+def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int) -> dict:
+    info = reduce_transcript(tail_rows(path, rows_bytes), limit)
+    mtime = path.stat().st_mtime
+    if info["state"] == "working" and time.time() - mtime > 600:
+        info["state"] = "idle"              # a turn that stopped writing 10 min ago is not running
+    term = (reg.get(sid) or {}).get("terminal")
+    title = " ".join((info["title"] or "").split())[:120]
+    return {"session": sid, "title": title, "cwd": info["cwd"], "project": Path(info["cwd"] or "").name or None,
+            "model": info["model"], "branch": info["branch"], "state": info["state"], "updated": round(mtime, 3),
+            "terminal": term, "where": describe(term) if term else None, "messages": info["messages"]}
+
+
+def cmd_sessions(args):
+    reg = registry()
+    found = {}
+    for sid in reg:
+        path = transcript_path(sid, reg)
+        if path:
+            found[sid] = path
+    cutoff = time.time() - RECENT_S
+    for p in PROJECTS.glob("*/*.jsonl") if PROJECTS.exists() else []:
+        try:
+            if p.stat().st_mtime >= cutoff and SESSION_RE.match(p.stem):
+                found.setdefault(p.stem, p)
+        except OSError:
+            continue
+    ordered = sorted(found.items(), key=lambda kv: kv[1].stat().st_mtime, reverse=True)[:args.limit]
+    out = []
+    for sid, path in ordered:
+        try:
+            info = session_info(sid, path, reg, 400_000, 30)
+        except (OSError, ValueError) as e:
+            log("session-read-failed", session=sid, error=str(e))
+            continue
+        said = [m for m in info.pop("messages") if m["role"] != "tool"]
+        info["last"] = " ".join(said[-1]["text"].split())[:200] if said else None
+        out.append(info)
+    if args.json:
+        print(json.dumps({"version": VERSION, "sessions": out}, ensure_ascii=False))
+    else:
+        for s in out:
+            print(f"{s['session'][:8]}  {s['state']:7}  {s['where'] or '-':32}  {s['title']}")
+    return 0
+
+
+def cmd_transcript(args):
+    if not SESSION_RE.match(args.session):
+        print(json.dumps({"error": "bad session id"})); return 2
+    reg = registry()
+    path = transcript_path(args.session, reg)
+    if not path:
+        print(json.dumps({"error": "no transcript for this session"})); return 1
+    info = session_info(args.session, path, reg, 3_000_000, max(1, min(args.limit, 300)))
+    print(json.dumps({"version": VERSION, **info}, ensure_ascii=False))
+    return 0
+
+
+CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def type_into(term: dict, text: str):
+    """Type text into the terminal and press Enter: the same thing a person at the keyboard does."""
+    if term["kind"] == "tmux":
+        tmux("send-keys", "-t", term["pane"], "-l", text)
+        tmux("send-keys", "-t", term["pane"], "Enter")
+    elif term["kind"] == "hc":
+        run(["hc", "send", term["pane"], text])
+    else:
+        session = term.get("session") or "default"
+        herdr = ["herdr"] if session == "default" else ["herdr", "--session", session]
+        run([*herdr, "pane", "send-text", term["pane"], text])
+        run([*herdr, "pane", "send-keys", term["pane"], "enter"])
+
+
+def cmd_prompt(args):
+    if not SESSION_RE.match(args.session):
+        print("bad session id", file=sys.stderr); return 2
+    text = " ".join(CONTROL_RE.sub(" ", args.text).split())
+    if not text:
+        print("nothing to send", file=sys.stderr); return 2
+    term = (registry().get(args.session) or {}).get("terminal")
+    if not term:
+        print("no terminal known for this session yet (recorded when one of its turns ends)", file=sys.stderr)
+        return 1
+    try:
+        type_into(term, text[:4000])
+    except _FAILS as e:
+        log("prompt-failed", session=args.session, error=str(e))
+        print(f"could not type into {describe(term)}: {e}", file=sys.stderr)
+        return 1
+    log("prompt-sent", session=args.session, terminal=describe(term), chars=len(text))
+    print(json.dumps({"ok": True, "where": describe(term)}))
+    return 0
+
+
 def last_logged():
     """The newest line of hook.log as {ts, outcome}, reading only the file's tail."""
     try:
@@ -592,6 +841,10 @@ def main(argv=None):
     a.add_argument("--timeout", type=int, default=600); a.add_argument("--require-remote", action="store_true")
     sub.add_parser("doctor")
     st = sub.add_parser("status"); st.add_argument("--json", action="store_true")
+    ss = sub.add_parser("sessions"); ss.add_argument("--json", action="store_true"); ss.add_argument("--limit", type=int, default=20)
+    tr = sub.add_parser("transcript"); tr.add_argument("session"); tr.add_argument("--limit", type=int, default=80)
+    tr.add_argument("--json", action="store_true")
+    pr = sub.add_parser("prompt"); pr.add_argument("session"); pr.add_argument("text")
     i = sub.add_parser("install-claude"); i.add_argument("--exe")
     u = sub.add_parser("uninstall-claude"); u.add_argument("--exe")
     args = p.parse_args(argv)
@@ -611,6 +864,12 @@ def main(argv=None):
         return cmd_doctor(args)
     if args.cmd == "status":
         return cmd_status(args)
+    if args.cmd == "sessions":
+        return cmd_sessions(args)
+    if args.cmd == "transcript":
+        return cmd_transcript(args)
+    if args.cmd == "prompt":
+        return cmd_prompt(args)
     if args.cmd == "install-claude":
         return cmd_install_claude(args)
     if args.cmd == "uninstall-claude":

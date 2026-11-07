@@ -17,6 +17,9 @@ the per-approval watcher below.
   sshtars-hook sessions [--json]      recent Claude Code sessions here, with the terminal each one runs in
   sshtars-hook transcript SESSION     the session's conversation reduced to chat rows (the app's Chat View)
   sshtars-hook prompt SESSION TEXT    type TEXT into the session's terminal and press Enter
+  sshtars-hook diff [--tmux S|--cwd D] the git changes where the terminal is (the app's diff view)
+  sshtars-hook servers               loopback web servers answering with HTML (the app's web preview)
+  sshtars-hook usage [--refresh]     Claude Code's plan limits (5h, 7d), cached for a minute
   sshtars-hook install-claude         add its hooks to ~/.claude/settings.json (keeps every other hook)
   sshtars-hook uninstall-claude       remove only its own hooks
 
@@ -53,6 +56,8 @@ switched Live Activities on.
 Sidebar (1.5.0): `sessions` also reports `context`, the tokens the model saw on the session's last main
 turn (input + cache read + cache creation), for Settings → Sidebar → Show agent details.
 
+Diff view, web preview and usage (1.6.0): read-only commands for the app; see the section below.
+
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
 import argparse
@@ -68,7 +73,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -864,6 +869,401 @@ def cmd_status(args):
     return 0
 
 
+# ------------------------------------------------------------------ diff view, web preview, usage (1.6.0)
+#
+# Moshi's diff viewer, Browser Preview and usage cards (docs/moshi-teardown.md §6, Hooks), as one-shot
+# commands the app runs over its own SSH connection. Nothing here talks to MCC.
+
+DIFF_MAX_BYTES = 600_000        # patch text in one reply; past it, files keep their counts and lose the patch
+DIFF_MAX_FILES = 300
+UNTRACKED_MAX_BYTES = 64_000    # an untracked file is shown whole (as added lines) up to this size
+EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+
+def git(cwd: str, *args, timeout=10) -> str:
+    # Fixed output whatever the user's git config says (diff.mnemonicPrefix, quotepath, external diff).
+    return run(["git", "-c", "core.quotepath=false", "-C", cwd, *args], timeout)
+
+
+def unquote_path(path: str) -> str:
+    """git C-quotes paths with unusual bytes ("a\\tb"); good enough for display and matching."""
+    if len(path) >= 2 and path[0] == path[-1] == '"':
+        return path[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape").encode("latin-1").decode("utf-8", "replace")
+    return path
+
+
+def parse_porcelain(text: str) -> list:
+    """`git status --porcelain=v1 -z --no-renames`: [(status letter, path)]."""
+    out = []
+    for entry in text.split("\0"):
+        if len(entry) < 4:
+            continue
+        xy, path = entry[:2], entry[3:]
+        if xy == "??":
+            status = "?"
+        elif "U" in xy or xy in ("AA", "DD"):
+            status = "U"
+        elif "D" in xy:
+            status = "D"
+        elif "A" in xy:
+            status = "A"
+        else:
+            status = "M"
+        out.append((status, path))
+    return out
+
+
+def parse_numstat(text: str) -> dict:
+    """`git diff --numstat --no-renames`: path → (added, removed), None for a binary file."""
+    stats = {}
+    for line in text.splitlines():
+        parts = line.split("\t", 2)
+        if len(parts) != 3:
+            continue
+        added, removed, path = parts
+        stats[unquote_path(path)] = None if added == "-" else (int(added), int(removed))
+    return stats
+
+
+def split_patch(text: str) -> dict:
+    """One `git diff` output → path → that file's patch (from its `diff --git` line)."""
+    patches, current, path = {}, [], None
+
+    def flush():
+        if path is not None and current:
+            patches[path] = "".join(current)
+
+    for line in text.splitlines(keepends=True):
+        if line.startswith("diff --git "):
+            flush()
+            current, path = [line], None
+            continue
+        if path is None and current and (line.startswith("+++ ") or line.startswith("--- ")):
+            name = unquote_path(line[4:].rstrip("\n").rstrip("\t"))   # git adds a tab after names with spaces
+            if name != "/dev/null" and name[:2] in ("a/", "b/"):
+                if line.startswith("+++ ") or not path:
+                    path = name[2:]
+        if path is None and current and line.startswith("Binary files "):
+            m = re.match(r"Binary files (?:a/)?(.+?) and (?:b/)?(.+?) differ", line)
+            if m:
+                path = unquote_path(m.group(2) if m.group(2) != "/dev/null" else m.group(1))
+        if current:
+            current.append(line)
+    flush()
+    return patches
+
+
+def untracked_patch(root: str, path: str):
+    """An untracked text file as a patch of added lines; (patch, added) or (None, None) when binary or big."""
+    try:
+        full = Path(root) / path
+        if full.is_symlink() or not full.is_file() or full.stat().st_size > UNTRACKED_MAX_BYTES:
+            return None, None
+        data = full.read_bytes()
+    except OSError:
+        return None, None
+    if b"\0" in data:
+        return None, None
+    lines = data.decode("utf-8", "replace").splitlines()
+    body = "".join(f"+{l}\n" for l in lines)
+    return f"--- /dev/null\n+++ b/{path}\n@@ -0,0 +1,{len(lines)} @@\n{body}", len(lines)
+
+
+def diff_report(cwd: str) -> dict:
+    cwd = os.path.realpath(os.path.expanduser(cwd))
+    if not os.path.isdir(cwd):
+        raise RuntimeError(f"{cwd} is not a directory")
+    try:
+        root = git(cwd, "rev-parse", "--show-toplevel").strip()
+    except RuntimeError:
+        return {"git": False, "cwd": cwd, "root": cwd, "files": []}
+    try:
+        git(root, "rev-parse", "--verify", "-q", "HEAD")
+        base, head = "HEAD", git(root, "log", "-1", "--format=%h %s").strip()
+    except RuntimeError:
+        base, head = EMPTY_TREE, None
+    branch = git(root, "rev-parse", "--abbrev-ref", "HEAD").strip() if head else None
+    ahead = behind = None
+    if head:
+        try:
+            counts = git(root, "rev-list", "--left-right", "--count", "@{upstream}...HEAD").split()
+            behind, ahead = int(counts[0]), int(counts[1])
+        except (RuntimeError, ValueError, IndexError):
+            pass
+    status = parse_porcelain(git(root, "status", "--porcelain=v1", "-z", "--no-renames", "--untracked-files=all", timeout=20))
+    stats = parse_numstat(git(root, "diff", base, "--numstat", "--no-renames", "--no-ext-diff", timeout=20))
+    patches = split_patch(git(root, "diff", base, "--no-color", "--no-ext-diff", "--no-renames", "--src-prefix=a/", "--dst-prefix=b/", timeout=30))
+    files, used, truncated = [], 0, len(status) > DIFF_MAX_FILES
+    for code, path in status[:DIFF_MAX_FILES]:
+        entry = {"path": path, "status": code, "added": 0, "removed": 0, "binary": False, "patch": None}
+        if code == "?":
+            patch, added = untracked_patch(root, path)
+            entry["added"] = added or 0
+            entry["binary"] = patch is None and added is None and (Path(root) / path).is_file() \
+                and (Path(root) / path).stat().st_size <= UNTRACKED_MAX_BYTES
+        else:
+            counts = stats.get(path, (0, 0))
+            if counts is None:
+                entry["binary"] = True
+            else:
+                entry["added"], entry["removed"] = counts
+            patch = patches.get(path)
+        if patch is not None:
+            if used + len(patch) <= DIFF_MAX_BYTES:
+                entry["patch"], used = patch, used + len(patch)
+            else:
+                truncated = True
+        files.append(entry)
+    return {"git": True, "cwd": cwd, "root": root, "branch": branch, "head": head, "ahead": ahead,
+            "behind": behind, "files": files, "truncated": truncated}
+
+
+def cmd_diff(args):
+    try:
+        if args.tmux:
+            cwd = tmux("display-message", "-p", "-t", args.tmux, "#{pane_current_path}").strip()
+        else:
+            cwd = args.cwd or os.getcwd()
+        report = diff_report(cwd)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+        print(f"diff: {e}", file=sys.stderr)
+        return 1
+    print(json.dumps({"version": VERSION, **report}, ensure_ascii=False))
+    return 0
+
+
+# Browser Preview: loopback listeners that answer HTTP with an HTML page. The app opens a same-port SSH
+# forward (phone 127.0.0.1:P → host 127.0.0.1:P) and loads http://localhost:P, like Moshi's same-port rule:
+# no path-prefix proxy, so dev-server websockets, redirects and cookies keep working.
+
+LOOPBACK = {"127.0.0.1", "::1", "0.0.0.0", "::", "*"}
+SKIP_PROCESSES = {"sshd", "ssh", "sshd-session", "systemd-resolve", "cupsd", "dnsmasq"}
+
+
+def proc_address(hex_addr: str) -> str:
+    """/proc/net/tcp{,6} local address ("0100007F" or 32 hex digits) → "127.0.0.1" / "::1" / "::"."""
+    raw = bytes.fromhex(hex_addr)
+    if len(raw) == 4:
+        return socket.inet_ntop(socket.AF_INET, raw[::-1])
+    # IPv6: four 32-bit words, each in the kernel's (little-endian) byte order.
+    words = b"".join(raw[i:i + 4][::-1] for i in range(0, 16, 4))
+    addr = socket.inet_ntop(socket.AF_INET6, words)
+    return addr[7:] if addr.startswith("::ffff:") and "." in addr else addr
+
+
+def parse_proc_net(text: str) -> list:
+    """/proc/net/tcp or tcp6: [{"bind", "port", "inode"}] for listening sockets."""
+    out = []
+    for line in text.splitlines()[1:]:
+        cols = line.split()
+        if len(cols) < 10 or cols[3] != "0A":          # 0A = TCP_LISTEN
+            continue
+        addr, _, port = cols[1].partition(":")
+        try:
+            out.append({"bind": proc_address(addr), "port": int(port, 16), "inode": cols[9]})
+        except (ValueError, OSError):
+            continue
+    return out
+
+
+def socket_owners() -> dict:
+    """socket inode → (process name, pid) for this user's processes (others' fds are not readable)."""
+    owners = {}
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        try:
+            fds = os.listdir(f"/proc/{pid}/fd")
+            name = Path(f"/proc/{pid}/comm").read_text().strip()
+        except OSError:
+            continue
+        for fd in fds:
+            try:
+                link = os.readlink(f"/proc/{pid}/fd/{fd}")
+            except OSError:
+                continue
+            if link.startswith("socket:["):
+                owners.setdefault(link[8:-1], (name, int(pid)))
+    return owners
+
+
+def proc_listeners() -> list:
+    rows = []
+    for name in ("tcp", "tcp6"):
+        try:
+            rows += parse_proc_net(Path(f"/proc/net/{name}").read_text())
+        except OSError:
+            pass
+    owners = socket_owners() if rows else {}
+    for r in rows:
+        r["process"], r["pid"] = owners.get(r.pop("inode"), (None, None))
+    return [r for r in rows if r["bind"] in LOOPBACK]
+
+
+def parse_lsof(text: str) -> list:
+    """`lsof -nP -iTCP -sTCP:LISTEN -Fpcn` (macOS)."""
+    out, pid, process = [], None, None
+    for line in text.splitlines():
+        tag, value = line[:1], line[1:]
+        if tag == "p":
+            pid = int(value) if value.isdigit() else None
+        elif tag == "c":
+            process = value
+        elif tag == "n":
+            host, _, port = value.rpartition(":")
+            host = host.strip("[]")
+            if host in LOOPBACK and port.isdigit():
+                out.append({"bind": host, "port": int(port), "process": process, "pid": pid})
+    return out
+
+
+def listeners() -> list:
+    if Path("/proc/net/tcp").exists():                 # Linux: no ss or lsof needed (BusyBox has neither's flags)
+        rows = proc_listeners()
+    elif shutil.which("lsof"):                         # macOS
+        rows = parse_lsof(run(["lsof", "-nP", "-iTCP", "-sTCP:LISTEN", "-Fpcn"], 10))
+    else:
+        raise RuntimeError("can't list listening ports here (no /proc/net/tcp, no lsof)")
+    seen, out = set(), []
+    for r in sorted(rows, key=lambda r: (r["port"], r["bind"] != "127.0.0.1")):
+        if r["port"] in seen or r["port"] == 22 or (r["process"] or "") in SKIP_PROCESSES:
+            continue
+        seen.add(r["port"])
+        out.append(r)
+    return out[:64]
+
+
+TITLE_RE = re.compile(rb"<title[^>]*>(.*?)</title>", re.I | re.S)
+
+
+def probe_http(host: str, port: int, timeout=1.0):
+    """GET / on the listener; the page's title when it answers with HTML, else None."""
+    target = f"[{host}]" if ":" in host else host
+    req = urllib.request.Request(f"http://{target}:{port}/", headers={"User-Agent": f"sshtars-hook/{VERSION}"})
+    try:
+        resp = urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError as e:
+        resp = e
+    except Exception:
+        return None
+    try:
+        kind = (resp.headers.get("Content-Type") or "").lower()
+        if "text/html" not in kind and "xhtml" not in kind:
+            return None
+        body = resp.read(32_768)
+    except Exception:
+        return None
+    finally:
+        try:
+            resp.close()
+        except Exception:
+            pass
+    m = TITLE_RE.search(body)
+    title = re.sub(r"\s+", " ", m.group(1).decode("utf-8", "replace")).strip() if m else ""
+    return title[:80]
+
+
+def cmd_servers(args):
+    import concurrent.futures
+    rows = listeners()
+
+    def check(r):
+        host = "::1" if r["bind"] == "::1" else "127.0.0.1"
+        title = probe_http(host, r["port"])
+        return None if title is None else {"host": host, "port": r["port"], "title": title,
+                                           "process": r["process"], "pid": r["pid"],
+                                           "origin": f"http://localhost:{r['port']}"}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
+        servers = [s for s in pool.map(check, rows) if s]
+    print(json.dumps({"version": VERSION, "servers": servers}, ensure_ascii=False))
+    return 0
+
+
+# Usage: Claude Code's plan limits, read the way Claude Code reads them — its own OAuth token from its own
+# credential file, re-read every time, never copied, never refreshed (refreshing would rotate the token
+# under Claude Code). The answer is cached for a minute so a busy app does not poll the API.
+
+USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
+USAGE_CACHE = STATE / "usage.json"
+USAGE_TTL_S = 60
+
+
+def claude_token() -> str:
+    base = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    path = base / ".credentials.json"
+    cred = None
+    if path.exists():
+        cred = json.loads(path.read_text()).get("claudeAiOauth")
+    elif sys.platform == "darwin" and shutil.which("security"):
+        try:
+            cred = json.loads(run(["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"])).get("claudeAiOauth")
+        except (RuntimeError, ValueError):
+            raise RuntimeError("Claude Code's sign-in is in the macOS Keychain, which is locked over SSH")
+    if not cred or not cred.get("accessToken"):
+        raise RuntimeError("Claude Code is not signed in with a Claude account on this host")
+    expires = cred.get("expiresAt")
+    if isinstance(expires, (int, float)) and expires / 1000 < time.time():
+        raise RuntimeError("Claude Code's sign-in has expired; it renews the next time Claude Code runs")
+    return cred["accessToken"], cred.get("subscriptionType")
+
+
+def usage_windows(body: dict) -> list:
+    """The API's limits as [{"label", "usedPercentage", "resetsAt"}], session first."""
+    windows = []
+    for limit in body.get("limits") or []:
+        if not isinstance(limit, dict) or limit.get("percent") is None:
+            continue
+        kind = limit.get("kind") or ""
+        model = ((limit.get("scope") or {}).get("model") or {}).get("display_name")
+        label = {"session": "5h", "weekly_all": "7d"}.get(kind) or ("7d " + model if model else kind.replace("_", " "))
+        windows.append({"label": label, "usedPercentage": round(float(limit["percent"])), "resetsAt": limit.get("resets_at")})
+    if not windows:
+        for key, label in (("five_hour", "5h"), ("seven_day", "7d"), ("seven_day_opus", "7d Opus"), ("seven_day_sonnet", "7d Sonnet")):
+            w = body.get(key)
+            if isinstance(w, dict) and w.get("utilization") is not None:
+                windows.append({"label": label, "usedPercentage": round(float(w["utilization"])), "resetsAt": w.get("resets_at")})
+    return windows
+
+
+def claude_usage() -> dict:
+    token, plan = claude_token()
+    req = urllib.request.Request(USAGE_URL, headers={"Authorization": f"Bearer {token}", "Accept": "application/json",
+                                                     "anthropic-beta": "oauth-2025-04-20",
+                                                     "User-Agent": f"sshtars-hook/{VERSION}"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            body = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"the usage API answered {e.code}")
+    return {"agent": "claude-code", "account": plan, "windows": usage_windows(body),
+            "capturedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+
+
+def cmd_usage(args):
+    if not args.refresh:
+        try:
+            cached = json.loads(USAGE_CACHE.read_text())
+            if time.time() - cached.get("ts", 0) < USAGE_TTL_S:
+                print(json.dumps({"version": VERSION, **cached["reply"]}, ensure_ascii=False))
+                return 0
+        except (OSError, ValueError, KeyError):
+            pass
+    usage, errors = [], []
+    try:
+        usage.append(claude_usage())
+    except Exception as e:
+        errors.append({"agent": "claude-code", "error": str(e)})
+    reply = {"host": host_name(), "usage": usage, "errors": errors}
+    try:
+        STATE.mkdir(parents=True, exist_ok=True)
+        USAGE_CACHE.write_text(json.dumps({"ts": time.time(), "reply": reply}))
+    except OSError:
+        pass
+    print(json.dumps({"version": VERSION, **reply}, ensure_ascii=False))
+    return 0
+
+
 # ------------------------------------------------------------------ install
 
 SETTINGS = Path.home() / ".claude/settings.json"
@@ -913,6 +1313,9 @@ def main(argv=None):
     tr = sub.add_parser("transcript"); tr.add_argument("session"); tr.add_argument("--limit", type=int, default=80)
     tr.add_argument("--json", action="store_true")
     pr = sub.add_parser("prompt"); pr.add_argument("session"); pr.add_argument("text")
+    d = sub.add_parser("diff"); d.add_argument("--json", action="store_true"); d.add_argument("--tmux"); d.add_argument("--cwd")
+    sv = sub.add_parser("servers"); sv.add_argument("--json", action="store_true")
+    us = sub.add_parser("usage"); us.add_argument("--json", action="store_true"); us.add_argument("--refresh", action="store_true")
     i = sub.add_parser("install-claude"); i.add_argument("--exe")
     u = sub.add_parser("uninstall-claude"); u.add_argument("--exe")
     args = p.parse_args(argv)
@@ -938,6 +1341,12 @@ def main(argv=None):
         return cmd_transcript(args)
     if args.cmd == "prompt":
         return cmd_prompt(args)
+    if args.cmd == "diff":
+        return cmd_diff(args)
+    if args.cmd == "servers":
+        return cmd_servers(args)
+    if args.cmd == "usage":
+        return cmd_usage(args)
     if args.cmd == "install-claude":
         return cmd_install_claude(args)
     if args.cmd == "uninstall-claude":

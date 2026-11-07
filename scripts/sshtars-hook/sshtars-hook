@@ -1,0 +1,436 @@
+#!/usr/bin/env python3
+"""sshtars-hook: a host's agents and scripts → MCC → the SSHTars iPhone app (Inbox + push).
+
+Clean-room take on Moshi's moshi-hook (docs/moshi-teardown.md §4), without a daemon or a cloud relay:
+every call is one short HTTP request to the MCC runner on hailmary, and the only long-lived process is
+the per-approval watcher below.
+
+  sshtars-hook claude-hook            Claude Code hook entry point (Notification, Stop); reads its JSON on stdin
+  sshtars-hook notify MSG [--title T] post to the Inbox (pushed when nobody is active in this tmux session)
+  sshtars-hook ask QUESTION [--options a,b] [--timeout S] [--require-remote]
+                                      block until the phone answers: exit 0 approved (prints the choice),
+                                      1 denied, 3 expired, 4 error (falls back to a terminal y/N unless
+                                      --require-remote)
+  sshtars-hook doctor                 check URL, token and the route; prints no secret
+  sshtars-hook install-claude         add its hooks to ~/.claude/settings.json (keeps every other hook)
+  sshtars-hook uninstall-claude       remove only its own hooks
+
+Approvals for Claude Code: when Claude Code has shown a permission prompt for ~6 s without an answer it
+fires the Notification hook (`notification_type: permission_prompt`). This hook then reads the prompt
+from the tmux pane, posts it as an approval, and leaves a detached watcher behind. The terminal prompt
+stays usable the whole time. The watcher polls MCC; on the phone's answer it re-reads the pane and,
+only if the same prompt is still there, presses Enter (the highlighted "Yes") or Escape ("No"). If the
+prompt goes away first (answered at the desk), the approval is closed on MCC.
+
+Credentials: the host's own MCC caller token (`sshtars-hook-<host>`), read at run time from Proton Pass
+item "MCC - MCC_TOKEN_SSHTARS_HOOK_<HOST>" through ~/scripts/proton-pass/pass-secrets.sh (TPM-sealed PAT
+and cache, every read logged to syslog → Graylog). SSHTARS_HOOK_TOKEN in the environment overrides it
+for tests. Nothing is written to disk but a log of outcomes (~/.local/state/sshtars-hook/hook.log).
+
+A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
+"""
+import argparse
+import json
+import os
+import re
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+VERSION = "1.0.0"
+DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
+STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
+LOG = STATE / "hook.log"
+PASS_SECRETS = Path.home() / "scripts/proton-pass/pass-secrets.sh"
+AWAY_S = int(os.environ.get("SSHTARS_HOOK_AWAY_S", "60"))          # no keystroke in the session for this long = away
+APPROVAL_TTL_S = int(os.environ.get("SSHTARS_HOOK_APPROVAL_TTL_S", "1800"))
+POLL_S = 2.0
+PROMPT_RE = re.compile(r"Do you want to (proceed|make this edit|create|allow|run)", re.I)
+OPTION_RE = re.compile(r"^\s*[❯>]?\s*\d\.\s+\S")
+
+
+# ------------------------------------------------------------------ plumbing
+
+def host_name() -> str:
+    return socket.gethostname().split(".")[0].lower()
+
+
+def log(outcome: str, **fields):
+    try:
+        STATE.mkdir(parents=True, exist_ok=True)
+        line = {"ts": round(time.time(), 3), "pid": os.getpid(), "outcome": outcome, **fields}
+        with open(LOG, "a") as f:
+            f.write(json.dumps(line, ensure_ascii=False)[:2000] + "\n")
+    except OSError:
+        pass
+
+
+def config() -> dict:
+    return {"url": os.environ.get("SSHTARS_HOOK_URL", DEFAULT_URL).rstrip("/"),
+            "item": os.environ.get("SSHTARS_HOOK_ITEM", f"MCC - MCC_TOKEN_SSHTARS_HOOK_{host_name().upper()}")}
+
+
+_token_cache = None
+
+
+def token(cfg) -> str:
+    """The host's MCC token: env override, else Proton Pass through pp_load (cache fresh for an hour)."""
+    global _token_cache
+    if _token_cache:
+        return _token_cache
+    env = os.environ.get("SSHTARS_HOOK_TOKEN", "").strip()
+    if env:
+        _token_cache = env
+        return env
+    if not PASS_SECRETS.exists():
+        raise RuntimeError(f"no token: SSHTARS_HOOK_TOKEN unset and {PASS_SECRETS} missing")
+    script = ('source "$1"; PP_FRESH_S="${PP_FRESH_S:-3600}" pp_load sshtars-hook "sshtars-hook token" '
+              '"SSHTARS_HOOK_TOKEN|$2|note" >/dev/null || exit 1; printf %s "$SSHTARS_HOOK_TOKEN"')
+    r = subprocess.run(["bash", "-c", script, "_", str(PASS_SECRETS), cfg["item"]],
+                       capture_output=True, text=True, timeout=60)
+    value = r.stdout.strip()
+    if r.returncode != 0 or not value:
+        raise RuntimeError(f"Proton Pass item {cfg['item']!r} not loaded (pp_load exit {r.returncode}; see syslog tag proton-pass-load)")
+    _token_cache = value
+    return value
+
+
+def api(method: str, path: str, body=None, cfg=None, timeout=10):
+    cfg = cfg or config()
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(cfg["url"] + path, data=data, method=method)
+    req.add_header("Authorization", f"Bearer {token(cfg)}")
+    req.add_header("Accept", "application/json")
+    if data is not None:
+        req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read() or b"{}")
+    except urllib.error.HTTPError as e:
+        try:
+            detail = json.loads(e.read() or b"{}").get("error", "")
+        except ValueError:
+            detail = ""
+        raise RuntimeError(f"MCC {method} {path}: HTTP {e.code} {detail}".strip()) from None
+
+
+# ------------------------------------------------------------------ tmux
+
+def tmux(*args, timeout=5) -> str:
+    r = subprocess.run(["tmux", *args], capture_output=True, text=True, timeout=timeout)
+    if r.returncode != 0:
+        raise RuntimeError(f"tmux {args[0]}: {r.stderr.strip()}")
+    return r.stdout
+
+
+def pane_target():
+    """{session, window, pane} for the pane this process runs in, or None outside tmux."""
+    pane = os.environ.get("TMUX_PANE")
+    if not pane or not os.environ.get("TMUX") or not shutil.which("tmux"):
+        return None
+    try:
+        out = tmux("display-message", "-p", "-t", pane, "#{session_name}|#{window_index}|#{pane_id}").strip()
+        session, window, pane_id = out.split("|", 2)
+        return {"session": session, "window": window, "pane": pane_id}
+    except (RuntimeError, ValueError, subprocess.SubprocessError, OSError) as e:
+        log("tmux-target-failed", error=str(e))
+        return None
+
+
+def last_activity(session: str) -> float:
+    """Newest keystroke time of any client attached to `session` (0 when none is attached)."""
+    try:
+        values = [int(v) for v in tmux("list-clients", "-t", session, "-F", "#{client_activity}").split() if v.isdigit()]
+    except (RuntimeError, subprocess.SubprocessError, OSError):
+        return 0.0
+    return float(max(values)) if values else 0.0
+
+
+def is_away(target) -> bool:
+    """True when nobody typed in this tmux session for AWAY_S (or no client is attached). Outside tmux
+    there is no signal, so the phone is told."""
+    if not target:
+        return True
+    activity = last_activity(target["session"])
+    return activity == 0 or time.time() - activity >= AWAY_S
+
+
+def capture(pane: str) -> list:
+    return tmux("capture-pane", "-p", "-t", pane).splitlines()
+
+
+def prompt_block(lines: list):
+    """The permission prompt on screen: up to 8 lines above "Do you want to …" and its numbered
+    options. None when no prompt is showing."""
+    idx = [i for i, line in enumerate(lines) if PROMPT_RE.search(line)]
+    if not idx:
+        return None
+    at = idx[-1]
+    end = at + 1
+    while end < len(lines) and (OPTION_RE.match(lines[end]) or not lines[end].strip()) and end - at < 8:
+        end += 1
+    options = [l for l in lines[at + 1:end] if OPTION_RE.match(l)]
+    if not options:
+        return None
+    start = at
+    while start > 0 and at - start < 8 and lines[start - 1].strip() and not set(lines[start - 1].strip()) <= set("─━-╭╮╰╯│ "):
+        start -= 1
+    return {"context": [l.strip(" │") for l in lines[start:at] if l.strip(" │")],
+            "question": lines[at].strip(" │"), "options": [o.strip(" │") for o in options]}
+
+
+def same_prompt(a, b) -> bool:
+    return bool(a and b) and a["question"] == b["question"] and \
+        [re.sub(r"^[❯>]\s*", "", o) for o in a["options"]] == [re.sub(r"^[❯>]\s*", "", o) for o in b["options"]]
+
+
+# ------------------------------------------------------------------ events
+
+def post_event(kind, title, body=None, *, target=None, push=True, **extra):
+    payload = {"kind": kind, "title": title[:200], "body": (body or "")[:1500], "push": push,
+               "tmux": target, **{k: v for k, v in extra.items() if v is not None}}
+    return api("POST", "/api/sshtars/hook/events", payload)
+
+
+def detach(fn, *args):
+    """Run fn(*args) in a detached grandchild (new session, stdio to /dev/null) and return at once."""
+    if os.fork() != 0:
+        return
+    os.setsid()
+    if os.fork() != 0:
+        os._exit(0)
+    fd = os.open(os.devnull, os.O_RDWR)
+    for n in (0, 1, 2):
+        os.dup2(fd, n)
+    try:
+        fn(*args)
+    except Exception as e:  # the watcher's last word goes to the log; nobody else is listening
+        log("detached-failed", error=f"{type(e).__name__}: {e}")
+    os._exit(0)
+
+
+def watch_approval(event_id: str, pane: str, prompt: dict, expires: float):
+    """Poll MCC for the phone's answer and type it into the pane, but only into the same prompt."""
+    log("watch-start", event=event_id, pane=pane)
+    while time.time() < expires:
+        time.sleep(POLL_S)
+        try:
+            now = prompt_block(capture(pane))
+        except (RuntimeError, subprocess.SubprocessError, OSError):
+            now = None
+        if not same_prompt(prompt, now):
+            api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "answered at the terminal"})
+            log("watch-closed", event=event_id, reason="prompt gone")
+            return
+        try:
+            state = api("GET", f"/api/sshtars/hook/events/{event_id}")
+        except RuntimeError as e:
+            log("watch-poll-failed", event=event_id, error=str(e))
+            continue
+        status = state.get("status")
+        if status in ("approved", "denied"):
+            key = "Enter" if status == "approved" else "Escape"
+            tmux("send-keys", "-t", pane, key)
+            log("watch-applied", event=event_id, status=status)
+            return
+        if status not in ("pending",):
+            log("watch-ended", event=event_id, status=status)
+            return
+    api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "expired on the host"})
+    log("watch-expired", event=event_id)
+
+
+# ------------------------------------------------------------------ Claude Code
+
+def claude_hook(stdin_text: str):
+    data = json.loads(stdin_text or "{}")
+    event = data.get("hook_event_name", "")
+    cwd = data.get("cwd") or os.getcwd()
+    project = Path(cwd).name or cwd
+    target = pane_target()
+
+    if event == "Notification":
+        kind = data.get("notification_type", "")
+        if kind == "permission_prompt":
+            permission_prompt(data, cwd, project, target)
+        elif kind in ("idle_prompt", "elicitation_dialog", "agent_needs_input"):
+            # Claude Code fires these only after the prompt has sat unanswered, which is itself the
+            # "nobody is at the desk" signal, so they always push.
+            msg = data.get("message") or "Claude is waiting for your input"
+            detach(lambda: post_event("notify", f"Claude is waiting · {project}", msg, target=target,
+                                      push=True, cwd=cwd, agent="claude", category="waiting"))
+        return
+    if event == "Stop":
+        if data.get("stop_hook_active"):
+            return
+        text = (data.get("last_assistant_message") or "").strip()
+        # Every turn ends in Stop, so it pushes only when tmux shows nobody typing in the session.
+        # Elsewhere (herdr, herdr-core, a plain terminal) there is no presence signal: Inbox only, and
+        # the idle_prompt notification above reaches the phone if the turn waits unanswered.
+        detach(lambda: post_event("notify", f"Claude finished · {project}", text[-600:], target=target,
+                                  push=bool(target) and is_away(target), cwd=cwd, agent="claude",
+                                  category="task_complete"))
+
+
+def permission_prompt(data, cwd, project, target):
+    message = data.get("message") or "Claude needs your permission"
+    prompt = None
+    if target:
+        try:
+            prompt = prompt_block(capture(target["pane"]))
+        except (RuntimeError, subprocess.SubprocessError, OSError) as e:
+            log("capture-failed", error=str(e))
+    if not prompt:
+        # Outside tmux, or the prompt is not on screen: the phone can only be told, not answer.
+        detach(lambda: post_event("notify", f"Claude needs approval · {project}",
+                                  f"{message}. Answer it at the terminal.", target=target, cwd=cwd,
+                                  agent="claude", category="approval_required"))
+        return
+    body = "\n".join(prompt["context"][-6:] + [prompt["question"]])
+    expires = time.time() + APPROVAL_TTL_S
+
+    def run():
+        created = post_event("approval", f"Claude needs approval · {project}", body, target=target, cwd=cwd,
+                             agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
+                             category="approval_required")
+        watch_approval(created["id"], target["pane"], prompt, expires)
+    detach(run)
+
+
+# ------------------------------------------------------------------ scripts
+
+def cmd_notify(args):
+    target = pane_target()
+    r = post_event("notify", args.title or args.message[:80], args.message if args.title else "",
+                   target=target, push=not args.quiet, agent="script", category="notify")
+    print(f"posted {r.get('id')} (push: {r.get('pushed')})")
+
+
+def cmd_ask(args):
+    options = [o.strip() for o in (args.options or "").split(",") if o.strip()]
+    try:
+        r = post_event("approval", args.question, args.detail or "", target=pane_target(), agent="script",
+                       options=options or None, expires_s=args.timeout, category="ask")
+    except Exception as e:
+        log("ask-failed", error=str(e))
+        if args.require_remote or not sys.stdin.isatty():
+            print(f"sshtars-hook: {e}", file=sys.stderr)
+            return 4
+        answer = input(f"{args.question} [y/N] ").strip().lower()
+        return 0 if answer in ("y", "yes") else 1
+    deadline = time.time() + args.timeout
+    while time.time() < deadline:
+        time.sleep(POLL_S)
+        try:
+            state = api("GET", f"/api/sshtars/hook/events/{r['id']}")
+        except RuntimeError as e:
+            log("ask-poll-failed", error=str(e))
+            continue
+        if state.get("status") == "approved":
+            if state.get("choice"):
+                print(state["choice"])
+            return 0
+        if state.get("status") == "denied":
+            return 1
+        if state.get("status") not in ("pending",):
+            return 3
+    return 3
+
+
+def cmd_doctor(_args):
+    cfg = config()
+    print(f"host        {host_name()}")
+    print(f"url         {cfg['url']}")
+    print(f"token item  {cfg['item']}" + ("  (overridden by SSHTARS_HOOK_TOKEN)" if os.environ.get("SSHTARS_HOOK_TOKEN") else ""))
+    target = pane_target()
+    print(f"tmux        {target or 'not in tmux'}" + (f"  away={is_away(target)}" if target else ""))
+    try:
+        token(cfg)
+        print("token       loaded")
+    except Exception as e:
+        print(f"token       FAILED: {e}")
+        return 1
+    try:
+        me = api("GET", "/api/sshtars/hook/whoami")
+        print(f"mcc         ok, this host is {me.get('host')!r}, {me.get('devices', 0)} phone(s) registered")
+    except Exception as e:
+        print(f"mcc         FAILED: {e}")
+        return 1
+    return 0
+
+
+# ------------------------------------------------------------------ install
+
+SETTINGS = Path.home() / ".claude/settings.json"
+EVENTS = {"Notification": None, "Stop": None}
+
+
+def _ours(entry) -> bool:
+    return any("sshtars-hook" in (h.get("command") or "") for h in entry.get("hooks", []))
+
+
+def cmd_install_claude(args, remove=False):
+    exe = str(Path(args.exe or shutil.which("sshtars-hook") or sys.argv[0]).resolve())
+    settings = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
+    if SETTINGS.exists():
+        backup = SETTINGS.with_name(f"settings.json.bak-sshtars-hook-{int(time.time())}")
+        shutil.copy2(SETTINGS, backup)
+        print(f"backup      {backup}")
+    hooks = settings.setdefault("hooks", {})
+    for event in EVENTS:
+        entries = [e for e in hooks.get(event, []) if not _ours(e)]
+        if not remove:
+            entries.append({"hooks": [{"type": "command", "command": f"{exe} claude-hook", "timeout": 30}]})
+        if entries:
+            hooks[event] = entries
+        else:
+            hooks.pop(event, None)
+    if not hooks:
+        settings.pop("hooks", None)
+    tmp = SETTINGS.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(settings, indent=2) + "\n")
+    tmp.replace(SETTINGS)
+    print(("removed" if remove else "installed") + f"     {', '.join(EVENTS)} hooks in {SETTINGS}")
+    return 0
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(prog="sshtars-hook", description=__doc__.split("\n")[0])
+    p.add_argument("--version", action="version", version=VERSION)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("claude-hook")
+    n = sub.add_parser("notify"); n.add_argument("message"); n.add_argument("--title"); n.add_argument("--quiet", action="store_true")
+    a = sub.add_parser("ask"); a.add_argument("question"); a.add_argument("--detail"); a.add_argument("--options")
+    a.add_argument("--timeout", type=int, default=600); a.add_argument("--require-remote", action="store_true")
+    sub.add_parser("doctor")
+    i = sub.add_parser("install-claude"); i.add_argument("--exe")
+    u = sub.add_parser("uninstall-claude"); u.add_argument("--exe")
+    args = p.parse_args(argv)
+
+    if args.cmd == "claude-hook":
+        # Never break the agent: whatever happens, exit 0 with nothing on stdout.
+        try:
+            claude_hook(sys.stdin.read())
+        except Exception as e:
+            log("claude-hook-failed", error=f"{type(e).__name__}: {e}")
+        return 0
+    if args.cmd == "notify":
+        cmd_notify(args); return 0
+    if args.cmd == "ask":
+        return cmd_ask(args)
+    if args.cmd == "doctor":
+        return cmd_doctor(args)
+    if args.cmd == "install-claude":
+        return cmd_install_claude(args)
+    if args.cmd == "uninstall-claude":
+        return cmd_install_claude(args, remove=True)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

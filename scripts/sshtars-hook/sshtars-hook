@@ -47,7 +47,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -505,6 +505,48 @@ def cmd_doctor(_args):
     return 0
 
 
+def last_logged():
+    """The newest line of hook.log as {ts, outcome}, reading only the file's tail."""
+    try:
+        with open(LOG, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            f.seek(max(0, size - 4096))
+            lines = f.read().decode("utf-8", "replace").strip().splitlines()
+        for line in reversed(lines):
+            try:
+                row = json.loads(line)
+                return {"ts": row.get("ts"), "outcome": row.get("outcome")}
+            except ValueError:
+                continue
+    except OSError:
+        pass
+    return None
+
+
+def cmd_status(args):
+    """What the app's connect probe reads: quick and offline (no Proton Pass, no MCC call)."""
+    settings = {}
+    try:
+        settings = json.loads(SETTINGS.read_text())
+    except (OSError, ValueError):
+        pass
+    hooks = settings.get("hooks", {}) if isinstance(settings, dict) else {}
+    wired = [e for e in EVENTS if any(_ours(x) for x in hooks.get(e, []) if isinstance(x, dict))]
+    source = "env" if os.environ.get("SSHTARS_HOOK_TOKEN") else ("proton" if PASS_SECRETS.exists() else "missing")
+    status = {"version": VERSION, "host": host_name(), "claude": len(wired) == len(EVENTS), "claude_events": wired,
+              "token": source, "last": last_logged()}
+    if args.json:
+        print(json.dumps(status, ensure_ascii=False))
+    else:
+        last = status["last"]
+        print(f"version     {VERSION}")
+        print(f"claude      {'installed' if status['claude'] else 'not installed'} ({', '.join(wired) or 'no events'})")
+        print(f"token       {source}")
+        print("last        " + (f"{last['outcome']} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(last['ts']))}" if last and last.get("ts") else "nothing logged"))
+    return 0
+
+
 # ------------------------------------------------------------------ install
 
 SETTINGS = Path.home() / ".claude/settings.json"
@@ -549,6 +591,7 @@ def main(argv=None):
     a = sub.add_parser("ask"); a.add_argument("question"); a.add_argument("--detail"); a.add_argument("--options")
     a.add_argument("--timeout", type=int, default=600); a.add_argument("--require-remote", action="store_true")
     sub.add_parser("doctor")
+    st = sub.add_parser("status"); st.add_argument("--json", action="store_true")
     i = sub.add_parser("install-claude"); i.add_argument("--exe")
     u = sub.add_parser("uninstall-claude"); u.add_argument("--exe")
     args = p.parse_args(argv)
@@ -566,6 +609,8 @@ def main(argv=None):
         return cmd_ask(args)
     if args.cmd == "doctor":
         return cmd_doctor(args)
+    if args.cmd == "status":
+        return cmd_status(args)
     if args.cmd == "install-claude":
         return cmd_install_claude(args)
     if args.cmd == "uninstall-claude":

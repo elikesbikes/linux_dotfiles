@@ -5,7 +5,8 @@ Clean-room take on Moshi's moshi-hook (docs/moshi-teardown.md §4), without a da
 every call is one short HTTP request to the MCC runner on hailmary, and the only long-lived process is
 the per-approval watcher below.
 
-  sshtars-hook claude-hook            Claude Code hook entry point (Notification, Stop); reads its JSON on stdin
+  sshtars-hook claude-hook            Claude Code hook entry point (Notification, Stop, UserPromptSubmit,
+                                      SessionEnd); reads its JSON on stdin
   sshtars-hook notify MSG [--title T] post to the Inbox and push it (--quiet: Inbox only)
   sshtars-hook ask QUESTION [--options a,b] [--timeout S] [--require-remote]
                                       block until the phone answers: exit 0 approved (prints the choice),
@@ -36,11 +37,18 @@ item "MCC - MCC_TOKEN_SSHTARS_HOOK_<HOST>" through ~/scripts/proton-pass/pass-se
 and cache, every read logged to syslog → Graylog). SSHTARS_HOOK_TOKEN in the environment overrides it
 for tests. Nothing is written to disk but a log of outcomes (~/.local/state/sshtars-hook/hook.log) and,
 per Claude Code session, which terminal it runs in (~/.local/state/sshtars-hook/sessions/<id>.json: the
-session id, transcript path, cwd and terminal address; no conversation text).
+session id, its title, transcript path, cwd and terminal address; no conversation text).
 
 Chat View (Moshi's, §6): the app reads `transcript` (Claude Code's own JSONL under ~/.claude/projects,
 reduced to prompts, answers and one line per tool call) and sends with `prompt`, which types into the
 pane like a person would. There is no second channel to the agent.
+
+Live Activities (1.4.0): every Claude Code hook also reports the session's state to MCC
+(`/api/sshtars/hook/activity`: working on a submitted prompt or an answered approval, waiting on a
+permission or idle prompt, done on Stop, ended on SessionEnd) with the session's title, one short line of
+detail (the prompt's first 140 characters, the question, or the start of the answer's last paragraph) and
+its terminal. MCC turns that into the phone's Lock Screen activity; it sends nothing unless the phone has
+switched Live Activities on.
 
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
@@ -57,7 +65,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -340,6 +348,25 @@ def post_event(kind, title, body=None, *, target=None, push=True, **extra):
     return api("POST", "/api/sshtars/hook/events", payload)
 
 
+def short(text, limit=140) -> str:
+    """One line for the Live Activity: control characters and runs of whitespace collapsed."""
+    return " ".join(CONTROL_RE.sub(" ", text or "").split())[:limit]
+
+
+def post_activity(state, data, *, project=None, target=None, detail=None):
+    """Report one session's state for the Live Activity. Called from a detached child; failures only log."""
+    sid = data.get("session_id") or ""
+    if not SESSION_RE.match(sid) or data.get("agent_id"):
+        return
+    title = data.get("session_title") or (registry_entry(sid) or {}).get("title") or project or "Claude"
+    try:
+        api("POST", "/api/sshtars/hook/activity",
+            {"session": sid, "state": state, "title": title[:80], "detail": short(detail), "agent": "claude",
+             "cwd": data.get("cwd"), "tmux": target})
+    except _FAILS as e:
+        log("activity-failed", state=state, error=str(e))
+
+
 def detach(fn, *args):
     """Run fn(*args) in a detached grandchild (new session, stdio to /dev/null) and return at once."""
     if os.fork() != 0:
@@ -357,7 +384,7 @@ def detach(fn, *args):
     os._exit(0)
 
 
-def watch_approval(event_id: str, term: dict, prompt: dict, expires: float):
+def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, activity=None):
     """Poll MCC for the phone's answer and type it into the terminal, but only into the same prompt
     (and, in herdr or herdr-core, only while the agent still says it is blocked)."""
     log("watch-start", event=event_id, terminal=describe(term))
@@ -370,6 +397,8 @@ def watch_approval(event_id: str, term: dict, prompt: dict, expires: float):
         if not same_prompt(prompt, now):
             api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "answered at the terminal"})
             log("watch-closed", event=event_id, reason="prompt gone")
+            if activity:
+                post_activity("working", activity, target=term, detail="answered at the terminal")
             return
         try:
             state = api("GET", f"/api/sshtars/hook/events/{event_id}")
@@ -385,6 +414,8 @@ def watch_approval(event_id: str, term: dict, prompt: dict, expires: float):
                 return
             press(term, "enter" if status == "approved" else "esc")
             log("watch-applied", event=event_id, status=status)
+            if activity:
+                post_activity("working", activity, target=term, detail=f"{status} from the phone")
             return
         if status not in ("pending",):
             log("watch-ended", event=event_id, status=status)
@@ -400,8 +431,17 @@ def claude_hook(stdin_text: str):
     event = data.get("hook_event_name", "")
     cwd = data.get("cwd") or os.getcwd()
     project = Path(cwd).name or cwd
+    if event == "SessionEnd":
+        # Claude Code gives SessionEnd hooks about 1.5 s in all: no terminal lookup, straight to the child.
+        detach(lambda: post_activity("ended", data, project=project, detail=data.get("reason") or "session ended"))
+        return
     target = terminal()
     record_session(data, target)
+
+    if event == "UserPromptSubmit":
+        prompt = data.get("prompt") or ""
+        detach(lambda: post_activity("working", data, project=project, target=target, detail=prompt))
+        return
 
     if event == "Notification":
         kind = data.get("notification_type", "")
@@ -411,8 +451,12 @@ def claude_hook(stdin_text: str):
             # Claude Code fires these only after the prompt has sat unanswered, which is itself the
             # "nobody is at the desk" signal, so they always push.
             msg = data.get("message") or "Claude is waiting for your input"
-            detach(lambda: post_event("notify", f"Claude is waiting · {project}", msg, target=target,
-                                      push=True, cwd=cwd, agent="claude", category="waiting"))
+
+            def waiting():
+                post_activity("waiting", data, project=project, target=target, detail=msg)
+                post_event("notify", f"Claude is waiting · {project}", msg, target=target,
+                           push=True, cwd=cwd, agent="claude", category="waiting")
+            detach(waiting)
         return
     if event == "Stop":
         if data.get("stop_hook_active"):
@@ -420,8 +464,12 @@ def claude_hook(stdin_text: str):
         text = (data.get("last_assistant_message") or "").strip()
         # Every turn ends in Stop, so it pushes only when nobody has looked (see unseen()); the
         # detached child does the waiting, so the agent is never held up.
-        detach(lambda: post_event("notify", f"Claude finished · {project}", text[-600:], target=target,
-                                  push=unseen(target), cwd=cwd, agent="claude", category="task_complete"))
+
+        def finished():
+            post_activity("done", data, project=project, target=target, detail=text.split("\n\n")[-1])
+            post_event("notify", f"Claude finished · {project}", text[-600:], target=target,
+                       push=unseen(target), cwd=cwd, agent="claude", category="task_complete")
+        detach(finished)
 
 
 def permission_prompt(data, cwd, project, target):
@@ -434,18 +482,21 @@ def permission_prompt(data, cwd, project, target):
             log("capture-failed", kind=target["kind"], error=str(e))
     if not prompt:
         # A plain terminal, or the prompt is not on screen: the phone can only be told, not answer.
-        detach(lambda: post_event("notify", f"Claude needs approval · {project}",
-                                  f"{message}. Answer it at the terminal.", target=target, cwd=cwd,
-                                  agent="claude", category="approval_required"))
+        def told():
+            post_activity("waiting", data, project=project, target=target, detail=message)
+            post_event("notify", f"Claude needs approval · {project}", f"{message}. Answer it at the terminal.",
+                       target=target, cwd=cwd, agent="claude", category="approval_required")
+        detach(told)
         return
     body = "\n".join(prompt["context"][-6:] + [prompt["question"]])
     expires = time.time() + APPROVAL_TTL_S
 
     def run():
+        post_activity("waiting", data, project=project, target=target, detail=prompt["question"])
         created = post_event("approval", f"Claude needs approval · {project}", body, target=target, cwd=cwd,
                              agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
                              category="approval_required")
-        watch_approval(created["id"], target, prompt, expires)
+        watch_approval(created["id"], target, prompt, expires, activity=data)
     detach(run)
 
 
@@ -532,11 +583,19 @@ def record_session(data, target):
     try:
         SESSIONS.mkdir(parents=True, exist_ok=True)
         tmp = SESSIONS / f".{sid}.tmp"
+        title = data.get("session_title") or (registry_entry(sid) or {}).get("title")
         tmp.write_text(json.dumps({"session": sid, "transcript": data.get("transcript_path"), "cwd": data.get("cwd"),
-                                   "terminal": target, "ts": round(time.time(), 3)}))
+                                   "terminal": target, "title": title, "ts": round(time.time(), 3)}))
         tmp.replace(SESSIONS / f"{sid}.json")
     except OSError as e:
         log("session-record-failed", error=str(e))
+
+
+def registry_entry(sid: str):
+    try:
+        return json.loads((SESSIONS / f"{sid}.json").read_text())
+    except (OSError, ValueError):
+        return None
 
 
 def registry() -> dict:
@@ -799,7 +858,7 @@ def cmd_status(args):
 # ------------------------------------------------------------------ install
 
 SETTINGS = Path.home() / ".claude/settings.json"
-EVENTS = {"Notification": None, "Stop": None}
+EVENTS = {"Notification": 30, "Stop": 30, "UserPromptSubmit": 30, "SessionEnd": 5}   # event → hook timeout (s)
 
 
 def _ours(entry) -> bool:
@@ -817,7 +876,7 @@ def cmd_install_claude(args, remove=False):
     for event in EVENTS:
         entries = [e for e in hooks.get(event, []) if not _ours(e)]
         if not remove:
-            entries.append({"hooks": [{"type": "command", "command": f"{exe} claude-hook", "timeout": 30}]})
+            entries.append({"hooks": [{"type": "command", "command": f"{exe} claude-hook", "timeout": EVENTS[event]}]})
         if entries:
             hooks[event] = entries
         else:

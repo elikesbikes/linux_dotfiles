@@ -6,7 +6,7 @@ every call is one short HTTP request to the MCC runner on hailmary, and the only
 the per-approval watcher below.
 
   sshtars-hook claude-hook            Claude Code hook entry point (Notification, Stop); reads its JSON on stdin
-  sshtars-hook notify MSG [--title T] post to the Inbox (pushed when nobody is active in this tmux session)
+  sshtars-hook notify MSG [--title T] post to the Inbox and push it (--quiet: Inbox only)
   sshtars-hook ask QUESTION [--options a,b] [--timeout S] [--require-remote]
                                       block until the phone answers: exit 0 approved (prints the choice),
                                       1 denied, 3 expired, 4 error (falls back to a terminal y/N unless
@@ -15,12 +15,17 @@ the per-approval watcher below.
   sshtars-hook install-claude         add its hooks to ~/.claude/settings.json (keeps every other hook)
   sshtars-hook uninstall-claude       remove only its own hooks
 
+Terminals: tmux, herdr and herdr-core (`hc`, what the Herdr app runs). Events carry the terminal so the
+app can open it, and "finished" pushes only when nobody has looked: tmux by keystrokes, herdr and
+herdr-core by their own seen state (see unseen()). A plain terminal gets Inbox entries, no target.
+
 Approvals for Claude Code: when Claude Code has shown a permission prompt for ~6 s without an answer it
 fires the Notification hook (`notification_type: permission_prompt`). This hook then reads the prompt
-from the tmux pane, posts it as an approval, and leaves a detached watcher behind. The terminal prompt
-stays usable the whole time. The watcher polls MCC; on the phone's answer it re-reads the pane and,
-only if the same prompt is still there, presses Enter (the highlighted "Yes") or Escape ("No"). If the
-prompt goes away first (answered at the desk), the approval is closed on MCC.
+from the terminal's screen, posts it as an approval, and leaves a detached watcher behind. The terminal
+prompt stays usable the whole time. The watcher polls MCC; on the phone's answer it re-reads the screen
+and, only if the same prompt is still there (and herdr or herdr-core still report the agent blocked),
+presses Enter (the highlighted "Yes") or Escape ("No"). If the prompt goes away first (answered at the
+desk), the approval is closed on MCC.
 
 Credentials: the host's own MCC caller token (`sshtars-hook-<host>`), read at run time from Proton Pass
 item "MCC - MCC_TOKEN_SSHTARS_HOOK_<HOST>" through ~/scripts/proton-pass/pass-secrets.sh (TPM-sealed PAT
@@ -42,7 +47,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -50,6 +55,7 @@ PASS_SECRETS = Path.home() / "scripts/proton-pass/pass-secrets.sh"
 AWAY_S = int(os.environ.get("SSHTARS_HOOK_AWAY_S", "60"))          # no keystroke in the session for this long = away
 APPROVAL_TTL_S = int(os.environ.get("SSHTARS_HOOK_APPROVAL_TTL_S", "1800"))
 POLL_S = 2.0
+SEEN_WAIT_S = int(os.environ.get("SSHTARS_HOOK_SEEN_WAIT_S", "20"))   # herdr/hc: time to look before a push
 PROMPT_RE = re.compile(r"Do you want to (proceed|make this edit|create|allow|run)", re.I)
 OPTION_RE = re.compile(r"^\s*[❯>]?\s*\d\.\s+\S")
 
@@ -119,49 +125,176 @@ def api(method: str, path: str, body=None, cfg=None, timeout=10):
         raise RuntimeError(f"MCC {method} {path}: HTTP {e.code} {detail}".strip()) from None
 
 
-# ------------------------------------------------------------------ tmux
+# ------------------------------------------------------------------ terminals: tmux, herdr, herdr-core
+#
+# The terminal an agent runs in, as MCC stores it and the app opens it:
+#   {"kind": "tmux",  "session": "agents", "window": "2", "pane": "%7"}
+#   {"kind": "herdr", "session": "default", "workspace": "sshtars", "pane": "w1:p1"}
+#   {"kind": "hc",    "workspace": "sshtars-ios", "pane": "t1g"}            (herdr-core, the Herdr app)
+# tmux is checked first: it can run inside the other two, and its pane is the more precise address.
+# herdr and hc are called without a session flag, so they talk to the session the agent inherited.
 
-def tmux(*args, timeout=5) -> str:
-    r = subprocess.run(["tmux", *args], capture_output=True, text=True, timeout=timeout)
+def run(argv, timeout=5) -> str:
+    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
     if r.returncode != 0:
-        raise RuntimeError(f"tmux {args[0]}: {r.stderr.strip()}")
+        raise RuntimeError(f"{' '.join(argv[:2])}: {(r.stderr or r.stdout).strip()[:200]}")
     return r.stdout
 
 
-def pane_target():
-    """{session, window, pane} for the pane this process runs in, or None outside tmux."""
+def tmux(*args, timeout=5) -> str:
+    return run(["tmux", *args], timeout)
+
+
+def herdr_result(*args) -> dict:
+    data = json.loads(run(["herdr", *args]) or "{}")
+    if data.get("error"):
+        raise RuntimeError(f"herdr {' '.join(args[:2])}: {data['error'].get('code')}")
+    return data.get("result") or {}
+
+
+def hc_info(address: str) -> dict:
+    return json.loads(run(["hc", "get", address, "--json"]) or "{}")
+
+
+_FAILS = (RuntimeError, ValueError, subprocess.SubprocessError, OSError)
+
+
+def tmux_terminal():
     pane = os.environ.get("TMUX_PANE")
     if not pane or not os.environ.get("TMUX") or not shutil.which("tmux"):
         return None
     try:
         out = tmux("display-message", "-p", "-t", pane, "#{session_name}|#{window_index}|#{pane_id}").strip()
         session, window, pane_id = out.split("|", 2)
-        return {"session": session, "window": window, "pane": pane_id}
-    except (RuntimeError, ValueError, subprocess.SubprocessError, OSError) as e:
+        return {"kind": "tmux", "session": session, "window": window, "pane": pane_id}
+    except _FAILS as e:
         log("tmux-target-failed", error=str(e))
         return None
 
 
+def hc_terminal():
+    address = os.environ.get("HC_TERMINAL_ID")
+    if not address or not shutil.which("hc"):
+        return None
+    term = {"kind": "hc", "pane": address}
+    try:
+        info = hc_info(address)
+        term["pane"] = info.get("address") or address
+        where = (info.get("labels") or {}).get("where") or ""          # "tars / sshtars-ios"
+        if where:
+            term["workspace"] = where.split(" / ", 1)[-1]
+    except _FAILS as e:
+        log("hc-target-failed", error=str(e))
+    return term
+
+
+def herdr_terminal():
+    pane = os.environ.get("HERDR_PANE_ID")
+    if os.environ.get("HERDR_ENV") != "1" or not pane or not shutil.which("herdr"):
+        return None
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    term = {"kind": "herdr", "session": os.environ.get("HERDR_SESSION") or "default", "pane": pane,
+            "workspace": workspace}
+    try:
+        for w in herdr_result("workspace", "list").get("workspaces", []):
+            if w.get("workspace_id") == workspace and w.get("label"):
+                term["workspace"] = w["label"]
+    except _FAILS as e:
+        log("herdr-target-failed", error=str(e))
+    return term
+
+
+def terminal():
+    """Where this process runs, or None in a plain terminal (then events carry no target)."""
+    return tmux_terminal() or hc_terminal() or herdr_terminal()
+
+
+def describe(term) -> str:
+    if not term:
+        return "plain terminal (no tmux, herdr or herdr-core)"
+    where = term.get("session") or ""
+    if term.get("window"):
+        where += f":{term['window']}"
+    if term.get("workspace"):
+        where += (" / " if where else "") + term["workspace"]
+    return f"{term['kind']} {where} pane {term['pane']}".replace("  ", " ")
+
+
+def screen(term) -> list:
+    """The visible screen of the terminal, as lines."""
+    if term["kind"] == "tmux":
+        return tmux("capture-pane", "-p", "-t", term["pane"]).splitlines()
+    if term["kind"] == "hc":
+        return run(["hc", "read", term["pane"]]).splitlines()
+    return run(["herdr", "pane", "read", term["pane"], "--source", "visible"]).splitlines()
+
+
+def press(term, key: str):
+    """key: "enter" or "esc"."""
+    if term["kind"] == "tmux":
+        tmux("send-keys", "-t", term["pane"], "Enter" if key == "enter" else "Escape")
+    elif term["kind"] == "hc":
+        run(["hc", "keys", term["pane"], key])
+    else:
+        run(["herdr", "pane", "send-keys", term["pane"], key])
+
+
+def agent_state(term):
+    """What herdr-core or herdr says the agent is doing (idle, working, blocked, done, …); None for tmux,
+    a plain terminal, or when it cannot be read. Both read it from the agent itself, not from the screen."""
+    if not term or term["kind"] == "tmux":
+        return None
+    try:
+        if term["kind"] == "hc":
+            status = hc_info(term["pane"]).get("status")
+            return status.get("state") if isinstance(status, dict) else status
+        return herdr_result("pane", "get", term["pane"]).get("pane", {}).get("agent_status")
+    except _FAILS as e:
+        log("agent-state-failed", kind=term["kind"], error=str(e))
+        return None
+
+
 def last_activity(session: str) -> float:
-    """Newest keystroke time of any client attached to `session` (0 when none is attached)."""
+    """Newest keystroke time of any client attached to the tmux `session` (0 when none is attached)."""
     try:
         values = [int(v) for v in tmux("list-clients", "-t", session, "-F", "#{client_activity}").split() if v.isdigit()]
-    except (RuntimeError, subprocess.SubprocessError, OSError):
+    except _FAILS:
         return 0.0
     return float(max(values)) if values else 0.0
 
 
-def is_away(target) -> bool:
-    """True when nobody typed in this tmux session for AWAY_S (or no client is attached). Outside tmux
-    there is no signal, so the phone is told."""
-    if not target:
-        return True
-    activity = last_activity(target["session"])
+def is_away(term) -> bool:
+    """tmux only: nobody typed in the session for AWAY_S, or no client is attached."""
+    activity = last_activity(term["session"])
     return activity == 0 or time.time() - activity >= AWAY_S
 
 
-def capture(pane: str) -> list:
-    return tmux("capture-pane", "-p", "-t", pane).splitlines()
+def unseen(term) -> bool:
+    """After a turn ends, should the phone be told? Runs in the detached child.
+
+    tmux: nobody typed in the session for AWAY_S. herdr-core: after SEEN_WAIT_S the agent is still
+    `done` and Herdr's `herdr.seen` turn is behind the terminal's turn (Herdr catches it up when someone
+    looks at the terminal). herdr: still `done` after SEEN_WAIT_S (herdr turns it `idle` once viewed).
+    A plain terminal has no signal: Inbox only, and Claude Code's idle_prompt reaches the phone if the
+    turn sits unanswered."""
+    if not term:
+        return False
+    if term["kind"] == "tmux":
+        return is_away(term)
+    time.sleep(SEEN_WAIT_S)
+    try:
+        if term["kind"] == "hc":
+            info = hc_info(term["pane"])
+            status = info.get("status")
+            state = status.get("state") if isinstance(status, dict) else status
+            if state != "done":
+                return False          # working again (someone typed) or blocked (that sends its own notice)
+            seen = int((info.get("labels") or {}).get("herdr.seen", -1))
+            return seen < int(info.get("turn") or 0)
+        return agent_state(term) == "done"
+    except _FAILS as e:
+        log("seen-check-failed", kind=term["kind"], error=str(e))
+        return True
 
 
 def prompt_block(lines: list):
@@ -214,14 +347,15 @@ def detach(fn, *args):
     os._exit(0)
 
 
-def watch_approval(event_id: str, pane: str, prompt: dict, expires: float):
-    """Poll MCC for the phone's answer and type it into the pane, but only into the same prompt."""
-    log("watch-start", event=event_id, pane=pane)
+def watch_approval(event_id: str, term: dict, prompt: dict, expires: float):
+    """Poll MCC for the phone's answer and type it into the terminal, but only into the same prompt
+    (and, in herdr or herdr-core, only while the agent still says it is blocked)."""
+    log("watch-start", event=event_id, terminal=describe(term))
     while time.time() < expires:
         time.sleep(POLL_S)
         try:
-            now = prompt_block(capture(pane))
-        except (RuntimeError, subprocess.SubprocessError, OSError):
+            now = prompt_block(screen(term))
+        except _FAILS:
             now = None
         if not same_prompt(prompt, now):
             api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "answered at the terminal"})
@@ -234,8 +368,12 @@ def watch_approval(event_id: str, pane: str, prompt: dict, expires: float):
             continue
         status = state.get("status")
         if status in ("approved", "denied"):
-            key = "Enter" if status == "approved" else "Escape"
-            tmux("send-keys", "-t", pane, key)
+            state = agent_state(term)
+            if state not in (None, "blocked"):
+                api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": f"agent is {state}, not waiting"})
+                log("watch-closed", event=event_id, reason=f"agent {state}")
+                return
+            press(term, "enter" if status == "approved" else "esc")
             log("watch-applied", event=event_id, status=status)
             return
         if status not in ("pending",):
@@ -252,7 +390,7 @@ def claude_hook(stdin_text: str):
     event = data.get("hook_event_name", "")
     cwd = data.get("cwd") or os.getcwd()
     project = Path(cwd).name or cwd
-    target = pane_target()
+    target = terminal()
 
     if event == "Notification":
         kind = data.get("notification_type", "")
@@ -269,12 +407,10 @@ def claude_hook(stdin_text: str):
         if data.get("stop_hook_active"):
             return
         text = (data.get("last_assistant_message") or "").strip()
-        # Every turn ends in Stop, so it pushes only when tmux shows nobody typing in the session.
-        # Elsewhere (herdr, herdr-core, a plain terminal) there is no presence signal: Inbox only, and
-        # the idle_prompt notification above reaches the phone if the turn waits unanswered.
+        # Every turn ends in Stop, so it pushes only when nobody has looked (see unseen()); the
+        # detached child does the waiting, so the agent is never held up.
         detach(lambda: post_event("notify", f"Claude finished · {project}", text[-600:], target=target,
-                                  push=bool(target) and is_away(target), cwd=cwd, agent="claude",
-                                  category="task_complete"))
+                                  push=unseen(target), cwd=cwd, agent="claude", category="task_complete"))
 
 
 def permission_prompt(data, cwd, project, target):
@@ -282,11 +418,11 @@ def permission_prompt(data, cwd, project, target):
     prompt = None
     if target:
         try:
-            prompt = prompt_block(capture(target["pane"]))
-        except (RuntimeError, subprocess.SubprocessError, OSError) as e:
-            log("capture-failed", error=str(e))
+            prompt = prompt_block(screen(target))
+        except _FAILS as e:
+            log("capture-failed", kind=target["kind"], error=str(e))
     if not prompt:
-        # Outside tmux, or the prompt is not on screen: the phone can only be told, not answer.
+        # A plain terminal, or the prompt is not on screen: the phone can only be told, not answer.
         detach(lambda: post_event("notify", f"Claude needs approval · {project}",
                                   f"{message}. Answer it at the terminal.", target=target, cwd=cwd,
                                   agent="claude", category="approval_required"))
@@ -298,14 +434,14 @@ def permission_prompt(data, cwd, project, target):
         created = post_event("approval", f"Claude needs approval · {project}", body, target=target, cwd=cwd,
                              agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
                              category="approval_required")
-        watch_approval(created["id"], target["pane"], prompt, expires)
+        watch_approval(created["id"], target, prompt, expires)
     detach(run)
 
 
 # ------------------------------------------------------------------ scripts
 
 def cmd_notify(args):
-    target = pane_target()
+    target = terminal()
     r = post_event("notify", args.title or args.message[:80], args.message if args.title else "",
                    target=target, push=not args.quiet, agent="script", category="notify")
     print(f"posted {r.get('id')} (push: {r.get('pushed')})")
@@ -314,7 +450,7 @@ def cmd_notify(args):
 def cmd_ask(args):
     options = [o.strip() for o in (args.options or "").split(",") if o.strip()]
     try:
-        r = post_event("approval", args.question, args.detail or "", target=pane_target(), agent="script",
+        r = post_event("approval", args.question, args.detail or "", target=terminal(), agent="script",
                        options=options or None, expires_s=args.timeout, category="ask")
     except Exception as e:
         log("ask-failed", error=str(e))
@@ -347,8 +483,13 @@ def cmd_doctor(_args):
     print(f"host        {host_name()}")
     print(f"url         {cfg['url']}")
     print(f"token item  {cfg['item']}" + ("  (overridden by SSHTARS_HOOK_TOKEN)" if os.environ.get("SSHTARS_HOOK_TOKEN") else ""))
-    target = pane_target()
-    print(f"tmux        {target or 'not in tmux'}" + (f"  away={is_away(target)}" if target else ""))
+    target = terminal()
+    extra = ""
+    if target and target["kind"] == "tmux":
+        extra = f"  away={is_away(target)}"
+    elif target:
+        extra = f"  agent={agent_state(target) or 'unknown'}"
+    print(f"terminal    {describe(target)}{extra}")
     try:
         token(cfg)
         print("token       loaded")

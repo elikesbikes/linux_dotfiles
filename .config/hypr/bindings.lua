@@ -34,3 +34,7 @@ hl.unbind("SUPER + SHIFT + A")
 o.bind("SUPER + SHIFT + A", "ChatTARS", { webapp = "https://chattars.home.elikesbikes.com/", focus = true })
 -- ChatTARS webapp always opens on workspace 2 (Brave webapp class)
 o.window("^brave-chattars\\.home\\.elikesbikes\\.com__.*", { workspace = "2" })
+-- Unbind existing SUPER+RETURN (was: Terminal / kitty)
+hl.unbind("SUPER + RETURN")
+-- herdr desktop app as the main terminal; focuses the open window instead of starting a second copy
+o.bind("SUPER + RETURN", "Herdr app", { launch = "/home/ecloaiza/.local/bin/herdr-app", focus = "^herdr-app$" })

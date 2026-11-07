@@ -50,6 +50,9 @@ detail (the prompt's first 140 characters, the question, or the start of the ans
 its terminal. MCC turns that into the phone's Lock Screen activity; it sends nothing unless the phone has
 switched Live Activities on.
 
+Sidebar (1.5.0): `sessions` also reports `context`, the tokens the model saw on the session's last main
+turn (input + cache read + cache creation), for Settings → Sidebar → Show agent details.
+
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
 import argparse
@@ -65,7 +68,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.4.0"
+VERSION = "1.5.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -656,7 +659,7 @@ def tool_summary(name: str, value) -> str:
 def reduce_transcript(rows: list, limit: int) -> dict:
     """Claude Code JSONL rows → title, model, branch, state and the last `limit` chat rows."""
     msgs, tools = [], {}
-    title = prompt_title = model = branch = cwd = None
+    title = prompt_title = model = branch = cwd = context = None
     state = "idle"
     for r in rows:
         kind = r.get("type")
@@ -692,6 +695,11 @@ def reduce_transcript(rows: list, limit: int) -> dict:
                 state = "working"
             continue
         model = message.get("model") or model
+        usage = message.get("usage")
+        if isinstance(usage, dict):         # tokens the model saw this turn = how full the context is
+            seen = sum(int(usage.get(k) or 0) for k in
+                       ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
+            context = seen or context
         for i, b in enumerate(content if isinstance(content, list) else []):
             if not isinstance(b, dict):
                 continue
@@ -715,7 +723,7 @@ def reduce_transcript(rows: list, limit: int) -> dict:
         model = None
     first_prompt = next((m["text"] for m in msgs if m["role"] == "user"), None)
     return {"title": title or prompt_title or first_prompt, "model": model, "branch": branch, "cwd": cwd,
-            "state": state, "messages": msgs[-limit:]}
+            "state": state, "context": context, "messages": msgs[-limit:]}
 
 
 def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int) -> dict:
@@ -727,6 +735,7 @@ def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int) -
     title = " ".join((info["title"] or "").split())[:120]
     return {"session": sid, "title": title, "cwd": info["cwd"], "project": Path(info["cwd"] or "").name or None,
             "model": info["model"], "branch": info["branch"], "state": info["state"], "updated": round(mtime, 3),
+            "context": info["context"],
             "terminal": term, "where": describe(term) if term else None, "messages": info["messages"]}
 
 

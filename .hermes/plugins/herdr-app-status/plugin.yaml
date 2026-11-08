@@ -1,0 +1,3 @@
+name: herdr-app-status
+version: "1.0"
+description: Report Hermes turn status (working, idle, blocked) to herdr-app via OSC 7501 so Hermes shows in its Agents list

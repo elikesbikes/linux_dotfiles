@@ -1,0 +1,16 @@
+# Feeds the token-bearing config into the gitlab-runner container's tmpfs (see gitlab-runner-docker-proton.sh).
+# Install on a host whose runner container mounts a tmpfs at /etc/gitlab-runner (linger on, user in docker group):
+#   ln -s ~/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-docker-proton.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now gitlab-runner-docker-proton.service
+[Unit]
+Description=GitLab Runner container config from Proton Pass (tmpfs, re-injected on every container start)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=%h/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-docker-proton.sh gitlab-runner
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

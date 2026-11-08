@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.3.1] - 2026-11-07
+
+### Fixed
+- Hermes Light launcher: `--password-store=gnome-libsecret` so the sign-in token is saved in gnome-keyring on Hyprland (Electron did not detect it); desktop entry window class and category.
+
+---
+
 ## [v1.3.0] - 2026-11-07
 
 ### Added

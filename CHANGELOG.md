@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.7.1] - 2026-11-08
+
+### Changed
+- `.bash/aliases.sh` now holds only aliases. The functions that lived there (`claude`, `cc`, `claudepower`, `claudepowerlocal`, `codexpower`, `hermescli`) moved unchanged to `.bash/functions.sh`, under "Claude / Codex / Hermes launchers".
+- `upgraderustdesk` is now a function instead of an alias. It stops with an error when apt is missing (it is for Ubuntu/Debian hosts) or when GitHub returns no .deb link. It downloads to a `mktemp` file instead of a fixed `/tmp/rustdesk.deb` and deletes the file afterwards.
+
+Tested: shell syntax. In a clean shell, `declare -f` of the six moved functions is identical before and after, and all of them plus `upgraderustdesk` and `gpull_force` load from `~/.bashrc`. On tars, `upgraderustdesk` stops with the apt error. Not tested: a real RustDesk install on an Ubuntu host.
+
+---
+
 ## [v1.7.0] - 2026-11-08
 
 ### Changed

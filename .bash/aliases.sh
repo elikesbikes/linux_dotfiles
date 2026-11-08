@@ -21,45 +21,6 @@ alias sudoers="$HOME/scripts/linux/install-sudoers.sh"
 # syncn moved to functions.sh (aliases don't expand inside functions)
 alias syncs='$HOME/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
-# Hosts that keep no Claude login on disk (murph sandbox) link ~/.local/bin/claude-proton, which loads this
-# host's CLAUDE_CODE_OAUTH_TOKEN from Proton Pass and then runs the real claude. Elsewhere: plain claude.
-claude() { if [[ -x "$HOME/.local/bin/claude-proton" ]]; then "$HOME/.local/bin/claude-proton" "$@"; else command claude "$@"; fi; }
-# Fresh sessions get an explicit --session-id so tmux-resurrect can resume each pane's own conversation.
-# With arguments (e.g. --resume, --continue) run plain claude; those already pin a session.
-cc() { if (($#)); then claude "$@"; else claude --session-id "$(uuidgen)"; fi; }
-claudepower() {
-  # Usage: claudepower [session name] [extra claude args...]
-  cd "$HOME/devops/ubuntu" || return
-  claudepowerlocal "$@"
-}
-claudepowerlocal() {
-  # Same as claudepower, but runs in the current directory.
-  # Usage: claudepowerlocal [session name] [extra claude args...]
-  local name=()
-  if [[ -n "$1" && "$1" != -* ]]; then name=(--name "$1"); shift; fi
-  if (($#)); then
-    claude --enable-auto-mode --dangerously-skip-permissions "${name[@]}" "$@"
-  else
-    claude --enable-auto-mode --dangerously-skip-permissions --session-id "$(uuidgen)" "${name[@]}"
-  fi
-}
-codexpower() { cd $HOME/devops/ubuntu && codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 alias claudemddocker='rm -f CLAUDE.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE.md'
 alias claudedocker='rm -f CLAUDE-docker.md && ln -s "$HOME/devops/github/adastra/AI/prompts/CLAUDE-docker.md" CLAUDE-docker.md'
 alias cleanupdotfiles='rm -rf $HOME/devops/github/linux_dotfiles/ && cd $HOME/devops/github && git clone https://github.com/elikesbikes/linux_dotfiles.git'
-alias upgraderustdesk='wget -O /tmp/rustdesk.deb "$(curl -s https://api.github.com/repos/rustdesk/rustdesk/releases/latest | grep -o '\''https://[^"]*x86_64\.deb'\'' | head -1)" && sudo apt install -y /tmp/rustdesk.deb'
-# Hermes CLI on endurance, from any host. Runs as the container's hermes user (never root: root re-owns its credentials).
-# Usage: hermescli [hermes args]   e.g. hermescli  |  hermescli chat  |  hermescli --continue
-hermescli() {
-  # Model shortcuts for this run only (config.yaml default stays Claude): hermescli --codex | --claude [more args]
-  case "${1:-}" in
-    --codex)  shift; set -- --provider openai-codex -m gpt-6-luna "$@" ;;
-    --claude) shift; set -- --provider claude-subscription-directsdk-experimental -m claude-sonnet-5-5 "$@" ;;
-  esac
-  if [[ "$(hostname -s)" == "endurance" ]]; then docker exec -it -u hermes hermes hermes "$@"
-  else
-    # printf '%q ' with no arguments prints '' (an empty argument that Hermes rejects as a command), so quote only when there are args
-    local args=""; (( $# )) && args="$(printf '%q ' "$@")"
-    ssh -t endurance "docker exec -it -u hermes hermes hermes ${args}"
-  fi
-}

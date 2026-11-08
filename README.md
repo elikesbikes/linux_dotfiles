@@ -166,6 +166,7 @@ The Bash environment is intentionally **split by responsibility**.
 - `.bashrc` does very little on purpose
 - Everything interesting lives in `.bash/`
 - Each file has a single job
+- `aliases.sh` holds only `alias` lines; anything with logic or arguments is a function in `functions.sh`
 
 This makes it easier to debug, extend, or remove pieces without breaking your shell. If something goes wrong, you'll know *where* and *why*.
 

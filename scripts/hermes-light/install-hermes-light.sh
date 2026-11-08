@@ -98,8 +98,8 @@ Comment=Hermes on endurance (remote-only desktop client)
 Exec=$BIN
 Icon=${ICON:-utilities-terminal}
 Terminal=false
-Categories=Network;Utility;
-StartupWMClass=Hermes Light
+Categories=Network;
+StartupWMClass=com.nousresearch.hermes-light
 EOF
 
 echo "Installed: $BIN  (menu: Hermes Light). First launch: Connect to existing Hermes -> https://hermes.home.elikesbikes.com"

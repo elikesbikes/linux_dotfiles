@@ -11,6 +11,9 @@ Wants=network-online.target
 ExecStart=%h/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-proton.sh
 Restart=always
 RestartSec=30
+# SIGQUIT = graceful stop (waits for a running job); SIGTERM makes the runner log forceful-shutdown warnings
+KillSignal=SIGQUIT
+TimeoutStopSec=300
 
 [Install]
 WantedBy=default.target

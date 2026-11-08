@@ -1,0 +1,16 @@
+# GitLab Runner whose token comes from Proton Pass at start (see gitlab-runner-proton.sh).
+# Install on a no-secrets host (needs linger: loginctl enable-linger):
+#   ln -s ~/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-proton.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now gitlab-runner-proton.service
+[Unit]
+Description=GitLab Runner (token from Proton Pass, config in RAM)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=%h/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-proton.sh
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

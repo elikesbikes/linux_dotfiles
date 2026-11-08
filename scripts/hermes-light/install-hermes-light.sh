@@ -88,8 +88,8 @@ exec "$HOME/.local/share/hermes-light/app/Hermes Light" --ozone-platform-hint=au
 EOF
 chmod 755 "$BIN"
 
-ICON="$APP_DIR/resources/app.asar.unpacked/dist/icon.png"
-[[ -f "$ICON" ]] || ICON=$(find "$APP_DIR/resources" -name '*.png' -path '*icon*' 2>/dev/null | head -1)
+ICON="$APP_DIR/resources/app.asar.unpacked/dist/apple-touch-icon.png"   # the only app icon PNG in the Linux build
+[[ -f "$ICON" ]] || ICON=""
 cat > "$DESKTOP" <<EOF
 [Desktop Entry]
 Type=Application

@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.9.2] - 2026-11-08
+
+### Changed
+- murph's runner (`murph-shell`, id 12) is locked to this project and runs protected branches only. `PIPELINE.md` documents this and adds it to the new-host steps.
+
+Tested: this push's `deploy-murph` job is the check that the locked, protected-only runner still picks up `main`.
+
+---
+
 ## [v1.9.1] - 2026-11-08
 
 ### Fixed

@@ -43,6 +43,8 @@ cannot sit in a `config.toml` on disk. Instead:
   (RAM), logs pass-cli out and starts the runner.
 - `scripts/gitlab-runner/gitlab-runner-proton.service` runs it as a systemd **user** service
   (linger is on), linked into `~/.config/systemd/user/`.
+- The runner is **locked** to this project and runs **protected branches only** (`main`), set with
+  `PUT /api/v4/runners/12` (`locked=true`, `access_level=ref_protected`).
 - The job fetches from the `gitlab` remote with murph's own GitLab token (git credential helper,
   `protonpass.hostItems true`).
 - murph's Claude Code hooks (SSHTars) live in `~/.claude/settings.json`, a separate file the reset
@@ -55,7 +57,8 @@ cannot sit in a `config.toml` on disk. Instead:
 2. **Install GitLab Runner** in `~/.local/bin` (same version as rocky; check the sha256 against
    `release.sha256` on the download bucket).
 3. **Create the runner** in GitLab (project runner for `ecloaiza/linux_dotfiles`, tags `shell,<host>`,
-   untagged jobs off) with `POST /api/v4/user/runners`. Store its token:
+   untagged jobs off) with `POST /api/v4/user/runners`, then lock it to the project and to protected
+   branches (`PUT /api/v4/runners/<id>` with `locked=true`, `access_level=ref_protected`). Store its token:
    - normal host: in `~/.gitlab-runner/config.toml`, run by a `gitlab-runner` user service;
    - no-secrets host: only in Proton (`gitlab-runner token - <host>`), started with
      `gitlab-runner-proton.service`.

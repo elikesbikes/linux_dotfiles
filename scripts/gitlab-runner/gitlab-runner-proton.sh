@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GitLab Runner for no-secrets hosts (first user: murph sandbox).
+# GitLab Runner whose token never touches disk (murph, rocky, hailmary since 2026-11-08).
 #
 # The runner token lives only in Proton Pass (HOMELAB item "gitlab-runner token - <short hostname>").
 # At every start this script unseals the host's own PAT from the TPM, reads the token, writes
@@ -7,7 +7,6 @@
 # runner. Nothing secret is written to disk. Run it from a systemd user service, see
 # gitlab-runner-proton.service next to this file.
 #
-# Hosts that may keep a token on disk (rocky, hailmary) use the plain ~/.gitlab-runner/config.toml instead.
 set -euo pipefail
 
 HOST="$(hostname -s)"

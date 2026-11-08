@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.10.0] - 2026-11-08
+
+### Changed
+- rocky and hailmary runners (`rocky-shell` 8, `hailmary-shell` 9) now start like murph's: `gitlab-runner-proton.service` reads the token from Proton Pass (`gitlab-runner token - rocky` / `- hailmary`) and keeps `config.toml` in RAM. Both tokens were reset through the GitLab API straight into Proton (never printed), so the old on-disk tokens no longer work; the old `~/.gitlab-runner/config.toml` files were shredded. On rocky this also ends the double runner (`gitlab-runner.service` + `gitlab-runner-shell.service` on one config); both old units are disabled.
+- `PIPELINE.md`, README and the script header: no runner token on disk on any deploy host.
+
+Tested: both runners online in GitLab with their config only in `/run/user/1000/gitlab-runner/`; no `glrt-` token in any `.toml` under `~` on either host. This push's pipeline is the end-to-end check on all three hosts.
+
+---
+
 ## [v1.9.3] - 2026-11-08
 
 ### Changed

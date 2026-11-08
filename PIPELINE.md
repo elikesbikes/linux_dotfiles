@@ -26,27 +26,27 @@ Symlinks pick up the changes instantly (no restart needed)
 
 | Host     | Job             | Runner (id)          | Where the runner token lives |
 |----------|-----------------|----------------------|------------------------------|
-| hailmary | deploy-hailmary | hailmary-shell (9)   | `~/.gitlab-runner/config.toml` |
-| murph    | deploy-murph    | murph-shell (12)     | Proton Pass only (`gitlab-runner token - murph`); config.toml in RAM, see below |
-| rocky    | deploy-rocky    | rocky-shell (8)      | `~/.gitlab-runner/config.toml` |
+| hailmary | deploy-hailmary | hailmary-shell (9)   | Proton Pass only (`gitlab-runner token - hailmary`), config in RAM |
+| murph    | deploy-murph    | murph-shell (12)     | Proton Pass only (`gitlab-runner token - murph`), config in RAM |
+| rocky    | deploy-rocky    | rocky-shell (8)      | Proton Pass only (`gitlab-runner token - rocky`), config in RAM |
 
 Other hosts (tars, case, gargantua, …) are **not** updated by the pipeline; pull them by hand
 (`gpull_dotfiles`). A host whose runner is offline leaves its job pending until the runner comes back.
 
-## murph: runner without a secret on disk
+## Runner tokens: never on disk (all three hosts)
 
-murph is a sandbox whose only allowed secret is its TPM-sealed Proton PAT, so its runner token
-cannot sit in a `config.toml` on disk. Instead:
+No runner token is stored on disk (murph since 2026-11-08 10:36; rocky and hailmary since 11:40, when
+their tokens were reset and the old `~/.gitlab-runner/config.toml` shredded). Each host runs:
 
 - `scripts/gitlab-runner/gitlab-runner-proton.sh` unseals the PAT, reads the HOMELAB item
   `gitlab-runner token - <short hostname>`, writes `config.toml` to `$XDG_RUNTIME_DIR/gitlab-runner/`
   (RAM), logs pass-cli out and starts the runner.
 - `scripts/gitlab-runner/gitlab-runner-proton.service` runs it as a systemd **user** service
   (linger is on), linked into `~/.config/systemd/user/`.
-- The runner serves **linux_dotfiles and adastra** (adastra's `deploy-murph` since 2026-11-08), is
+- murph's runner serves **linux_dotfiles and adastra** (adastra's `deploy-murph` since 2026-11-08), is
   **locked** (no other projects) and runs **protected branches only** (`main`), set with
   `PUT /api/v4/runners/12` (`locked=true`, `access_level=ref_protected`).
-- The job fetches from the `gitlab` remote with murph's own GitLab token (git credential helper,
+- murph's dotfiles job fetches from the `gitlab` remote with murph's own GitLab token (git credential helper,
   `protonpass.hostItems true`).
 - murph's Claude Code hooks (SSHTars) live in `~/.claude/settings.json`, a separate file the reset
   does not touch.
@@ -60,9 +60,8 @@ cannot sit in a `config.toml` on disk. Instead:
 3. **Create the runner** in GitLab (project runner for `ecloaiza/linux_dotfiles`, tags `shell,<host>`,
    untagged jobs off) with `POST /api/v4/user/runners`, then lock it to the project and to protected
    branches (`PUT /api/v4/runners/<id>` with `locked=true`, `access_level=ref_protected`). Store its token:
-   - normal host: in `~/.gitlab-runner/config.toml`, run by a `gitlab-runner` user service;
-   - no-secrets host: only in Proton (`gitlab-runner token - <host>`), started with
-     `gitlab-runner-proton.service`.
+   only in Proton (`gitlab-runner token - <host>`) and start it with `gitlab-runner-proton.service`.
+   Never keep it in `~/.gitlab-runner/config.toml`.
 4. **Add a `deploy-<host>` job** to `.gitlab-ci.yml` (copy an existing one, change the tag) and add the
    host to the table above.
 5. **Test**: push and check the job log shows BEFORE/AFTER on the new host.
@@ -73,4 +72,4 @@ cannot sit in a `config.toml` on disk. Instead:
 |------|---------|
 | `.gitlab-ci.yml` | Pipeline definition (one job per host) |
 | `scripts/sync-sudoers-ci.sh` | Installs `sudoers/sudoers.d/` when it changed (NOPASSWD on each host) |
-| `scripts/gitlab-runner/gitlab-runner-proton.sh` / `.service` | Runner start with the token from Proton (murph) |
+| `scripts/gitlab-runner/gitlab-runner-proton.sh` / `.service` | Runner start with the token from Proton (rocky, hailmary, murph) |

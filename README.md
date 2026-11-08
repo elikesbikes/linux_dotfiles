@@ -126,20 +126,20 @@ State is tracked under `~/.local/state/onboarding/`. See `scripts/onboarding/REA
 
 ## 5. CI/CD Pipeline
 
-Pushing dotfile changes **auto-deploys to the entire homelab fleet** via GitLab CI. The repo has two push remotes (GitHub + GitLab); the pipeline runs on every push to `main`.
+Pushing to `main` **auto-deploys to the deploy hosts** via GitLab CI. The repo has two push remotes (GitHub + GitLab); the pipeline runs on every push to `main`.
 
 ```
 gacp_dotfiles "message"  →  push to GitHub + GitLab
                               ↓
-            GitLab pipeline SSHes into each host:
-            git fetch origin && git reset --hard origin/main
+            One job per host, run by that host's own GitLab Runner (no SSH):
+            git fetch gitlab main && git reset --hard gitlab/main
                               ↓
             Symlinks pick up changes instantly
 ```
 
-Hosts updated by the pipeline: `docker-prod-1`, `endurance`, `gargantua`, `ranger0`, `ranger1`, `tars`, `trainerroad2` (offline hosts are skipped gracefully). When `sudoers/` changes, the pipeline additionally runs `scripts/sync-sudoers-ci.sh` on each host. Full details and host onboarding steps are in `PIPELINE.md`.
+Hosts updated by the pipeline: `hailmary`, `murph`, `rocky`. Other hosts (tars, case, gargantua) are pulled by hand with `gpull_dotfiles`. When `sudoers/` changes, the job also runs `scripts/sync-sudoers-ci.sh`. murph's runner keeps no token on disk: it reads it from Proton Pass at start (`scripts/gitlab-runner/`). Full details and host onboarding steps are in `PIPELINE.md`.
 
-> ⚠️ Because each host is **hard-reset to `origin/main`**, any change saved to disk but not committed *and* pushed is silently wiped on the next sync. Edit → commit → push.
+> ⚠️ Because each deploy host is **hard-reset to `gitlab/main`**, any change saved to disk but not committed *and* pushed is silently wiped on the next sync. Edit → commit → push.
 
 ---
 

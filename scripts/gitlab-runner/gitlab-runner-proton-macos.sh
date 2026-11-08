@@ -41,7 +41,8 @@ PROTON_PASS_PERSONAL_ACCESS_TOKEN="$(cat "$PAT_FILE")" "$PASS_CLI" login >/dev/n
 token="$("$PASS_CLI" item view --vault-name "$VAULT" --item-title "$ITEM" --field note)"
 "$PASS_CLI" logout >/dev/null 2>&1 || true
 rm -rf "$PROTON_PASS_SESSION_DIR"
-[[ "$token" == glrt-* ]] || { echo "Proton item '$ITEM' is missing or not a runner token" >&2; exit 1; }
+# Runners registered the old way (kipp's) have a 26-character token without the glrt- prefix.
+[[ ${#token} -ge 20 && "$token" != *[[:space:]]* ]] || { echo "Proton item '$ITEM' is missing or not a runner token" >&2; exit 1; }
 
 cat > "$CONF" <<EOF
 concurrent = 1

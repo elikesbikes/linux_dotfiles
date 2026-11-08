@@ -57,6 +57,13 @@ Tested: CI lint valid. On murph the runner comes online with no token in any fil
 
 ---
 
+## [v1.8.1] - 2026-11-08
+
+### Fixed
+- `scripts/checkmk-local/honcho_queue` (endurance): the CheckMK check "Honcho API" was CRIT ("not answering (ERR HTTPError)") since Honcho's login was turned on (2026-11-08 ~07:50), because it read the queue without a key (401), and it added about two "No access token" errors a minute to Honcho's log. It now makes a 60-second workspace key inside the `honcho-api` container with Honcho's own `create_jwt` and the container's `AUTH_JWT_SECRET`; the secret never leaves the container and no key is stored.
+
+Tested: shell syntax; run by hand on endurance it prints `0 "Honcho memory queue" pending=6 ... completed=11` instead of the CRIT line; installed copy runs the same. Not tested: the next CheckMK service discovery/check cycle on the CheckMK server (owner can watch the service turn OK).
+
 ## [v1.8.0] - 2026-11-08
 
 ### Added

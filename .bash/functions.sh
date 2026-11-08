@@ -194,6 +194,41 @@ gpull() {
 
 
 # ------------------------------------------------------------
+# gpull_force
+# ------------------------------------------------------------
+# Makes the current branch match origin exactly: fetches, then
+# hard-resets to origin/<current branch>. DISCARDS local commits
+# and uncommitted changes to tracked files (untracked files stay).
+# Replaced the old `repopullforce` alias (v1.7.0).
+#
+# Usage:
+#   gpull_force
+# ------------------------------------------------------------
+gpull_force() {
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || {
+      echo "Error: Not inside a git repository."
+      return 1
+    }
+    if [ "$branch" = "HEAD" ]; then
+      echo "Error: Detached HEAD; check out a branch first."
+      return 1
+    fi
+
+    echo "--> Running: git fetch --all"
+    git fetch --all || return 1
+
+    echo "--> Running: git reset --hard origin/$branch"
+    git reset --hard "origin/$branch" || return 1
+
+    echo "--> Running: git pull"
+    git pull || return 1
+
+    echo "SUCCESS: $branch now matches origin/$branch."
+}
+
+
+# ------------------------------------------------------------
 # gcap
 # ------------------------------------------------------------
 # Commits local changes and then pulls remote changes.

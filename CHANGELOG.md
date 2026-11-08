@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.7.0] - 2026-11-08
+
+### Changed
+- `.bash/functions.sh`: new `gpull_force` function, an easier-to-remember name next to `gpull`. It makes the current branch match origin exactly (`git fetch --all`, `git reset --hard origin/<branch>`, `git pull`), so local commits and uncommitted changes to tracked files are lost; untracked files stay. It refuses to run outside a git repo or on a detached HEAD.
+- `.bash/aliases.sh`: removed the `repopullforce` alias (replaced by `gpull_force`).
+
+Tested: shell syntax; on a throwaway repo, `gpull_force` dropped a local commit and an uncommitted edit, kept an untracked file, and refused outside a repo and on a detached HEAD.
+
+---
+
 ## [v1.6.0] - 2026-11-08
 
 ### Added

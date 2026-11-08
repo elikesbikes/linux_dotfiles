@@ -7,6 +7,17 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.11.0] - 2026-11-08
+
+### Changed
+- Every other GitLab runner now keeps its token only in Proton Pass, like the deploy runners since v1.10.0. Each token was reset through the GitLab API straight into its Proton item (never printed); the old on-disk configs were shredded.
+  - **tars (10) and endurance (11)** use `gitlab-runner-proton.service`; tars's old `gitlab-runner-tars.service` is disabled.
+  - **kipp (3)** gets the macOS twin `scripts/gitlab-runner/gitlab-runner-proton-macos.sh` and the LaunchAgent `com.elikesbikes.gitlab-runner-proton.plist`: the PAT comes from kipp's no-TPM file and the config sits on an 8 MB RAM disk at `~/.gitlab-runner-ram/mnt`. The token is not passed through the environment, because shell jobs inherit it.
+  - **Docker runners rocky-docker (6) and hailmary's homelab-docker-runner (1)**: new `scripts/gitlab-runner/gitlab-runner-docker-proton.sh` / `.service` pipe the config (templates `docker-rocky.toml`, `docker-hailmary.toml`, placeholder `@TOKEN@`) into the container's tmpfs `/etc/gitlab-runner` through `docker exec`, again after every container start (`docker events`). The compose files (tutorials `gitlab-runner`, `gitlab`) mount the tmpfs instead of a volume or `./runner-config`.
+- `PIPELINE.md` (new section "The other homelab runners") and README: no runner token on disk anywhere.
+
+Tested: tars, endurance, kipp and rocky-docker online in GitLab with no token in any file; hailmary's runner 1 checked after this push (result in the vault GitLab note). Not tested: a real job on kipp (iOS build), on tars, or on either Docker runner.
+
 ## [v1.10.1] - 2026-11-08
 
 ### Fixed

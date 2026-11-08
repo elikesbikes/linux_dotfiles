@@ -51,6 +51,24 @@ their tokens were reset and the old `~/.gitlab-runner/config.toml` shredded). Ea
 - murph's Claude Code hooks (SSHTars) live in `~/.claude/settings.json`, a separate file the reset
   does not touch.
 
+## The other homelab runners (2026-11-08)
+
+The same rule now covers every runner, not only the three deploy hosts. Each token was reset through the
+GitLab API straight into its Proton item (never printed) and the old on-disk config was shredded.
+
+| Runner (id) | Host | Executor | Proton item | How it starts |
+|-------------|------|----------|-------------|---------------|
+| tars-shell (10) | tars | shell | `gitlab-runner token - tars` | `gitlab-runner-proton.service` (old `gitlab-runner-tars.service` disabled) |
+| endurance-shell (11) | endurance | shell | `gitlab-runner token - endurance` | `gitlab-runner-proton.service` |
+| kipp (3) | kipp (macOS) | shell | `gitlab-runner token - kipp` | LaunchAgent `com.elikesbikes.gitlab-runner-proton` runs `gitlab-runner-proton-macos.sh`: PAT from `~/.secrets/proton-pass-pat` (no TPM on macOS), config on an 8 MB RAM disk at `~/.gitlab-runner-ram/mnt` |
+| rocky-docker (6) | rocky | docker | `gitlab-runner token - rocky-docker` | container with a tmpfs `/etc/gitlab-runner`; `gitlab-runner-docker-proton.service` pipes in `docker-rocky.toml` with the token |
+| homelab-docker-runner (1) | hailmary | docker | `gitlab-runner token - hailmary-docker` | same, template `docker-hailmary.toml`; the container is the `gitlab-runner` service of the GitLab compose project |
+
+Docker runners: the container starts with an empty tmpfs and logs "Failed to load config" until the host
+service injects it, which it does again after every container start (`docker events`). Rotate a token by
+resetting it through the API into its Proton item, then restart the service (shell, docker) or the
+LaunchAgent (kipp).
+
 ## Adding a New Host
 
 1. **Clone the repo** to `~/devops/github/linux_dotfiles` and add the GitLab remote:
@@ -72,4 +90,7 @@ their tokens were reset and the old `~/.gitlab-runner/config.toml` shredded). Ea
 |------|---------|
 | `.gitlab-ci.yml` | Pipeline definition (one job per host) |
 | `scripts/sync-sudoers-ci.sh` | Installs `sudoers/sudoers.d/` when it changed (NOPASSWD on each host) |
-| `scripts/gitlab-runner/gitlab-runner-proton.sh` / `.service` | Runner start with the token from Proton (rocky, hailmary, murph) |
+| `scripts/gitlab-runner/gitlab-runner-proton.sh` / `.service` | Shell runner start with the token from Proton (rocky, hailmary, murph, tars, endurance) |
+| `scripts/gitlab-runner/gitlab-runner-proton-macos.sh` / `com.elikesbikes.gitlab-runner-proton.plist` | Same for kipp (macOS, RAM disk) |
+| `scripts/gitlab-runner/gitlab-runner-docker-proton.sh` / `.service` | Injects a Docker runner's config into its tmpfs (rocky, hailmary) |
+| `scripts/gitlab-runner/docker-rocky.toml`, `docker-hailmary.toml` | Docker runner config templates (`@TOKEN@`, no secret) |

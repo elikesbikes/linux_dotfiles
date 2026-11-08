@@ -2,7 +2,7 @@
 
 ## What this does
 
-Every time you push dotfile changes, GitLab automatically syncs them to all machines in the homelab.
+Every push to `main` makes GitLab update the dotfiles checkout on each deploy host.
 
 ## Workflow
 
@@ -13,60 +13,60 @@ git push → GitHub + GitLab
          ↓
 --- GitLab pipeline takes over automatically ---
          ↓
-SSH into each machine and run:
-  git fetch origin && git reset --hard origin/main
+One job per host, run by that host's own GitLab Runner (shell executor, user ecloaiza).
+No SSH: each job runs on its host:
+  cd ~/devops/github/linux_dotfiles
+  git fetch gitlab main && git reset --hard gitlab/main
+  (+ scripts/sync-sudoers-ci.sh when the last commit changed sudoers/)
          ↓
 Symlinks pick up the changes instantly (no restart needed)
 ```
 
 ## Machines that get updated
 
-| Machine   | IP             | Notes                     |
-|-----------|----------------|---------------------------|
-| hailmary      | 192.168.5.25   | primary target            |
-| tars          | 192.168.5.127  | source of truth (dev box) |
-| gargantua     | 192.168.5.110  | skipped if offline        |
-| trainerroad2  | 192.168.5.176  | skipped if offline        |
+| Host     | Job             | Runner (id)          | Where the runner token lives |
+|----------|-----------------|----------------------|------------------------------|
+| hailmary | deploy-hailmary | hailmary-shell (9)   | `~/.gitlab-runner/config.toml` |
+| murph    | deploy-murph    | murph-shell (12)     | Proton Pass only (`gitlab-runner token - murph`); config.toml in RAM, see below |
+| rocky    | deploy-rocky    | rocky-shell (8)      | `~/.gitlab-runner/config.toml` |
 
-Retired in Project Exodus (2026-07), removed from the pipeline:
-docker-prod-1 (192.168.5.24), endurance (192.168.5.30),
-ranger0 (192.168.5.16), ranger1 (192.168.5.35).
+Other hosts (tars, case, gargantua, …) are **not** updated by the pipeline; pull them by hand
+(`gpull_dotfiles`). A host whose runner is offline leaves its job pending until the runner comes back.
 
-## What happens if you push FROM one of those machines
+## murph: runner without a secret on disk
 
-The pipeline SSHes back into the same machine and runs `git reset --hard origin/main`.
-Since the files already match what was just pushed, nothing changes. Harmless.
+murph is a sandbox whose only allowed secret is its TPM-sealed Proton PAT, so its runner token
+cannot sit in a `config.toml` on disk. Instead:
 
+- `scripts/gitlab-runner/gitlab-runner-proton.sh` unseals the PAT, reads the HOMELAB item
+  `gitlab-runner token - <short hostname>`, writes `config.toml` to `$XDG_RUNTIME_DIR/gitlab-runner/`
+  (RAM), logs pass-cli out and starts the runner.
+- `scripts/gitlab-runner/gitlab-runner-proton.service` runs it as a systemd **user** service
+  (linger is on), linked into `~/.config/systemd/user/`.
+- The job fetches from the `gitlab` remote with murph's own GitLab token (git credential helper,
+  `protonpass.hostItems true`).
+- murph's Claude Code hooks (SSHTars) live in `~/.claude/settings.json`, a separate file the reset
+  does not touch.
 
 ## Adding a New Host
 
-When adding a new host to the deployment pipeline:
-
-1. **SSH key setup (CRITICAL)**
-   - The host MUST have the `gitlab-ci-dotfiles` deploy key in `~/.ssh/authorized_keys`
-   - Simply having any SSH key is not enough — must be the specific GitLab CI/CD key
-   - Copy from an existing host: `ssh existing-host "cat ~/.ssh/authorized_keys" | ssh new-host "cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"`
-
-2. **Clone the repo**
-   - `git clone https://github.com/elikesbikes/linux_dotfiles.git ~/devops/github/linux_dotfiles`
-
-3. **Update PIPELINE.md & .gitlab-ci.yml**
-   - Add host to machines table (alphabetical)
-   - Add SSH deployment step to pipeline
-
-4. **Test**
-   - Push a test commit to verify the host receives updates
-
-### Troubleshooting Pipeline Failures
-
-**"Permission denied (publickey)" for a new host?**
-- Check `~/.ssh/authorized_keys` contains the `gitlab-ci-dotfiles` key specifically
-- Other keys (endurance, case, github-actions) alone will NOT work for the pipeline
-- Copy the full `authorized_keys` from a working host to fix
+1. **Clone the repo** to `~/devops/github/linux_dotfiles` and add the GitLab remote:
+   `git remote add gitlab https://gitlab.home.elikesbikes.com/ecloaiza/linux_dotfiles.git`
+2. **Install GitLab Runner** in `~/.local/bin` (same version as rocky; check the sha256 against
+   `release.sha256` on the download bucket).
+3. **Create the runner** in GitLab (project runner for `ecloaiza/linux_dotfiles`, tags `shell,<host>`,
+   untagged jobs off) with `POST /api/v4/user/runners`. Store its token:
+   - normal host: in `~/.gitlab-runner/config.toml`, run by a `gitlab-runner` user service;
+   - no-secrets host: only in Proton (`gitlab-runner token - <host>`), started with
+     `gitlab-runner-proton.service`.
+4. **Add a `deploy-<host>` job** to `.gitlab-ci.yml` (copy an existing one, change the tag) and add the
+   host to the table above.
+5. **Test**: push and check the job log shows BEFORE/AFTER on the new host.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `.gitlab-ci.yml` | Pipeline definition |
-| `SSH_PRIVATE_KEY` | CI/CD variable in GitLab — private key used to SSH into each machine |
+| `.gitlab-ci.yml` | Pipeline definition (one job per host) |
+| `scripts/sync-sudoers-ci.sh` | Installs `sudoers/sudoers.d/` when it changed (NOPASSWD on each host) |
+| `scripts/gitlab-runner/gitlab-runner-proton.sh` / `.service` | Runner start with the token from Proton (murph) |

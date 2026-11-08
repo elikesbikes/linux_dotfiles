@@ -36,3 +36,23 @@ deploy-hailmary:
     - echo "dotfiles synced on hailmary"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+
+# murph (sandbox) keeps no secrets on disk: its runner (murph-shell, id 12) reads its token from Proton
+# at start and keeps config.toml in RAM. See scripts/gitlab-runner/gitlab-runner-proton.sh.
+deploy-murph:
+  stage: deploy
+  tags: [murph]
+  script:
+    - cd ~/devops/github/linux_dotfiles
+    - echo "BEFORE:" && git log --oneline -1
+    - git fetch gitlab main
+    - git reset --hard gitlab/main
+    - echo "AFTER:" && git log --oneline -1
+    - |
+      if ! git diff --quiet HEAD~1 HEAD -- sudoers/ 2>/dev/null; then
+        echo "sudoers changed, syncing..."
+        sudo /home/ecloaiza/devops/github/linux_dotfiles/scripts/sync-sudoers-ci.sh
+      fi
+    - echo "dotfiles synced on murph"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.4.0] - 2026-11-07
+
+### Added
+- `.hermes/plugins/herdr-app-status`: Hermes plugin that reports Hermes's turn status to herdr-app (OSC 7501) so Hermes shows in its Agents list; linked by `create-managed-symlinks.sh`.
+
+---
+
 ## [v1.3.1] - 2026-11-07
 
 ### Fixed

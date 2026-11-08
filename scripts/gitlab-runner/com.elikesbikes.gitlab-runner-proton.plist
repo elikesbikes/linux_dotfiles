@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GitLab Runner on kipp with its token only in Proton (gitlab-runner-proton-macos.sh). Replaces Homebrew's
+     sh.brew.gitlab-runner (run `brew services stop gitlab-runner` first). Install:
+       cp ~/devops/github/linux_dotfiles/scripts/gitlab-runner/com.elikesbikes.gitlab-runner-proton.plist ~/Library/LaunchAgents/
+       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.elikesbikes.gitlab-runner-proton.plist -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.elikesbikes.gitlab-runner-proton</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/ecloaiza/devops/github/linux_dotfiles/scripts/gitlab-runner/gitlab-runner-proton-macos.sh</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>/Users/ecloaiza</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<key>LimitLoadToSessionType</key>
+	<array>
+		<string>Aqua</string>
+		<string>Background</string>
+		<string>LoginWindow</string>
+		<string>StandardIO</string>
+		<string>System</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/ecloaiza/Library/Logs/gitlab-runner-proton.log</string>
+</dict>
+</plist>

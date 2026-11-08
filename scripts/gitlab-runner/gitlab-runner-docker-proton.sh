@@ -62,7 +62,7 @@ inject() {
 wait_running
 inject
 # Re-inject after every container start (restart, recreate, daemon restart).
-docker events --filter "container=$CONTAINER" --filter event=start --format '{{.Status}}' |
+docker events --filter "container=$CONTAINER" --filter event=start --format '{{.Action}}' |
 while read -r _; do
     sleep 2
     wait_running && inject || log "re-inject failed; will retry on the next start or service restart"

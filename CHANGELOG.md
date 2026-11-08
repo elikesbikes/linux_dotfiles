@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.3.0] - 2026-11-07
+
+### Added
+- `scripts/hermes-light/install-hermes-light.sh`: builds Hermes Light (the remote-only Hermes Desktop, no local agent) from source in a throwaway container and installs it under `$HOME` with a launcher and menu entry; turns on keyring encryption for the sign-in token before the first launch. See `scripts/hermes-light/README.md`.
+
+---
+
 ## [v1.0.0] - 2025-12-20
 
 ### 🎉 Initial stable release

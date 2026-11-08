@@ -22,6 +22,18 @@ Do not assume how software behaves. Verify claims with source code, documentatio
 - Bugs and broken things found along the way are reported, not fixed: add each to the findings backlog (vault `IT/github/adastra/Homelab/projects/Findings Backlog.md`) with date, host, what is wrong and evidence.
 - Exception: a **show-stopper** (data loss risk, a security hole being exploited, production down, or something that blocks the plan itself). Then stop, say it is a show-stopper and why, and fix it first.
 
+## Definition of Done — every change, every project (user rule 2026-11-07)
+
+The owner called the work sloppy: docs, versions, the vault and clean-up were being skipped while the code shipped. A change is not done, and must not be reported as done, until each item below is handled (or is plainly not applicable, and the report says why). Check the list before committing and again before the final report. A project's CLAUDE.md can add specifics (the iOS apps' list is in each repo).
+
+1. **Version.** Every push of an app or tool gets a new version, by change type (semver): new user-visible feature → minor; fixes only (bugs, warnings, docs, refactors) → patch. It goes in the same commit as the change, with whatever the project's build-number scheme needs (iOS: `build-base`).
+2. **No warnings.** A clean build shows no compiler or linter warning from our code (third-party code excepted). Warnings are fixed, not left for later.
+3. **Repo docs in the same commit.** README and the project's docs describe what changed, how to use it, what was tested and what wasn't; CLAUDE.md when a rule or gotcha changed.
+4. **Obsidian vault** (CouchDB only, see below): the project/service/infra doc gets the change (commit, version, tests); the Findings Backlog gets bugs found or fixed.
+5. **Clean up** everything the work created: test and demo servers, screenshots, scratch builds and DerivedData copies, test settings written into simulators or apps, temp files on hosts, analysis sessions. Anything deliberately left running is named in the report.
+6. **Memory** updated when something non-obvious was learned; stale memories corrected.
+7. **Report** states the version, what was tested and what wasn't, then the status block.
+
 ## Git — No Manual Commands
 
 Never run `git add`, `git commit`, `git push`, or any manual git commands. Claude Code hooks handle commits and pushes automatically after file edits. For manual triggers, use the `gacp_*` shell functions:

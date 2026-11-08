@@ -7,6 +7,19 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.9.0] - 2026-11-08
+
+### Added
+- Pipeline: `deploy-murph` job. murph (sandbox) now gets every push to `main` like rocky and hailmary, run by its own runner `murph-shell` (id 12, tags `shell,murph`).
+- `scripts/gitlab-runner/gitlab-runner-proton.sh` + `.service`: a GitLab Runner for hosts that may keep no secret on disk. At start it unseals the host's TPM PAT, reads the runner token from Proton Pass (`gitlab-runner token - <host>`), writes `config.toml` to `$XDG_RUNTIME_DIR` (RAM), logs pass-cli out and starts the runner.
+
+### Changed
+- `PIPELINE.md` and README §5 rewritten to match the real pipeline (a runner on each deploy host, no SSH). The old text described an SSH deploy key and retired hosts.
+
+Tested: CI lint valid. On murph the runner comes online with no token in any file on disk, and job 7097 passed. The first run (job 7096) had failed because `~/.bash_logout` runs `clear_console`; murph's copy now has the same interactive-only guard as rocky. The v1.9.0 push itself is the end-to-end test (see the vault note `infra/murph`).
+
+---
+
 ## [v1.8.0] - 2026-11-08
 
 ### Added

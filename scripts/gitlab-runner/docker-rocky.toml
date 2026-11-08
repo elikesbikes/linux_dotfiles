@@ -1,5 +1,5 @@
 # rocky-docker (runner id 6, docker executor, project runner for mcc). Template for
-# gitlab-runner-docker-proton.sh: @TOKEN@ is replaced in memory with "gitlab-runner token - rocky-docker"
+# gitlab-runner-docker-proton.sh: the token placeholder is replaced in memory with "gitlab-runner token - rocky-docker"
 # from Proton and the result goes into the container's tmpfs. No secret in this file.
 concurrent = 1
 check_interval = 0

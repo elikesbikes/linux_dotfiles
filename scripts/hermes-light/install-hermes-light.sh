@@ -84,7 +84,7 @@ cat > "$BIN" <<'EOF'
 #!/usr/bin/env bash
 # Hermes Light launcher (dotfiles scripts/hermes-light). Fixed settings folder, Wayland when available.
 export HERMES_DESKTOP_USER_DATA_DIR="$HOME/.config/hermes-light"
-exec "$HOME/.local/share/hermes-light/app/Hermes Light" --ozone-platform-hint=auto "$@"
+exec "$HOME/.local/share/hermes-light/app/Hermes Light" --ozone-platform-hint=auto --password-store=gnome-libsecret "$@"
 EOF
 chmod 755 "$BIN"
 

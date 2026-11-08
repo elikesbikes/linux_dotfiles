@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.6.0] - 2026-11-08
+
+### Added
+- `scripts/proton-pass/git-credential-protonpass`: per-host git tokens, opt-in with `git config --global protonpass.hostItems true`. The helper then reads `<item> - <short hostname>` first (for example `gitlab.home.elikesbikes.com - git credential - murph`) and falls back to the shared item with a syslog warning (tag `git-credential-protonpass`) if the host item is missing. Hosts without the setting are unchanged (no extra Proton lookup). First user: murph.
+
+Tested: shell syntax; tars unchanged (setting absent). murph: see the vault note for the GitLab push/fetch test.
+
+---
+
 ## [v1.5.0] - 2026-11-08
 
 ### Added

@@ -15,6 +15,9 @@
           "lifeExpectancy": 90
         },
         {
+          "id": "omarchy.elsewhen"
+        },
+        {
           "id": "omarchy.keyboard-layout"
         },
         {
@@ -87,7 +90,10 @@
         {
           "id": "ecloaiza.tray"
         }
-      ]
+      ],
+      "centerBegin": [],
+      "centerEnd": [],
+      "tray": []
     },
     "position": "top",
     "transparent": true

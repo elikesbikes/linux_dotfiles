@@ -38,3 +38,10 @@ o.window("^brave-chattars\\.home\\.elikesbikes\\.com__.*", { workspace = "2" })
 hl.unbind("SUPER + RETURN")
 -- herdr desktop app as the main terminal; focuses the open window instead of starting a second copy
 o.bind("SUPER + RETURN", "Herdr app", { launch = "/home/ecloaiza/.local/bin/herdr-app", focus = "^herdr-app$" })
+
+-- Dictation keys from before Alt + Space and Right Alt became the defaults.
+-- Remove these lines to give the keys back to applications.
+if o.dictation_installed and o.dictation_installed() then
+  o.bind("SUPER + CTRL + X", "Toggle dictation", "omarchy-dictation toggle")
+  o.bind_hold("F9", "Start dictation (push-to-talk)", "omarchy-dictation start", "Stop dictation (push-to-talk)", "omarchy-dictation stop")
+end

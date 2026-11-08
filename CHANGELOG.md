@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.11.1] - 2026-11-08
+
+### Fixed
+- `scripts/checkmk-local/gitlab_runner` (endurance): the CheckMK service "GitLab runner" went WARN ("config mode ?") after v1.11.0, because it still read `~/.gitlab-runner/config.toml`, which no longer exists. It now checks the RAM config `/run/user/<uid>/gitlab-runner/config.toml` (must be mode 600) and warns if a token file shows up on disk again.
+
+Tested: run by hand on endurance after installing it to `/usr/lib/check_mk_agent/local/`: `0 "GitLab runner" ... RAM config mode 600`. Not tested: the WARN paths (no config, token file on disk).
+
 ## [v1.11.0] - 2026-11-08
 
 ### Changed

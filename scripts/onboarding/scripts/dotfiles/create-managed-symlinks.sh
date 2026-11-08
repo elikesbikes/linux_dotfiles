@@ -136,6 +136,16 @@ ensure_link "$HOME_DIR/.config/herdr-app/keys.json" "$REPO_DIR/.config/herdr-app
 ensure_link "$HOME_DIR/.config/herdr-app/settings.json" "$REPO_DIR/.config/herdr-app/settings.json" || true
 ensure_link "$HOME_DIR/.config/herdr-app/themes/catppuccin.json" "$REPO_DIR/.config/herdr-app/themes/catppuccin.json" || true
 
+# Hermes plugin that reports Hermes's turn status to herdr-app (OSC 7501), so a
+# Hermes terminal shows in herdr-app's Agents list. Link the files, not the
+# directory, so Python's __pycache__ lands in ~/.hermes and not in this repo.
+# Enable once per host: hermes plugins enable herdr-app-status
+if [[ -d "$HOME_DIR/.hermes" ]]; then
+  mkdir -p "$HOME_DIR/.hermes/plugins/herdr-app-status"
+  ensure_link "$HOME_DIR/.hermes/plugins/herdr-app-status/__init__.py" "$REPO_DIR/.hermes/plugins/herdr-app-status/__init__.py" || true
+  ensure_link "$HOME_DIR/.hermes/plugins/herdr-app-status/plugin.yaml" "$REPO_DIR/.hermes/plugins/herdr-app-status/plugin.yaml" || true
+fi
+
 # Unison: symlink only profile files, not the whole directory.
 # Runtime files (archives, fingerprints, logs) stay in the real ~/.unison/.
 mkdir -p "$HOME_DIR/.unison"

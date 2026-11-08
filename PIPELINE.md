@@ -43,7 +43,8 @@ cannot sit in a `config.toml` on disk. Instead:
   (RAM), logs pass-cli out and starts the runner.
 - `scripts/gitlab-runner/gitlab-runner-proton.service` runs it as a systemd **user** service
   (linger is on), linked into `~/.config/systemd/user/`.
-- The runner is **locked** to this project and runs **protected branches only** (`main`), set with
+- The runner serves **linux_dotfiles and adastra** (adastra's `deploy-murph` since 2026-11-08), is
+  **locked** (no other projects) and runs **protected branches only** (`main`), set with
   `PUT /api/v4/runners/12` (`locked=true`, `access_level=ref_protected`).
 - The job fetches from the `gitlab` remote with murph's own GitLab token (git credential helper,
   `protonpass.hostItems true`).

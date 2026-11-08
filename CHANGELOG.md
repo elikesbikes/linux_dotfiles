@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.9.3] - 2026-11-08
+
+### Changed
+- `PIPELINE.md`: murph's runner now also serves adastra (adastra `.gitlab-ci.yml` gained `deploy-murph`, commit `6da0e73`).
+
+Tested: adastra pipeline 2174 green on rocky, hailmary and murph; all three checkouts at `6da0e73` and clean.
+
+---
+
 ## [v1.9.2] - 2026-11-08
 
 ### Changed

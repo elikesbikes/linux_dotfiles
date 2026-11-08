@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.8.0] - 2026-11-08
+
+### Added
+- `scripts/hermes-secrets/hermes-secrets.sh`: helper that Hermes (v0.23+) runs at start through its `command` secret source (`secrets.command` in `~/.hermes/config.yaml`). It fetches `HONCHO_API_KEY` from Proton Pass item `honcho - API key - <host>` with the host's own TPM-sealed PAT (`pp_load`) and prints it as `KEY=VALUE` on stdout; its log lines go to stderr, which Hermes discards. No key in any file. First host: case (Hermes sync stage C3). README in the folder.
+
+Tested on case (2026-11-08): the helper exits 0 in 1.8 s and prints one line, `HONCHO_API_KEY=` plus a 136-character value (checked by name and length only); `hermes memory status` reports `Command helper: applied 1 secret`; a one-shot chat opened a Honcho session on endurance and `honcho_search` returned shared memory; from endurance the session showed 2 messages (peers emmanuel, hermes) and was deleted. Not tested: tars (later stage), a start away from home (Proton unreachable: the 7-day cache applies; Honcho unreachable: 5 s timeout in `honcho.json`).
+
 ## [v1.7.1] - 2026-11-08
 
 ### Changed

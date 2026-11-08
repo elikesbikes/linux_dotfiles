@@ -14,6 +14,8 @@ This project follows a pragmatic versioning model inspired by
 
 Tested: shell syntax; run by hand on endurance it prints `0 "Honcho memory queue" pending=6 ... completed=11` instead of the CRIT line; installed copy runs the same. Not tested: the next CheckMK service discovery/check cycle on the CheckMK server (owner can watch the service turn OK).
 
+Tag note: the `v1.10.1` tag was created later (2026-11-08 ~12:40, owner's choice), on the commit that adds this note, so it also contains the gitlab-runner Proton work committed in between (`1ea0b7d`..`a4d03f6`, `scripts/gitlab-runner/`). That work is not described here; it gets its own entry when it is released.
+
 ## [v1.10.0] - 2026-11-08
 
 ### Changed

@@ -209,6 +209,7 @@ Beyond onboarding, `scripts/` ships standalone homelab tooling. Each directory h
 
 | Path                              | Purpose                                      |
 |-----------------------------------|----------------------------------------------|
+| `scripts/claude/`                 | `claude-proton`: Claude Code with its OAuth token from Proton, nothing on disk (murph) |
 | `scripts/linux/DDNS/`             | Dynamic DNS updater                          |
 | `scripts/linux/firewall-external/`| External firewall rule application           |
 | `scripts/linux/idrive-monitor/`   | iDrive backup monitoring                     |

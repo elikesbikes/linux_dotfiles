@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# claude-proton: start Claude Code with THIS host's OAuth token from Proton Pass, so no Claude login is
+# ever stored on disk. For hosts whose rule is "no secrets except the TPM-sealed Proton PAT" (murph sandbox).
+#
+# Proton item (vault HOMELAB): "claude - CLAUDE_CODE_OAUTH_TOKEN - <short hostname>", made by the owner
+# from `claude setup-token` (Note item -> field note, or Login item -> field password; both are tried).
+# The PAT comes from the TPM (handle 0x81010001); there is no plaintext fallback on purpose.
+#
+# Enable on a host:  ln -s ~/devops/github/linux_dotfiles/scripts/claude/claude-proton ~/.local/bin/claude-proton
+# The claude() function in .bash/aliases.sh then routes every `claude` call through this script.
+# On hosts without the link nothing changes. Never run `/login` on such a host: it writes the token to disk.
+set -euo pipefail
+
+REAL="$HOME/.local/bin/claude"
+[[ -x "$REAL" ]] || { echo "claude-proton: $REAL not found (install Claude Code first)" >&2; exit 1; }
+
+if [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
+  PASS_CLI="$HOME/.local/bin/pass-cli"
+  export PROTON_PASS_KEY_PROVIDER=fs PROTON_PASS_SESSION_DIR="/tmp/pass-agent-claude"
+  host="$(hostname -s)"
+  item="claude - CLAUDE_CODE_OAUTH_TOKEN - $host"
+  if ! "$PASS_CLI" info >/dev/null 2>&1; then
+    pat="$(tpm2_unseal -c 0x81010001 2>/dev/null)" || { echo "claude-proton: TPM unseal failed, no PAT" >&2; exit 1; }
+    PROTON_PASS_PERSONAL_ACCESS_TOKEN="$pat" "$PASS_CLI" login >/dev/null
+    unset pat
+  fi
+  tok=""
+  for field in note password; do
+    tok="$(PROTON_PASS_AGENT_REASON="Claude Code on $host" "$PASS_CLI" item view --vault-name HOMELAB \
+           --item-title "$item" --field "$field" 2>/dev/null | tr -d '[:space:]')" || true
+    [[ -n "$tok" ]] && break
+  done
+  [[ -n "$tok" ]] || { echo "claude-proton: no token in Proton item '$item' (run 'claude setup-token' and save it there)" >&2; exit 1; }
+  export CLAUDE_CODE_OAUTH_TOKEN="$tok"
+  unset tok
+fi
+
+exec "$REAL" "$@"

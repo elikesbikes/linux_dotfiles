@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.5.0] - 2026-11-08
+
+### Added
+- `scripts/claude/claude-proton`: starts Claude Code with the host's own `CLAUDE_CODE_OAUTH_TOKEN` from Proton Pass (item `claude - CLAUDE_CODE_OAUTH_TOKEN - <host>`, PAT from the TPM), so no Claude login is stored on disk. For no-secrets hosts such as the murph sandbox; enabled per host by linking it into `~/.local/bin`.
+- `.bash/aliases.sh`: `claude()` function that uses `~/.local/bin/claude-proton` when the host has it and plain `claude` otherwise (no change on other hosts; `cc` and `claudepower` go through it too).
+
+Tested: shell syntax; on tars `claude` still resolves to the normal binary. Not tested before release: a full murph start with the Proton token (the token item does not exist yet).
+
+---
+
 ## [v1.4.0] - 2026-11-07
 
 ### Added

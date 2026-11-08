@@ -21,6 +21,9 @@ alias sudoers="$HOME/scripts/linux/install-sudoers.sh"
 # syncn moved to functions.sh (aliases don't expand inside functions)
 alias syncs='$HOME/scripts/linux/sudoers/sync-sudoers.sh'
 alias sync_claude='unison claude_skills'
+# Hosts that keep no Claude login on disk (murph sandbox) link ~/.local/bin/claude-proton, which loads this
+# host's CLAUDE_CODE_OAUTH_TOKEN from Proton Pass and then runs the real claude. Elsewhere: plain claude.
+claude() { if [[ -x "$HOME/.local/bin/claude-proton" ]]; then "$HOME/.local/bin/claude-proton" "$@"; else command claude "$@"; fi; }
 # Fresh sessions get an explicit --session-id so tmux-resurrect can resume each pane's own conversation.
 # With arguments (e.g. --resume, --continue) run plain claude; those already pin a session.
 cc() { if (($#)); then claude "$@"; else claude --session-id "$(uuidgen)"; fi; }

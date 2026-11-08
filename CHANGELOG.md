@@ -12,7 +12,7 @@ This project follows a pragmatic versioning model inspired by
 ### Fixed
 - `scripts/gitlab-runner/gitlab-runner-proton.service`: stops the runner with SIGQUIT (graceful: a running job may finish, up to 5 min) instead of SIGTERM, which made the runner log "forceful shutdown" warnings. The runner config also sets `request_concurrency = 2`, which removes the "long polling issues" warning at start.
 
-Tested: on murph, a service restart logs no shutdown or long-polling warning. Only the runner's own "Running in user-mode" notice remains, which rocky also logs (its runner is a user service too).
+Tested: on murph, a service restart now does a graceful shutdown (no "forceful shutdown" line) and logs no long-polling warning. The runner still prints its own WARNING-level lines for any stop ("received stop signal", "Starting graceful shutdown") and for user mode ("Running in user-mode"), which rocky also logs (its runner is a user service too).
 
 ---
 

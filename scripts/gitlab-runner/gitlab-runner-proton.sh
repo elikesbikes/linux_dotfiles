@@ -47,6 +47,8 @@ shutdown_timeout = 0
   url = "https://gitlab.home.elikesbikes.com"
   token = "$token"
   executor = "shell"
+  # 1 (the default) makes the runner log a "long polling issues" warning at every start
+  request_concurrency = 2
 EOF
 unset token
 

@@ -33,9 +33,11 @@ import types
 import unicodedata
 from pathlib import Path
 
-READ_ROOTS = ("Career/Courses/", "Templates/")
+HOMELAB = "IT/github/adastra/Homelab/"   # the owner's homelab docs: READ-ONLY for Hermes (owner, 2026-11-09)
+READ_ROOTS = ("Career/Courses/", "Templates/", HOMELAB)
 WRITE_ROOTS = ("Career/Courses/",)
 MAX_PARTS = 5                 # Career/Courses/<course>/<folder>/<note>.md (owner: <= 3 folders deep under Career)
+DEEP_ROOTS = {HOMELAB: 12}    # read-only roots allowed deeper (Homelab's deepest note: 10 parts, 2026-11-09)
 MAX_PATH = 300
 MAX_NOTE = 256 * 1024
 MAX_OUT = 512 * 1024

@@ -67,8 +67,8 @@ HL = "IT/github/adastra/Homelab"
     f"{HL}/projects/Findings Backlog.md",
     f"{HL}/services/Honcho (endurance).md",
     f"{HL}/topology.excalidraw.md",
-    f"{HL}/archive/a/b/c/d/e/note.md",                   # 10 parts: Homelab's deepest note today
-    f"{HL}/a/b/c/d/e/f/note.md",                         # 12 parts: the Homelab limit
+    f"{HL}/archive/a/b/c/d/note.md",                     # 10 parts: Homelab's deepest note today
+    f"{HL}/a/b/c/d/e/f/g/note.md",                       # 12 parts: the Homelab limit
 ])
 def test_homelab_readable(path):
     assert vg.check_path(path, vg.READ_ROOTS, note=True) == path
@@ -80,7 +80,7 @@ def test_homelab_listing_prefixes():
 
 
 @pytest.mark.parametrize("path,why", [
-    (f"{HL}/a/b/c/d/e/f/g/note.md", "deeper than 12"),
+    (f"{HL}/a/b/c/d/e/f/g/h/note.md", "deeper than 12"),
     (f"{HL}/../Finances/x.md", "not allowed"),
     (f"{HL}/.obsidian/x.md", "not allowed"),
     ("IT/github/adastra/Other/x.md", "under"),

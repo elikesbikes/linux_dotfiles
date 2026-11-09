@@ -22,10 +22,18 @@ hl.monitor({ output = dell, mode = "preferred", position = "352x0", scale = omar
 -- Bottom: Gigabyte G34WQC ultrawide
 hl.monitor({ output = ultrawide, mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })
 
--- Pin workspaces 1-8 to the ultrawide.
--- Since Omarchy 4.5.0 every monitor has its own workspaces 1-10: the ultrawide keeps ids 1-10 and
--- the Dell gets 11-20, which its bar shows as 1-10. The old rule "workspace 9 on the Dell, default"
--- is gone because it fought that. Super + 9 now goes to the Dell instead (see bindings.lua).
+-- One global workspace numbering: ultrawide 1-8, Dell 9. Numbers never change.
+--
+-- Omarchy 4.5.0 (2026-11-08) gives every monitor its own block of workspaces (ultrawide 1-10, Dell
+-- 11-20, see /usr/share/omarchy/default/hypr/monitor-workspaces.lua) and renumbers workspaces while a
+-- monitor is off. The owner wants the old behavior (2026-11-09), which takes three overrides:
+--   1. here: Omarchy's re-sorting is switched off. Its handlers (Hyprland start, config reload,
+--      monitor added/removed) call o.workspaces.reconcile at event time, so a no-op stops them all.
+--   2. bindings.lua: Super + 1-0 and the "move workspace to monitor" keys go back to plain Hyprland.
+--   3. the bar uses the clone ecloaiza.workspaces (global numbers) instead of omarchy.workspaces.
+-- After every Omarchy update, check that monitor-workspaces.lua still exposes o.workspaces.reconcile.
+o.workspaces.reconcile = function() end
+
 hl.workspace_rule({ workspace = "1", monitor = ultrawide })
 hl.workspace_rule({ workspace = "2", monitor = ultrawide })
 hl.workspace_rule({ workspace = "3", monitor = ultrawide })

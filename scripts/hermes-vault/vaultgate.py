@@ -89,8 +89,9 @@ def check_path(raw, roots, note):
     if not any(path.startswith(r) or (not note and r.startswith(path) and path.endswith("/")) for r in roots):
         raise Refused(f"path must be under {', '.join(roots)}")
     parts = path.rstrip("/").split("/") if not note else path.split("/")
-    if len(parts) > MAX_PARTS:
-        raise Refused(f"path is deeper than {MAX_PARTS} parts")
+    limit = next((n for r, n in DEEP_ROOTS.items() if r in roots and path.startswith(r)), MAX_PARTS)
+    if len(parts) > limit:
+        raise Refused(f"path is deeper than {limit} parts")
     for p in parts:
         if p in (".", "..") or p.startswith(".") or p != p.strip() or not PART_RE.fullmatch(p):
             raise Refused(f"path part not allowed: {p!r}")

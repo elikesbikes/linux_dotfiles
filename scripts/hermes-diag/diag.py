@@ -99,7 +99,7 @@ PROFILES = {
     "hailmary": {
         "mcc": True,
         "fitness": True,
-        "containers": ("tars-mcc-bot", "case-mcc-bot", "tars-n8n"),
+        "containers": ("tesseract-mcc-bot", "lazarus-mcc-bot", "mcc-n8n"),
         "units": ("mcc-runner.service",),
     },
 }

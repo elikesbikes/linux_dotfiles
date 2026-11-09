@@ -1,6 +1,6 @@
 ---
-revision: 4
-updated: 2026-10-02 17:30
+revision: 5
+updated: 2026-11-09 13:20
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -37,7 +37,7 @@ The same `diag.py` runs on every target; the host's profile (by short hostname) 
 |---|---|
 | `status` | MCC components that are not ok (from MCC's local API) |
 | `component <name>` | full state of one component |
-| `container-logs <name>` | last 200 lines of `tars-mcc-bot`, `case-mcc-bot` or `tars-n8n` |
+| `container-logs <name>` | last 200 lines of `tesseract-mcc-bot`, `lazarus-mcc-bot` or `mcc-n8n` |
 | `service-journal <unit>` | last 200 journal lines of `mcc-runner.service` |
 | `fit <name> [n]` | hailmary only: the owner's fitness, health and lab data. Each of 36 names maps to ONE fixed GET on MCC's local `http://127.0.0.1:5679/api/life/...` (data files only; no Garmin call, no writes); `n` = a capped day/week/month count or, for `activity-compare`, a numeric activity id. `rides`/`activities` come as a compact table and `labs` without the point history, so they fit the 64 KB cap. Owner approved 2026-10-29, including anxiety and labs |
 | `help` | this list |
@@ -79,7 +79,8 @@ The sudoers rule is **not** written by hand: `gen-sudoers.py` generates it from 
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
-| 4 | 2026-10-29 | (this revision) | `fit` group: 36 read-only fitness/health/labs views from MCC's local API, hailmary only (129 tests). |
+| 5 | 2026-11-09 13:20 | (this revision) | MCC containers renamed with the trust zones (TARS/CASE to TESSERACT/LAZARUS): `tesseract-mcc-bot`, `lazarus-mcc-bot`, `mcc-n8n` in the hailmary allowlist and the generated sudoers rule. |
+| 4 | 2026-10-29 | 308d601 | `fit` group: 36 read-only fitness/health/labs views from MCC's local API, hailmary only (129 tests). |
 | 3 | 2026-10-02 17:30 | (see git) | Multi-host: generic commands, Linux/macOS profiles, macOS installer (93 tests). |
 | 2 | 2026-10-02 16:05 | (see git) | Sudoers rule moved into the repo (generated, host-restricted, deployed by the pipeline); drift tests. |
 | 1 | 2026-10-02 15:10 | 5d8636d | Initial version: gate, installer, uninstaller, tests. |

@@ -15,7 +15,29 @@
           "lifeExpectancy": 90
         },
         {
-          "id": "omarchy.elsewhen"
+          "id": "omarchy.elsewhen",
+          "cities": [
+            {
+              "name": "Los Angeles",
+              "zone": "America/Los_Angeles"
+            },
+            {
+              "name": "New York",
+              "zone": "America/New_York"
+            },
+            {
+              "name": "London",
+              "zone": "Europe/London"
+            },
+            {
+              "name": "Dubai",
+              "zone": "Asia/Dubai"
+            },
+            {
+              "name": "Tokyo",
+              "zone": "Asia/Tokyo"
+            }
+          ]
         },
         {
           "id": "omarchy.keyboard-layout"

@@ -50,10 +50,10 @@ def go(request, spy=None, api=API):
 
 @pytest.mark.parametrize("request_text", [
     "status; id", "status && id", "status | cat", "status `id`", "status $(id)", "status > /tmp/x",
-    "container-logs tars-mcc-bot; rm -rf /", "container-logs tars-mcc-bot\nid", "container-logs 'tars-mcc-bot'",
-    'container-logs "tars-mcc-bot"', "container-logs tars-mcc-bot\\", "container-logs ../../etc/passwd",
+    "container-logs tesseract-mcc-bot; rm -rf /", "container-logs tesseract-mcc-bot\nid", "container-logs 'tesseract-mcc-bot'",
+    'container-logs "tesseract-mcc-bot"', "container-logs tesseract-mcc-bot\\", "container-logs ../../etc/passwd",
     "container-logs /etc/passwd", "service-journal mcc-runner.service;id", "component a b",
-    "container-logs tars-mcc-bot --follow", "container-logs -f", "container-logs --tail 1 tars-mcc-bot",
+    "container-logs tesseract-mcc-bot --follow", "container-logs -f", "container-logs --tail 1 tesseract-mcc-bot",
     "cat /etc/shadow", "bash", "sh -c id", "sudo -n true", "ls", "docker ps", "exec id",
     "status\x00id", "status\tid", "status\rid", "STATUS", "Status", "x" * 500, "container-logs " + "a" * 200,
 ])
@@ -64,7 +64,7 @@ def test_hostile_requests_are_rejected_and_run_nothing(request_text):
 
 
 def test_unknown_container_and_unit_are_rejected_even_if_well_formed():
-    for r in ("container-logs traefik", "container-logs hermes", "container-logs tars-mcc-bot2",
+    for r in ("container-logs traefik", "container-logs hermes", "container-logs tesseract-mcc-bot2",
               "container-logs TARS-MCC-BOT", "service-journal sshd.service", "service-journal ssh",
               "service-journal mcc-runner", "service-journal mcc-runner.service.d"):
         code, _, outcome, spy = go(r)
@@ -100,9 +100,9 @@ def test_component_returns_one_component_json():
 
 
 def test_container_logs_runs_exactly_the_fixed_argv_without_a_shell():
-    code, text, outcome, spy = go("container-logs tars-mcc-bot")
+    code, text, outcome, spy = go("container-logs tesseract-mcc-bot")
     assert (code, outcome) == (0, "ok") and "LOGLINE" in text
-    assert spy.calls == [["sudo", "-n", "/usr/bin/docker", "logs", "--tail", "200", "tars-mcc-bot"]]
+    assert spy.calls == [["sudo", "-n", "/usr/bin/docker", "logs", "--tail", "200", "tesseract-mcc-bot"]]
 
 
 def test_service_journal_runs_exactly_the_fixed_argv():
@@ -135,7 +135,7 @@ def test_secrets_are_redacted_in_command_output():
         "-----BEGIN OPENSSH PRIVATE KEY-----\nAAAAB3NzaC1\n-----END OPENSSH PRIVATE KEY-----",
         "blob " + "A1b2C3d4" * 8,
     ])
-    code, text, _, _ = go("container-logs tars-mcc-bot", Spy(secret_lines))
+    code, text, _, _ = go("container-logs tesseract-mcc-bot", Spy(secret_lines))
     assert code == 0
     for leak in ("abc123SECRETvalue", "abcdefghijklmnop1234", "0123456789abcdef0123456789abcdef", "FAKEFAKEFAKEFAKE", "xxxxxxxxxxxxxxxxxxxxxxxxxxxAB",
                  "hunter2hunter2", "sk-ant-api03-ABCDEF", "AAAAB3NzaC1", "A1b2C3d4A1b2C3d4A1b2C3d4"):
@@ -145,7 +145,7 @@ def test_secrets_are_redacted_in_command_output():
 
 def test_normal_log_text_is_not_mangled():
     line = "2026-10-02T13:55:01+0000 runner INFO sweep done in 12.3s: 156 components, 2 failed\n"
-    assert go("container-logs tars-mcc-bot", Spy(line))[1] == line
+    assert go("container-logs tesseract-mcc-bot", Spy(line))[1] == line
 
 
 def test_redaction_applies_to_api_data_too():
@@ -155,7 +155,7 @@ def test_redaction_applies_to_api_data_too():
 
 
 def test_output_is_capped():
-    code, text, _, _ = go("container-logs tars-mcc-bot", Spy("line of log text\n" * 20000))
+    code, text, _, _ = go("container-logs tesseract-mcc-bot", Spy("line of log text\n" * 20000))
     assert code == 0 and len(text.encode()) <= diag.MAX_BYTES + 100 and "truncated" in text
 
 
@@ -164,7 +164,7 @@ def test_output_is_capped():
 def test_timeout_and_unexpected_errors_are_reported_without_tracebacks():
     def boom(argv):
         raise subprocess.TimeoutExpired(argv, 15)
-    code, text, outcome = diag.handle("container-logs tars-mcc-bot", api_fetch=lambda: API, run=boom)
+    code, text, outcome = diag.handle("container-logs tesseract-mcc-bot", api_fetch=lambda: API, run=boom)
     assert (code, outcome) == (3, "timeout") and "Traceback" not in text
 
     def bad_api():
@@ -224,7 +224,7 @@ def test_name_check_rejects_bad_names_by_itself(name):
 def test_parser_accepts_only_the_known_shapes():
     assert diag.parse("status") == ("status", [])
     assert diag.parse("component int-garmin") == ("component", ["int-garmin"])
-    assert diag.parse("container-logs tars-mcc-bot") == ("container-logs", ["tars-mcc-bot"])
+    assert diag.parse("container-logs tesseract-mcc-bot") == ("container-logs", ["tesseract-mcc-bot"])
     assert diag.parse("service-journal mcc-runner.service") == ("service-journal", ["mcc-runner.service"])
 
 
@@ -315,7 +315,7 @@ def test_listening_is_linux_only():
 
 
 def test_default_profile_has_no_mcc_or_logs_commands():
-    for req in ("status", "component runner", "container-logs tars-n8n", "service-journal mcc-runner.service"):
+    for req in ("status", "component runner", "container-logs mcc-n8n", "service-journal mcc-runner.service"):
         code, text, spy = _gen(req, "linux")
         assert code == 2 and spy.calls == [], req
 

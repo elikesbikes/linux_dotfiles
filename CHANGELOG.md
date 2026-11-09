@@ -15,7 +15,14 @@ This project follows a pragmatic versioning model inspired by
   - `update-gate.sh` (new): on hailmary, `sudo ~/scripts/hermes-vault/update-gate.sh` installs only the gate program, keeps the old one as `vaultgate.py.prev`, and self-tests (a Homelab write must be refused; a real Homelab `list`).
   - The Hermes skill that uses it, `devops/homelab-notes`, lives in the hermes-config repo.
 
-Tested: 51 gate tests pass (13 new), and all 296 real Homelab note paths pass the gate's path rules. The note sizes fit the gate's 512 KiB output cap (the Findings Backlog is 255 KiB). The live test on hailmary and in Hermes is in the vault notes (`projects/hermes-endurance`).
+Tested: 51 gate tests pass (13 new), and all 296 real Homelab note paths pass the gate's path rules. The note sizes fit the gate's 512 KiB output cap (the Findings Backlog is 255 KiB).
+
+Live, 2026-11-09:
+- The owner ran `update-gate.sh` on hailmary. The self-test refused a Homelab write and listed `Homelab/infra/`.
+- From Hermes' container, `list` and `get` work; the Findings Backlog came back whole (260,622 bytes). A Homelab `create` and a `Finances/` read were refused.
+- A real Hermes chat ("what revision is my Honcho note?") picked the skill without being told and answered rev 10 / 2026-11-08 12:25, which matches the vault. The test chat was then deleted from Hermes and from Honcho.
+
+Not tested: Discord, and Open WebUI after this change. Both use the same Hermes and skills.
 
 ## [v1.12.0] - 2026-11-09
 

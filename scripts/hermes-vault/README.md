@@ -67,4 +67,4 @@ sudo ~/scripts/hermes-vault/uninstall.sh
 |---|---|---|---|
 | 1 | 2026-10-28 | 3fb6d1d | Initial gate: create-only school notes, own TPM-sealed per-item PAT. |
 | 2 | 2026-10-28 20:49 | 847277c | Read secrets by item share id (item-scoped PAT sees no vault); 38 tests. |
-| 3 | 2026-11-09 | (this revision) | Read-only access to `IT/github/adastra/Homelab/` (up to 12 parts deep) for the new `homelab-notes` skill; `update-gate.sh` updates only the gate program; 51 tests. |
+| 3 | 2026-11-09 | (this revision) | v1.13.0. Read-only access to `IT/github/adastra/Homelab/` (up to 12 parts deep) for the new `homelab-notes` skill; `update-gate.sh` updates only the gate program; 51 tests. |

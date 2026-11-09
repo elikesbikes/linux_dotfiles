@@ -60,6 +60,48 @@ def test_read_roots_allow_templates_and_listing_prefixes():
         vg.check_path("Daily Notes/", vg.READ_ROOTS, note=False)
 
 
+HL = "IT/github/adastra/Homelab"
+
+
+@pytest.mark.parametrize("path", [
+    f"{HL}/projects/Findings Backlog.md",
+    f"{HL}/services/Honcho (endurance).md",
+    f"{HL}/topology.excalidraw.md",
+    f"{HL}/archive/a/b/c/d/e/note.md",                   # 10 parts: Homelab's deepest note today
+    f"{HL}/a/b/c/d/e/f/note.md",                         # 12 parts: the Homelab limit
+])
+def test_homelab_readable(path):
+    assert vg.check_path(path, vg.READ_ROOTS, note=True) == path
+
+
+def test_homelab_listing_prefixes():
+    for p in (f"{HL}/", f"{HL}/projects/", "IT/github/adastra/", "IT/"):   # parents of the root: results are filtered
+        assert vg.check_path(p, vg.READ_ROOTS, note=False) == p
+
+
+@pytest.mark.parametrize("path,why", [
+    (f"{HL}/a/b/c/d/e/f/g/note.md", "deeper than 12"),
+    (f"{HL}/../Finances/x.md", "not allowed"),
+    (f"{HL}/.obsidian/x.md", "not allowed"),
+    ("IT/github/adastra/Other/x.md", "under"),
+    (f"{HL}x/y.md", "under"),
+    ("IT/x.md", "under"),
+])
+def test_homelab_read_refusals(path, why):
+    with pytest.raises(vg.Refused) as e:
+        vg.check_path(path, vg.READ_ROOTS, note=True)
+    assert why.lower() in str(e.value).lower()
+
+
+def test_homelab_never_writable_and_career_depth_unchanged():
+    with pytest.raises(vg.Refused, match="under"):
+        vg.check_path(f"{HL}/projects/x.md", vg.WRITE_ROOTS, note=True)
+    with pytest.raises(vg.Refused, match="deeper than 5"):
+        vg.check_path("Career/Courses/a/b/c/d.md", vg.READ_ROOTS, note=True)
+    code, out, outcome, _ = vg.handle(f"create {HL}/projects/x.md", io.BytesIO(b"# x\n"))
+    assert code == 2 and outcome == "refused"
+
+
 @pytest.mark.parametrize("request_,verb,arg", [
     (None, "help", ""), ("", "help", ""), ("help", "help", ""),
     ("list Career/Courses/", "list", "Career/Courses/"),

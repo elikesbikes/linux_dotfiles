@@ -1,11 +1,11 @@
 ---
-revision: 2
-updated: 2026-10-28
+revision: 3
+updated: 2026-11-09
 ---
 
 # hermes-vault
 
-Lets the Hermes agent (chattars / Discord) **create** school notes in the Obsidian vault, and nothing more. Sibling of [hermes-diag](../hermes-diag/README.md): same idea (an SSH account whose only program is a strict gate), but for writing notes instead of reading diagnostics.
+Lets the Hermes agent on endurance (Open WebUI / Discord / dashboard) **create** school notes in the Obsidian vault and **read** the owner's homelab docs, and nothing more. Sibling of [hermes-diag](../hermes-diag/README.md): same idea (an SSH account whose only program is a strict gate), but for writing notes instead of reading diagnostics.
 
 ## Table of Contents
 
@@ -18,18 +18,20 @@ Lets the Hermes agent (chattars / Discord) **create** school notes in the Obsidi
 
 ## 1. How it fits together
 
-chattars (Open WebUI) -> Hermes on endurance -> skill `school-notes` -> `hvault create <path>` (note text on stdin) -> SSH as `hermes-vault@hailmary` (key pinned to endurance's address) -> forced command `vaultgate.py` -> MCC's `vault_fetch` module -> CouchDB -> LiveSync -> the owner's Obsidian.
+chattars (Open WebUI) -> Hermes on endurance -> skill `school-notes` (`hvault create <path>`, note text on stdin) or skill `homelab-notes` (`hvault list|get <path>`) -> SSH as `hermes-vault@hailmary` (key pinned to endurance's address) -> forced command `vaultgate.py` -> MCC's `vault_fetch` module -> CouchDB -> LiveSync -> the owner's Obsidian.
 
 ## 2. What the gate allows
 
 | Verb | Where | Notes |
 |---|---|---|
 | `help` | - | no secrets loaded |
-| `list <prefix>` | `Career/Courses/`, `Templates/` | note paths |
-| `get <path.md>` | `Career/Courses/`, `Templates/` | one note's text |
+| `list <prefix>` | `Career/Courses/`, `Templates/`, `IT/github/adastra/Homelab/` | note paths |
+| `get <path.md>` | `Career/Courses/`, `Templates/`, `IT/github/adastra/Homelab/` | one note's text (max 512 KiB returned) |
 | `create <path.md>` | `Career/Courses/<existing course>/` only | text on stdin, max 256 KiB, UTF-8; **refused if the note exists** (case-insensitive) |
 
-Never: overwrite, delete, rename, write outside `Career/Courses/`, invent a new course folder, go deeper than `Career/Courses/<course>/<folder>/<note>.md`. Paths are checked before any secret is loaded (tests: `test_vaultgate.py`). Every request goes to syslog (tag `hermes-vault`, Graylog); writes also produce MCC's `vault.write` audit event.
+Never: overwrite, delete, rename, write outside `Career/Courses/` (so the Homelab docs are **read-only**), invent a new course folder, go deeper than `Career/Courses/<course>/<folder>/<note>.md` (5 parts). Homelab paths may be up to 12 parts deep (its deepest note had 10 on 2026-11-09; all 296 notes passed the path rules).
+
+Why Homelab is readable (owner, 2026-11-09): Hermes on endurance could not see the homelab docs when asked to review them. Anyone who can chat with this Hermes can now ask for them, including IPs and the Findings Backlog; the owner accepted that. The docs hold no secrets (those live in Proton Pass). Paths are checked before any secret is loaded (tests: `test_vaultgate.py`). Every request goes to syslog (tag `hermes-vault`, Graylog); writes also produce MCC's `vault.write` audit event.
 
 ## 3. Secrets
 
@@ -45,6 +47,8 @@ Never: overwrite, delete, rename, write outside `Career/Courses/`, invent a new 
 sudo ~/scripts/hermes-vault/install.sh
 # tests (anywhere)
 uvx pytest -q ~/scripts/hermes-vault/test_vaultgate.py
+# update only the gate program after a change reached hailmary (keeps the old one as vaultgate.py.prev)
+sudo ~/scripts/hermes-vault/update-gate.sh
 # remove
 sudo ~/scripts/hermes-vault/uninstall.sh
 ```
@@ -62,4 +66,5 @@ sudo ~/scripts/hermes-vault/uninstall.sh
 | Rev | Date | Commit | Change |
 |---|---|---|---|
 | 1 | 2026-10-28 | 3fb6d1d | Initial gate: create-only school notes, own TPM-sealed per-item PAT. |
-| 2 | 2026-10-28 | (this revision) | Read secrets by item share id (item-scoped PAT sees no vault); 38 tests. |
+| 2 | 2026-10-28 20:49 | 847277c | Read secrets by item share id (item-scoped PAT sees no vault); 38 tests. |
+| 3 | 2026-11-09 | (this revision) | Read-only access to `IT/github/adastra/Homelab/` (up to 12 parts deep) for the new `homelab-notes` skill; `update-gate.sh` updates only the gate program; 51 tests. |

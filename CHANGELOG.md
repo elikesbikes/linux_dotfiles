@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.13.0] - 2026-11-09
+
+### Added
+- `scripts/hermes-vault`: Hermes on endurance can now **read** the owner's homelab docs in the Obsidian vault (`IT/github/adastra/Homelab/`), read-only (owner's choice, 2026-11-09). Before this, Hermes in Open WebUI could not see them and suggested mounting or cloning the vault, which doesn't fit (the vault lives in CouchDB on hailmary).
+  - `vaultgate.py`: `IT/github/adastra/Homelab/` added to the read roots (`list`, `get`), up to 12 path parts deep (the deepest note has 10). Writing is still only allowed under `Career/Courses/`, create-only.
+  - `update-gate.sh` (new): on hailmary, `sudo ~/scripts/hermes-vault/update-gate.sh` installs only the gate program, keeps the old one as `vaultgate.py.prev`, and self-tests (a Homelab write must be refused; a real Homelab `list`).
+  - The Hermes skill that uses it, `devops/homelab-notes`, lives in the hermes-config repo.
+
+Tested: 51 gate tests pass (13 new), and all 296 real Homelab note paths pass the gate's path rules. The note sizes fit the gate's 512 KiB output cap (the Findings Backlog is 255 KiB). The live test on hailmary and in Hermes is in the vault notes (`projects/hermes-endurance`).
+
 ## [v1.12.0] - 2026-11-09
 
 ### Changed

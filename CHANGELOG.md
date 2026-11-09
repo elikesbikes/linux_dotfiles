@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.11.2] - 2026-11-09
+
+### Fixed
+- Hyprland on tars: the Dell U2719DX was no longer "workspace 9". Omarchy 4.5.0 (installed 2026-11-08) gave every monitor its own workspaces 1-10 (`/usr/share/omarchy/default/hypr/monitor-workspaces.lua`, no switch to turn it off): the ultrawide keeps ids 1-10, the Dell gets 11-20 and its bar shows them as 1-10. It re-applies that at every Hyprland start, config reload and monitor change, so a reboot doesn't undo it.
+  - `.config/hypr/bindings.lua`: `SUPER + 9` focuses the Dell, `SUPER + SHIFT + 9` sends the active window to the workspace the Dell shows (and follows), `SUPER + SHIFT + ALT + 9` does the same without following. The Dell is found by make/model/serial, not by connector.
+  - `.config/hypr/monitors.lua`: removed the old rule pinning workspace 9 to the Dell as its default (it fought Omarchy's per-monitor model); workspaces 1-8 stay pinned to the ultrawide.
+
+Tested: `hyprctl reload` with no config errors; the three binds are registered; `hyprctl dispatch 'o.dell_focus()'` moved focus to the Dell. Not tested: the two move-window keys (they would have moved one of the owner's windows), and a fresh login.
+
 ## [v1.11.1] - 2026-11-08
 
 ### Fixed

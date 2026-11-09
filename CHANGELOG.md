@@ -7,6 +7,26 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.14.0] - 2026-11-09
+
+### Changed
+- `scripts/proton-pass/ssh-agent-start.sh`: the SSH agent now serves **only the host's own key**, from the Proton vault `SSH <short hostname>` (one key, `<host> SSH identity`), instead of all ~21 keys in HOMELAB. Owner rule (2026-10-09): each host signs only as itself; before this, any host could sign as any other, and some did (endurance and murph pinned other hosts' keys).
+  - Vault choice: per-host override `~/.config/proton-pass/ssh-agent-vault`, else `SSH <host>`, else HOMELAB with a syslog warning (case and gargantua until they are migrated).
+  - Each host's PAT has viewer access to its own SSH vault only.
+  - hailmary keeps HOMELAB through the override until the SSHTars iPhone/iPad keys get their own agents.
+- Each host's `~/.ssh/config` (not in this repo) now pins only `~/.ssh/identity.pub` under `Host *`; every per-target `IdentityFile` was removed.
+
+### Added
+- `scripts/proton-pass/README.md`: the identity model, how the agent picks its vault, how to add a host.
+
+Tested, 2026-11-09:
+- Temporary agent per host on its own vault, logins pinned to the new key: full mesh of tars, hailmary, rocky, endurance, murph, kipp, trainerroad (42/42); tars to 15 infra and mesh targets (router, Proxmox 1s/4s/6s, PDM, Home Assistant, three Windows hosts); hailmary to the router (certbot).
+- After the switch, through the real agent and config: tars 15/15; rocky, murph, endurance, kipp, trainerroad 6/6 each; `ssh-add -l` shows one key on each.
+
+Not tested: case and gargantua (offline); hailmary (override until the SSHTars change).
+
+---
+
 ## [v1.13.0] - 2026-11-09
 
 ### Added

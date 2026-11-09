@@ -60,7 +60,7 @@ VERB_RE = re.compile(r"[a-z]{1,10}")
 # One path part: letters (any language), digits and a few punctuation marks used in course/note names.
 PART_RE = re.compile(r"[\w][\w .,()&+'#-]*", re.UNICODE)
 
-HELP = """hermes-vault: put school notes into the Obsidian vault (create-only).
+HELP = """hermes-vault: put school notes into the Obsidian vault (create-only); read school and homelab notes.
   help
   list <prefix>      note paths under <prefix>        (allowed: {read})
   get <path.md>      one note's text                  (allowed: {read})

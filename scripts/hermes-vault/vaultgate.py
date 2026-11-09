@@ -2,7 +2,7 @@
 """Vault capture gate for the Hermes agent (forced command of the `hermes-vault` SSH user on hailmary).
 
 Hermes (an AI agent in a container on endurance) connects here over SSH to put the owner's school notes into the
-Obsidian vault (CouchDB + LiveSync). sshd ignores whatever it asks to run and starts THIS script; the request arrives
+Obsidian vault (CouchDB + LiveSync), and to READ the owner's homelab docs (IT/github/adastra/Homelab/, never written). sshd ignores whatever it asks to run and starts THIS script; the request arrives
 only as data in $SSH_ORIGINAL_COMMAND and, for `create`, the note text on stdin. The script is the security boundary:
 
   * four verbs: help, list <prefix>, get <path>, create <path> (text on stdin);

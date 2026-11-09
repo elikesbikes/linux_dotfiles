@@ -137,7 +137,7 @@ gacp_dotfiles "message"  →  push to GitHub + GitLab
             Symlinks pick up changes instantly
 ```
 
-Hosts updated by the pipeline: `hailmary`, `murph`, `rocky`. Other hosts (tars, case, gargantua) are pulled by hand with `gpull_dotfiles`. When `sudoers/` changes, the job also runs `scripts/sync-sudoers-ci.sh`. No GitLab runner in the homelab keeps its token on disk (deploy hosts, tars, endurance, kipp and the Docker runners on rocky and hailmary): each reads it from Proton Pass at start (`scripts/gitlab-runner/`). Full details and host onboarding steps are in `PIPELINE.md`.
+Hosts updated by the pipeline: `hailmary`, `murph`, `rocky`. Other hosts (tars, case, gargantua, endurance, kipp, trainerroad) are pulled by hand with `gpull_dotfiles`. When `sudoers/` changes, the job also runs `scripts/sync-sudoers-ci.sh`. No GitLab runner in the homelab keeps its token on disk (deploy hosts, tars, endurance, kipp and the Docker runners on rocky and hailmary): each reads it from Proton Pass at start (`scripts/gitlab-runner/`). Full details and host onboarding steps are in `PIPELINE.md`.
 
 > ⚠️ Because each deploy host is **hard-reset to `gitlab/main`**, any change saved to disk but not committed *and* pushed is silently wiped on the next sync. Edit → commit → push.
 

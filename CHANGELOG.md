@@ -7,6 +7,17 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.12.0] - 2026-11-09
+
+### Changed
+- Hyprland on tars: back to one global workspace numbering, as before Omarchy 4.5.0 (owner's choice). The ultrawide has 1-8, the Dell has 9, and numbers no longer change when a monitor turns off. Omarchy 4.5.0's per-monitor workspaces gave the Dell 11-20 and renumbered a monitor's workspaces onto the other screen while it was off, putting them back when it returned. This replaces the v1.11.2 "Super + 9 = Dell" keys.
+  - `.config/hypr/monitors.lua`: `o.workspaces.reconcile` is a no-op, which switches off Omarchy's re-sorting on Hyprland start, config reload and monitor add/remove. The rule "workspace 9 on the Dell, default" is back.
+  - `.config/hypr/bindings.lua`: `SUPER (+ SHIFT / + SHIFT + ALT) + 1-0` go to the plain workspaces 1-10 again, and `SUPER + SHIFT + ALT + arrows` move a workspace to another monitor without renumbering it (`o.workspace_to_monitor`).
+  - `.config/omarchy/plugins/ecloaiza.workspaces/`: a clone of the bar's `omarchy.workspaces` widget (`omarchy plugin clone`, and the bar in `~/.config/omarchy/shell.json` switched to it). Every bar shows the same global numbers and a click goes to the plain workspace.
+  - After every Omarchy update, check that `/usr/share/omarchy/default/hypr/monitor-workspaces.lua` still exposes `o.workspaces.reconcile`, and that the stock widget hasn't gained fixes worth copying.
+
+Tested: `hyprctl reload` with no config errors, and each workspace key is bound once. The Dell stayed on workspace 9 through a config reload, which it would not have done with Omarchy's re-sorting on. After a shell restart both bars show `1 2 3 4 5 7 9`. Not tested: pressing the keys (simulated key presses with `wtype` don't trigger Hyprland key binds), turning the monitors off and on, and a fresh login. The shell log warning "Handler was registered but will not be used ... target omarchy.workspaces" (one per extra screen) also comes from the stock widget; it is not from this change.
+
 ## [v1.11.2] - 2026-11-09
 
 ### Fixed

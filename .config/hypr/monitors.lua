@@ -22,8 +22,10 @@ hl.monitor({ output = dell, mode = "preferred", position = "352x0", scale = omar
 -- Bottom: Gigabyte G34WQC ultrawide
 hl.monitor({ output = ultrawide, mode = "preferred", position = "0x1152", scale = omarchy_monitor_scale })
 
--- Pin workspaces to monitors.
--- Ultrawide gets 1-8, Dell gets 9.
+-- Pin workspaces 1-8 to the ultrawide.
+-- Since Omarchy 4.5.0 every monitor has its own workspaces 1-10: the ultrawide keeps ids 1-10 and
+-- the Dell gets 11-20, which its bar shows as 1-10. The old rule "workspace 9 on the Dell, default"
+-- is gone because it fought that. Super + 9 now goes to the Dell instead (see bindings.lua).
 hl.workspace_rule({ workspace = "1", monitor = ultrawide })
 hl.workspace_rule({ workspace = "2", monitor = ultrawide })
 hl.workspace_rule({ workspace = "3", monitor = ultrawide })

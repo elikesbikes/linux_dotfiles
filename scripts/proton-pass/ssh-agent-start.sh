@@ -10,7 +10,17 @@
 #      SSHTars device keys move to their own agents.
 #   2. "SSH <short hostname>" when that vault exists.
 #   3. HOMELAB, with a syslog warning: a host not migrated yet (case, gargantua) keeps working until it gets its vault.
+#
+# Device mode (hailmary, SSHTars): `ssh-agent-start.sh --device <name>` serves the vault "SSH <name>" (one key titled
+# "SSHTars device identity") on ~/.ssh/sshtars-<name>.sock, for the SSHTars broker to hand to that one iPhone/iPad.
+# No fallback in device mode: a missing vault is an error. Run by the user unit proton-pass-ssh-agent-device@<name>.
 set -euo pipefail
+
+DEVICE=""
+if [[ "${1:-}" == "--device" ]]; then
+    DEVICE="${2:-}"
+    [[ "$DEVICE" =~ ^[a-z0-9][a-z0-9-]{0,40}$ ]] || { echo "usage: $0 [--device <name>]  (name: a-z 0-9 -)" >&2; exit 2; }
+fi
 
 PASS_CLI="$HOME/.local/bin/pass-cli"
 PAT_FILE="$HOME/.secrets/proton-pass-pat"

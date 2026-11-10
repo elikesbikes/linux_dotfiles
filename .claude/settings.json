@@ -244,6 +244,29 @@
   "enabledPlugins": {},
   "extraKnownMarketplaces": {},
   "effortLevel": "low",
+  "modelSettings": {
+    "claude-opus-4-6": {
+      "effortLevel": "low"
+    },
+    "claude-sonnet-5-5": {
+      "effortLevel": "high",
+      "autoCompactWindow": 400000
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5": {
+      "effortLevel": "medium"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high",
+      "autoCompactWindow": 400000
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high",
+      "autoCompactWindow": 400000
+    }
+  },
   "tui": "fullscreen",
   "voice": {
     "enabled": true,
@@ -287,29 +310,6 @@
     ]
   },
   "voiceEnabled": true,
-  "modelSettings": {
-    "claude-opus-4-6": {
-      "effortLevel": "low"
-    },
-    "claude-sonnet-5-5": {
-      "effortLevel": "high",
-      "autoCompactWindow": 400000
-    },
-    "claude-sonnet-5": {
-      "effortLevel": "high"
-    },
-    "claude-fable-5": {
-      "effortLevel": "medium"
-    },
-    "claude-fable-5-1": {
-      "effortLevel": "high",
-      "autoCompactWindow": 400000
-    },
-    "claude-opus-5-5": {
-      "effortLevel": "high",
-      "autoCompactWindow": 400000
-    }
-  },
   "mcpServers": {
     "unifi": {
       "type": "sse",
@@ -338,5 +338,6 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
-  }
+  },
+  "model": "opus"
 }

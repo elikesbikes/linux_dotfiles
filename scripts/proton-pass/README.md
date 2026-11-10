@@ -23,11 +23,23 @@ hosts signed with another host's key. That model is gone.
 
 ### How the agent picks its vault (first match wins)
 
-1. `~/.config/proton-pass/ssh-agent-vault` (one line): a per-host override. hailmary uses `HOMELAB` until the SSHTars
-   iPhone/iPad keys move to their own agents, because its broker hands that agent to the devices.
+1. `~/.config/proton-pass/ssh-agent-vault` (one line): a per-host override (unused since v1.15.0; hailmary used
+   `HOMELAB` until the SSHTars devices got their own agents).
 2. `SSH <short hostname>`, when the PAT can see that vault.
 3. `HOMELAB`, with a syslog warning (`proton-pass-ssh-agent` tag): a host that has not been migrated yet (case, gargantua)
    keeps working until it gets its vault.
+
+### SSHTars devices (iPhone, iPad)
+
+The SSHTars app reaches hosts through hailmary's broker (`scripts/sshtars/broker`, a forced command on each device's
+login line). Each device has its own vault, `SSH <device>`, with one key titled `SSHTars device identity`, served by
+`ssh-agent-start.sh --device <device>` on `~/.ssh/sshtars-<device>.sock` (unit `proton-pass-ssh-agent-device@<device>`).
+The broker hands a device only its own socket, so the iPhone cannot sign as the iPad or as hailmary. hailmary's PAT has
+viewer access to the device vaults (one PAT per host); the broker's syslog line (`device=`) traces each use to a device.
+
+Adding a device: create the vault and key as for a host (title `SSHTars device identity`), grant hailmary's PAT, put the
+public key on every catalog host, then on hailmary
+`systemctl --user enable --now proton-pass-ssh-agent-device@<device>` and add the device's login line.
 
 ### Client side
 

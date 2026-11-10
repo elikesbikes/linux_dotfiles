@@ -7,6 +7,20 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.15.0] - 2026-11-09
+
+### Added
+- SSHTars devices sign only as themselves. `scripts/proton-pass/ssh-agent-start.sh --device <name>` serves the Proton vault `SSH <name>` (one key titled `SSHTars device identity`) on `~/.ssh/sshtars-<name>.sock`; the user unit `scripts/proton-pass/systemd/proton-pass-ssh-agent-device@.service` runs one per device on hailmary (`tars-iphone2`, `tars-ipad`). No HOMELAB fallback in device mode.
+
+### Changed
+- `scripts/sshtars/broker`: the `agent` request now pipes to the device's own socket (`~/.ssh/sshtars-<device>.sock`) instead of hailmary's HOMELAB agent, refuses a device name outside `a-z 0-9 -`, and logs an error when that device's agent is not running. Before this, every device signed with the one shared `tars-iphone` key from HOMELAB. Same change in the sshtars-ios repo `tools/broker/`.
+- `scripts/sshtars/catalog.py`: docstring for the new key naming (the catalog's `key:` is now `SSHTars device identity`).
+- `scripts/certbot/certbot-renew.sh` (canary) and `hooks/deploy_to_unifi.sh`: pin `~/.ssh/identity.pub` (hailmary's own Proton identity key) instead of `~/.ssh/id_ed25519.pub`, for hailmary's switch to its own vault.
+
+Tested, 2026-11-09: both device agents list exactly one key; each device key logs in to all 9 reachable catalog hosts (tars, rocky, hailmary, kipp, endurance, trainerroad, router, proxmox-prod-6s, nvr-prod-2) through the device's socket. Not tested: the app on the devices (needs a catalog sync by the owner); gargantua (offline).
+
+---
+
 ## [v1.14.0] - 2026-11-09
 
 ### Changed

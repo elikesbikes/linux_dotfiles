@@ -7,7 +7,8 @@ vault (CouchDB on hailmary) and holds one ```yaml block:
     groups: [{name, parent?, username?, port?, key?, via_hailmary?}]
     hosts:  [{label, hostname, group?, port?, username?, key?, tags?, via_hailmary?}]
 
-`key` is a Proton Pass SSH key *name* (its comment in the HOMELAB agent).
+`key` is a Proton Pass SSH key *name*: the item title in the device's own agent. Every device vault ("SSH <device>")
+holds one key titled "SSHTars device identity", so one catalog name serves every device.
 
     catalog.py              -> JSON for the app ({"version": 1, "groups": [...], "hosts": [...]})
     catalog.py --permitopen -> permitopen="host:port",... for devices' authorized_keys lines

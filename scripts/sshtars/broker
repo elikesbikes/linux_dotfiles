@@ -3,20 +3,27 @@
 # authorized_keys:  restrict,port-forwarding,permitopen="…",command="/home/ecloaiza/scripts/sshtars/broker <device>" ecdsa-sha2-nistp256 AAAA… sshtars-<device>
 #
 # Allowed requests (SSH_ORIGINAL_COMMAND):
-#   agent   pipe to the Proton Pass SSH agent (HOMELAB vault): list keys + sign. No key export.
+#   agent   pipe to THIS device's own Proton Pass SSH agent: list keys + sign. No key export.
+#           Each device has its own vault "SSH <device>" (one key, "SSHTars device identity") served on
+#           ~/.ssh/sshtars-<device>.sock by the user unit proton-pass-ssh-agent-device@<device> (dotfiles).
 #   catalog print the SSHTars host catalog (Obsidian note) as JSON (catalog.py)
 # Anything else, including a shell, is refused. Every request is logged to syslog
 # (forwarded to Graylog) with the device name, so each use is traceable per device.
 # Source: sshtars-ios repo tools/broker/broker. Design: docs/proton-and-host-catalog.md.
 set -eu
-SOCK="$HOME/.ssh/proton-pass-agent.sock"
 DEVICE="${1:-unknown-device}"
+case "$DEVICE" in *[!a-z0-9-]*|"") echo "sshtars-broker: bad device name" >&2; exit 1;; esac
+SOCK="$HOME/.ssh/sshtars-$DEVICE.sock"
 REQ="${SSH_ORIGINAL_COMMAND:-}"
 FROM="${SSH_CLIENT:-?}"; FROM="${FROM%% *}"
 
 logger -t sshtars-broker -p auth.info "device=$DEVICE request=${REQ:-<shell>} from=${FROM:-?}"
 case "$REQ" in
   agent)
+    if [ ! -S "$SOCK" ]; then
+      logger -t sshtars-broker -p auth.err "device=$DEVICE no agent socket $SOCK (unit proton-pass-ssh-agent-device@$DEVICE)"
+      echo "sshtars-broker: no agent for device $DEVICE" >&2; exit 1
+    fi
     exec socat - "UNIX-CONNECT:$SOCK"
     ;;
   catalog)

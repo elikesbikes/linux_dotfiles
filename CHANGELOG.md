@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.15.1] - 2026-11-09
+
+### Fixed
+- `scripts/onboarding/scripts/security/setup-ssh-key.sh` followed the old key model: it looked up a `<target> SSH Key` in the agent, saved it as `~/.ssh/pubkeys/<target>.pub` and pinned it per target, which is the "key named after the host you log in to" pattern the v1.14.0 identity model replaced. It now installs the running host's own `~/.ssh/identity.pub` (checked against the agent, setup steps printed when missing) and adds only a `HostName`/`User` alias; user, sudo, OS and Windows handling are unchanged. Onboarding READMEs updated.
+
+Tested: the identity path and the no-identity error against an unreachable test address (no side effects: `known_hosts` and `~/.ssh/config` unchanged). Not tested end to end against a fresh host.
+
+---
+
 ## [v1.15.0] - 2026-11-09
 
 ### Added

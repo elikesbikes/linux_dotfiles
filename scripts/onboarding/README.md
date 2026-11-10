@@ -80,7 +80,7 @@ Not registered in `master.sh` — run these directly:
 |--------|---------|
 | `themes/apply_brave_catppuccin_macchiato.sh` | Patches Brave's `Preferences` to the Catppuccin Macchiato palette |
 | `themes/apply_brave_catppuccin_mocha.sh` | Patches Brave's `Preferences` to the Catppuccin Mocha palette |
-| `security/setup-ssh-key.sh <hostname>` | Bootstraps SSH key access for `ecloaiza` on a new remote host via the Proton Pass SSH agent |
+| `security/setup-ssh-key.sh <hostname>` | Bootstraps SSH key access for `ecloaiza` on a new remote host: installs the **running host's own** identity key (`~/.ssh/identity.pub`, Proton vault `SSH <host>`) |
 
 ```bash
 bash scripts/themes/apply_brave_catppuccin_mocha.sh

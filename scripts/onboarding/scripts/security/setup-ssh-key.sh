@@ -13,7 +13,9 @@ set -uo pipefail
 #   - Target user exists or needs creation
 #   - Debian/Ubuntu (sudo group) vs Arch (wheel group)
 #   - Windows admin (administrators_authorized_keys) vs non-admin (.ssh/)
-#   - MaxAuthTries workaround (pubkey file + SSH config entry)
+#   - Installs THIS host's own identity key (~/.ssh/identity.pub, Proton vault "SSH <this host>").
+#     Each host signs only as itself (dotfiles v1.14.0); there are no per-target keys or pins any more.
+#     Every other host that should reach the target runs this script itself, or appends its own identity.pub.
 #   - Garbage in authorized_keys from previous failed runs
 
 DOMAIN="home.elikesbikes.com"
@@ -24,7 +26,8 @@ usage() {
 Usage: $(basename "$0") [OPTIONS] <hostname>
 
 Sets up SSH key access for ${TARGET_USER} on a new host.
-The host must have a '<hostname> SSH Key' loaded in the Proton Pass agent.
+Installs THIS host's own identity key (~/.ssh/identity.pub, served by the Proton Pass agent
+from the vault 'SSH <this host>') on the target. Run it from each host that should reach the target.
 
 Options:
   --user <login_user>   User to SSH in as for setup (default: root)
@@ -37,7 +40,7 @@ Examples:
   $(basename "$0") --password endurance                  # Fresh machine, need password
   $(basename "$0") --password --user emmanuel kipp       # Ubuntu Desktop, SSH as install user
   $(basename "$0") --windows --password nvr-prod-1       # Windows host
-  $(basename "$0") --ip 192.168.5.50 newbox              # Use IP, key name is 'newbox SSH Key'
+  $(basename "$0") --ip 192.168.5.50 newbox              # Use IP instead of newbox.${DOMAIN}
   $(basename "$0") --password --user ecloaiza mydesktop  # Login user IS target user
 EOF
     exit 1
@@ -73,26 +76,29 @@ else
     FQDN="${HOSTNAME}.${DOMAIN}"
 fi
 
-# --- Extract pubkey early so we can pin it in SSH_OPTS ---
+# --- This host's own identity key (each host signs only as itself) ---
 
-log "Looking for '${HOSTNAME} SSH Key' in the SSH agent..."
-PUBKEY=$(ssh-add -L 2>/dev/null | grep -i "${HOSTNAME} SSH Key" || true)
-
-if [[ -z "$PUBKEY" ]]; then
-    err "No key matching '${HOSTNAME} SSH Key' found in the agent."
+OWN_PUB="$HOME/.ssh/identity.pub"
+log "Using this host's identity key: ${OWN_PUB}"
+if [[ ! -s "$OWN_PUB" ]]; then
+    err "No ${OWN_PUB}. This host has no SSH identity yet."
     echo ""
-    echo "Create one first:"
-    echo "  pass-cli login"
-    echo "  pass-cli item create ssh-key generate --title '${HOSTNAME} SSH Key' --vault-name HOMELAB --key-type ed25519"
-    echo "  systemctl --user restart proton-pass-ssh-agent"
+    echo "Set one up first (see scripts/proton-pass/README.md, 'Adding a host'):"
+    echo "  pass-cli vault create --name 'SSH $(hostname -s)'"
+    echo "  pass-cli item create ssh-key generate --vault-name 'SSH $(hostname -s)' --title '$(hostname -s) SSH identity' --comment 'ecloaiza@$(hostname -s)' --key-type ed25519"
+    echo "  grant this host's PAT viewer on that vault, write its public key to ${OWN_PUB},"
+    echo "  then: systemctl --user restart proton-pass-ssh-agent"
     exit 1
 fi
-
+PUBKEY=$(head -n1 "$OWN_PUB")
 PUBKEY_FINGERPRINT=$(echo "$PUBKEY" | awk '{print $2}')
+if ! ssh-add -L 2>/dev/null | grep -qF "$PUBKEY_FINGERPRINT"; then
+    err "The SSH agent does not hold the key in ${OWN_PUB}."
+    echo "  Check: ssh-add -l   (expect one key, '$(hostname -s) SSH identity')"
+    echo "  Restart: systemctl --user restart proton-pass-ssh-agent"
+    exit 1
+fi
 log "Found public key: ${PUBKEY:0:50}..."
-
-mkdir -p ~/.ssh/pubkeys
-echo "$PUBKEY" > ~/.ssh/pubkeys/${HOSTNAME}.pub
 
 # --- SSH multiplexing — single password prompt reused for all commands ---
 CONTROL_DIR=$(mktemp -d)
@@ -106,7 +112,7 @@ trap cleanup EXIT
 
 SSH_OPTS="-o ConnectTimeout=10 -o ControlMaster=auto -o ControlPath=${CONTROL_PATH} -o ControlPersist=120"
 if [[ "$ALLOW_PASSWORD" == false ]]; then
-    SSH_OPTS="$SSH_OPTS -o BatchMode=yes -o IdentitiesOnly=yes -i $HOME/.ssh/pubkeys/${HOSTNAME}.pub"
+    SSH_OPTS="$SSH_OPTS -o BatchMode=yes -o IdentitiesOnly=yes -i ${OWN_PUB}"
 else
     SSH_OPTS="$SSH_OPTS -o IdentitiesOnly=yes -o PreferredAuthentications=keyboard-interactive,password"
 fi
@@ -336,7 +342,7 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
     ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
     log "Testing SSH as ${TARGET_USER}..."
-    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
+    if ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ${OWN_PUB} "${TARGET_USER}@${FQDN}" "echo ok" > /dev/null 2>&1; then
         log "SSH as ${TARGET_USER} works."
     else
         warn "Direct key test failed. Adding SSH config entry..."
@@ -346,8 +352,6 @@ if [[ "$DETECTED_OS" == "windows" ]]; then
 Host ${HOSTNAME}
     HostName ${FQDN}
     User ${TARGET_USER}
-    IdentityFile ~/.ssh/pubkeys/${HOSTNAME}.pub
-    IdentitiesOnly yes
 EOF
             DID_ADD_SSH_CONFIG=true
             log "Added SSH config entry."
@@ -366,7 +370,7 @@ EOF
     echo "Host:   ${FQDN} (${IP})"
     echo "User:   ${TARGET_USER}"
     echo "Key:    ${HOSTNAME} SSH Key"
-    echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
+    echo "Pubkey: ${OWN_PUB} (this host's own identity)"
     echo "SSH:    ssh ${TARGET_USER}@${FQDN}"
     exit 0
 fi
@@ -586,15 +590,13 @@ fi
 
 ssh -o ControlPath="$CONTROL_PATH" -O exit "${LOGIN_USER}@${FQDN}" 2>/dev/null || true
 
-# Always add SSH config entry — Proton Pass agent has too many keys for MaxAuthTries
+# Add a short alias (HostName/User). The key pin lives once under Host * (identity.pub), not per target.
 if ! grep -q "^Host ${HOSTNAME}$" ~/.ssh/config 2>/dev/null; then
     cat >> ~/.ssh/config <<EOF
 
 Host ${HOSTNAME}
     HostName ${FQDN}
     User ${TARGET_USER}
-    IdentityFile ~/.ssh/pubkeys/${HOSTNAME}.pub
-    IdentitiesOnly yes
 EOF
     DID_ADD_SSH_CONFIG=true
     log "Added SSH config entry for ${HOSTNAME}."
@@ -621,7 +623,7 @@ if [[ "$HAS_SUDO" == true ]]; then
     VERIFY_CMD="whoami && sudo -n whoami 2>/dev/null || echo '(sudo not available or needs password)'"
 fi
 
-RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/pubkeys/${HOSTNAME}.pub "${TARGET_USER}@${FQDN}" "$VERIFY_CMD" 2>/dev/null || \
+RESULT=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o IdentitiesOnly=yes -i ${OWN_PUB} "${TARGET_USER}@${FQDN}" "$VERIFY_CMD" 2>/dev/null || \
          ssh -o ConnectTimeout=5 -o BatchMode=yes "${HOSTNAME}" "$VERIFY_CMD" 2>/dev/null || \
          echo "")
 
@@ -639,7 +641,7 @@ echo "=== Done ==="
 echo "Host:   ${FQDN} (${IP})"
 echo "User:   ${TARGET_USER}"
 echo "Key:    ${HOSTNAME} SSH Key"
-echo "Pubkey: ~/.ssh/pubkeys/${HOSTNAME}.pub"
+echo "Pubkey: ${OWN_PUB} (this host's own identity)"
 echo "OS:     ${DETECTED_OS} (${HOST_TYPE}${DISTRO:+, ${DISTRO}})"
 if [[ "$HAS_SUDO" == true ]]; then
     echo "Sudo:   yes (NOPASSWD)"

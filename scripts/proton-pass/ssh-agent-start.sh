@@ -52,6 +52,17 @@ if ! "$PASS_CLI" info &>/dev/null; then
     PROTON_PASS_PERSONAL_ACCESS_TOKEN="$(get_pat)" "$PASS_CLI" login
 fi
 
+if [[ -n "$DEVICE" ]]; then
+    VAULT="SSH $DEVICE"
+    SOCKET="$HOME/.ssh/sshtars-$DEVICE.sock"
+    if ! "$PASS_CLI" vault list 2>/dev/null | sed -n 's/^- \[[^]]*\]: //p' | grep -Fxq "$VAULT"; then
+        log err "device agent: no vault '$VAULT' visible to this host's PAT"
+        exit 1
+    fi
+    rm -f "$SOCKET"
+    exec "$PASS_CLI" ssh-agent start --vault-name "$VAULT" --socket-path "$SOCKET"
+fi
+
 own_vault="SSH $(hostname -s)"
 if [[ -s "$OVERRIDE" ]]; then
     VAULT="$(head -n1 "$OVERRIDE")"

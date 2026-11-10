@@ -1,0 +1,12 @@
+[Unit]
+Description=Proton Pass SSH agent for SSHTars device %i (vault "SSH %i")
+After=default.target proton-pass-ssh-agent.service
+
+[Service]
+Type=simple
+ExecStart=%h/scripts/proton-pass/ssh-agent-start.sh --device %i
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

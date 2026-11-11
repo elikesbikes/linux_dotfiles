@@ -40,7 +40,9 @@ their tokens were reset and the old `~/.gitlab-runner/config.toml` shredded). Ea
 
 - `scripts/gitlab-runner/gitlab-runner-proton.sh` unseals the PAT, reads the HOMELAB item
   `gitlab-runner token - <short hostname>`, writes `config.toml` to `$XDG_RUNTIME_DIR/gitlab-runner/`
-  (RAM), logs pass-cli out and starts the runner.
+  (RAM), logs pass-cli out and starts the runner. It sets `umask 077` only while writing the config and
+  goes back to `umask 022` before starting the runner: jobs inherit the runner's umask, and 077 made every
+  deployed file owner-only (fixed in v1.15.2).
 - `scripts/gitlab-runner/gitlab-runner-proton.service` runs it as a systemd **user** service
   (linger is on), linked into `~/.config/systemd/user/`.
 - murph's runner serves **linux_dotfiles and adastra** (adastra's `deploy-murph` since 2026-11-08), is

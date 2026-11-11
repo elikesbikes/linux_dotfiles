@@ -179,6 +179,17 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/ios/ntfytars gacp_ntfytars --stdin",
+            "timeout": 30,
+            "statusMessage": "Auto-committing ntfytars-ios..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
             "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/elikesbikes.com gacp_elikesbikes --stdin",
             "timeout": 60,
             "statusMessage": "Auto-committing elikesbikes.com..."

@@ -742,6 +742,24 @@ gacp_openldap() {
 
 
 # ------------------------------------------------------------
+# gacp_ntfytars
+# ------------------------------------------------------------
+# gacp workflow inside the NtfyTars iOS repo (GitLab only: ecloaiza/ntfytars-ios, project id 24).
+# No build-number bump here: CI uses $CI_PIPELINE_IID minus the committed build-base (like
+# gacp_sshtars). Also called by the Claude Code auto-commit hook (settings.json).
+#
+# Usage:
+#   gacp_ntfytars "Commit message"
+# ------------------------------------------------------------
+gacp_ntfytars() {
+  pushd $HOME/devops/projects/ios/ntfytars > /dev/null || return 1
+  gacp "$@"
+  local RC=$?
+  popd > /dev/null
+  return $RC
+}
+
+# ------------------------------------------------------------
 # gacp_hermes_config
 # ------------------------------------------------------------
 # gacp workflow inside the PRIVATE hermes-config repo (GitLab only:

@@ -12,7 +12,9 @@ This project follows a pragmatic versioning model inspired by
 ### Fixed
 - `scripts/gitlab-runner/gitlab-runner-proton.sh` and `gitlab-runner-proton-macos.sh` started the runner with the `umask 077` they set for the RAM config. The runner passes its umask to every job, so since 2026-11-08 every file a shell-runner job wrote (deploy `git reset --hard`, builds) was owner-only on murph, rocky, hailmary, tars, endurance and kipp. Visible break: the Hermes vault gate (user `hermes-vault` on hailmary) failed every read with `PermissionError`, because it imports MCC's `shared/auth_policy.py`, which a deploy had written as `600`. Both launchers now set `umask 022` just before `exec`; the config stays private inside its `700` RAM folder.
 
-Repair of files already written owner-only: tracked files and folders in the shell-runner deploy checkouts got their read bits back (see the vault Findings Backlog row of 2026-11-11 for the hosts and counts).
+Repair of files already written owner-only (only files from the repos, changed since 2026-11-08; state, data and secrets untouched): git checkouts on murph 106, rocky 328, hailmary 333 (mcc, adastra, tutorials, dotfiles); deployed `~/devops/docker` copies on rocky 27 and hailmary 29 (ntfytars-relay, watchyourlan, gitlab-runner / gitlab) and endurance 11 files + 4 folders (hermes, `data/` left at 700). All six runners restarted 13:02-13:04 (no job running); Linux runner processes show `Umask: 0022`.
+
+Tested: the Hermes container on endurance (as user `hermes`) lists and reads Homelab notes through the gate again (`outcome=ok`, 106 notes); affected containers healthy. Not tested: a new deploy writing a file (next pipeline will show it); kipp's runner umask (macOS has no /proc; next iOS job).
 
 ---
 

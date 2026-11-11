@@ -51,4 +51,8 @@ shutdown_timeout = 0
 EOF
 unset token
 
+# umask 077 above is only for the config and the pass-cli session. The runner keeps the umask it is started
+# with and passes it to every job, so without this line every file a deploy writes (git checkout, builds) is
+# owner-only and other users cannot read it (2026-11-11: the Hermes vault gate on hailmary could not import MCC).
+umask 022
 exec "$RUNNER" run --config "$CONF" --working-directory "$HOME"

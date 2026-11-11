@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.15.2] - 2026-11-11
+
+### Fixed
+- `scripts/gitlab-runner/gitlab-runner-proton.sh` and `gitlab-runner-proton-macos.sh` started the runner with the `umask 077` they set for the RAM config. The runner passes its umask to every job, so since 2026-11-08 every file a shell-runner job wrote (deploy `git reset --hard`, builds) was owner-only on murph, rocky, hailmary, tars, endurance and kipp. Visible break: the Hermes vault gate (user `hermes-vault` on hailmary) failed every read with `PermissionError`, because it imports MCC's `shared/auth_policy.py`, which a deploy had written as `600`. Both launchers now set `umask 022` just before `exec`; the config stays private inside its `700` RAM folder.
+
+Repair of files already written owner-only: tracked files and folders in the shell-runner deploy checkouts got their read bits back (see the vault Findings Backlog row of 2026-11-11 for the hosts and counts).
+
+---
+
 ## [v1.15.1] - 2026-11-09
 
 ### Fixed

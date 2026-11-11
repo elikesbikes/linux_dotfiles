@@ -62,4 +62,7 @@ shutdown_timeout = 0
 EOF
 unset token
 
+# umask 077 above is only for the RAM disk and config. The runner passes its umask to every job, so restore the
+# normal one or every file a job writes is owner-only (same fix as gitlab-runner-proton.sh, 2026-11-11).
+umask 022
 exec "$RUNNER" run --config "$CONF" --working-directory "$HOME" --syslog

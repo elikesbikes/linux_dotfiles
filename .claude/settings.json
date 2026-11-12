@@ -317,7 +317,7 @@
       "autoCompactWindow": 400000
     },
     "claude-opus-5-5": {
-      "effortLevel": "high",
+      "effortLevel": "xhigh",
       "autoCompactWindow": 400000
     },
     "claude-fable-5-2": {

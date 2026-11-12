@@ -71,6 +71,10 @@ option numbers in the terminal, and only while that question is on its screen. P
 session ("Claude finished · <session title>") instead of the folder. `install-claude` writes through a
 symlinked settings.json and writes a command that works on every host sharing that file.
 
+1.7.1: MCC over HTTPS through hailmary's Traefik (https://cooper.home.elikesbikes.com, the bearer router) instead
+of plain HTTP to :5679 on the LAN, so the token, the prompt text and the phone's answer never cross the LAN in
+clear and nobody in between can answer "approved" (MCC security audit run 4 follow-up). It needs DNS: when the
+router's DNS fails the hook logs the failure and the phone gets nothing; Claude Code at the desk is unaffected.
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
 import argparse
@@ -87,8 +91,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.7.0"
-DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
+VERSION = "1.7.1"
+DEFAULT_URL = "https://cooper.home.elikesbikes.com"   # hailmary's MCC runner through Traefik, HTTPS (1.7.1)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
 PASS_SECRETS = Path.home() / "scripts/proton-pass/pass-secrets.sh"

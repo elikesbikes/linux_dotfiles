@@ -6,7 +6,7 @@ every call is one short HTTP request to the MCC runner on hailmary, and the only
 the per-approval watcher below.
 
   sshtars-hook claude-hook            Claude Code hook entry point (Notification, Stop, UserPromptSubmit,
-                                      SessionEnd); reads its JSON on stdin
+                                      SessionEnd, PreToolUse for AskUserQuestion); reads its JSON on stdin
   sshtars-hook notify MSG [--title T] post to the Inbox and push it (--quiet: Inbox only)
   sshtars-hook ask QUESTION [--options a,b] [--timeout S] [--require-remote]
                                       block until the phone answers: exit 0 approved (prints the choice),
@@ -17,9 +17,12 @@ the per-approval watcher below.
   sshtars-hook sessions [--json]      recent Claude Code sessions here, with the terminal each one runs in
   sshtars-hook transcript SESSION     the session's conversation reduced to chat rows (the app's Chat View)
   sshtars-hook prompt SESSION TEXT    type TEXT into the session's terminal and press Enter
+  sshtars-hook answer SESSION N...    answer the question Claude Code is asking there: one option number per
+                                      question (several joined by commas where the question takes several)
   sshtars-hook diff [--tmux S|--cwd D] the git changes where the terminal is (the app's diff view)
   sshtars-hook servers               loopback web servers answering with HTML (the app's web preview)
   sshtars-hook usage [--refresh]     Claude Code's plan limits (5h, 7d), cached for a minute
+  sshtars-hook stats                 this host's CPU, memory and network right now (the app's Server card)
   sshtars-hook install-claude         add its hooks to ~/.claude/settings.json (keeps every other hook)
   sshtars-hook uninstall-claude       remove only its own hooks
 
@@ -58,9 +61,20 @@ turn (input + cache read + cache creation), for Settings → Sidebar → Show ag
 
 Diff view, web preview and usage (1.6.0): read-only commands for the app; see the section below.
 
+1.7.0: `stats` (CPU, memory, network, load, uptime; Linux from /proc, macOS from top, sysctl, vm_stat and
+netstat). `transcript` reports a question Claude Code asks (AskUserQuestion) as a `question` row with its
+options, descriptions and previews, and the answers once given. Claude Code writes the question to its
+transcript only once it is answered, so a PreToolUse hook (matcher AskUserQuestion) saves the open one in
+~/.local/state/sshtars-hook/questions/<session>.json (the questions and options; nothing else); a sub-agent's row carries its type, model,
+state and run time (from Claude Code's own subagents/ folder beside the transcript). `answer` presses the
+option numbers in the terminal, and only while that question is on its screen. Push titles name the
+session ("Claude finished · <session title>") instead of the folder. `install-claude` writes through a
+symlinked settings.json and writes a command that works on every host sharing that file.
+
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
 """
 import argparse
+import calendar
 import json
 import os
 import re
@@ -73,7 +87,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.6.0"
+VERSION = "1.7.0"
 DEFAULT_URL = "http://192.168.5.25:5679"          # the MCC runner on hailmary (token judged on the TCP peer)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -375,6 +389,15 @@ def post_activity(state, data, *, project=None, target=None, detail=None):
         log("activity-failed", state=state, error=str(e))
 
 
+def session_name(data, project) -> str:
+    """What a push calls the session: its title when Claude Code or an earlier hook call gave one (two
+    sessions in one folder are otherwise the same notification), else the folder's name."""
+    sid = data.get("session_id") or ""
+    title = data.get("session_title") or ((registry_entry(sid) or {}).get("title") if SESSION_RE.match(sid) else None)
+    title = " ".join((title or "").split())
+    return title[:60] if title else project
+
+
 def detach(fn, *args):
     """Run fn(*args) in a detached grandchild (new session, stdio to /dev/null) and return at once."""
     if os.fork() != 0:
@@ -439,12 +462,16 @@ def claude_hook(stdin_text: str):
     event = data.get("hook_event_name", "")
     cwd = data.get("cwd") or os.getcwd()
     project = Path(cwd).name or cwd
+    if event == "PreToolUse":
+        record_question(data)          # nothing else: Claude Code waits for this before it shows the question
+        return
     if event == "SessionEnd":
         # Claude Code gives SessionEnd hooks about 1.5 s in all: no terminal lookup, straight to the child.
         detach(lambda: post_activity("ended", data, project=project, detail=data.get("reason") or "session ended"))
         return
     target = terminal()
     record_session(data, target)
+    name = session_name(data, project)
 
     if event == "UserPromptSubmit":
         prompt = data.get("prompt") or ""
@@ -454,7 +481,7 @@ def claude_hook(stdin_text: str):
     if event == "Notification":
         kind = data.get("notification_type", "")
         if kind == "permission_prompt":
-            permission_prompt(data, cwd, project, target)
+            permission_prompt(data, cwd, project, target, name)
         elif kind in ("idle_prompt", "elicitation_dialog", "agent_needs_input"):
             # Claude Code fires these only after the prompt has sat unanswered, which is itself the
             # "nobody is at the desk" signal, so they always push.
@@ -462,7 +489,7 @@ def claude_hook(stdin_text: str):
 
             def waiting():
                 post_activity("waiting", data, project=project, target=target, detail=msg)
-                post_event("notify", f"Claude is waiting · {project}", msg, target=target,
+                post_event("notify", f"Claude is waiting · {name}", msg, target=target,
                            push=True, cwd=cwd, agent="claude", category="waiting")
             detach(waiting)
         return
@@ -475,12 +502,13 @@ def claude_hook(stdin_text: str):
 
         def finished():
             post_activity("done", data, project=project, target=target, detail=text.split("\n\n")[-1])
-            post_event("notify", f"Claude finished · {project}", text[-600:], target=target,
+            post_event("notify", f"Claude finished · {name}", text[-600:], target=target,
                        push=unseen(target), cwd=cwd, agent="claude", category="task_complete")
         detach(finished)
 
 
-def permission_prompt(data, cwd, project, target):
+def permission_prompt(data, cwd, project, target, name=None):
+    name = name or project
     message = data.get("message") or "Claude needs your permission"
     prompt = None
     if target:
@@ -492,7 +520,7 @@ def permission_prompt(data, cwd, project, target):
         # A plain terminal, or the prompt is not on screen: the phone can only be told, not answer.
         def told():
             post_activity("waiting", data, project=project, target=target, detail=message)
-            post_event("notify", f"Claude needs approval · {project}", f"{message}. Answer it at the terminal.",
+            post_event("notify", f"Claude needs approval · {name}", f"{message}. Answer it at the terminal.",
                        target=target, cwd=cwd, agent="claude", category="approval_required")
         detach(told)
         return
@@ -501,7 +529,7 @@ def permission_prompt(data, cwd, project, target):
 
     def run():
         post_activity("waiting", data, project=project, target=target, detail=prompt["question"])
-        created = post_event("approval", f"Claude needs approval · {project}", body, target=target, cwd=cwd,
+        created = post_event("approval", f"Claude needs approval · {name}", body, target=target, cwd=cwd,
                              agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
                              category="approval_required")
         watch_approval(created["id"], target, prompt, expires, activity=data)
@@ -599,6 +627,42 @@ def record_session(data, target):
         log("session-record-failed", error=str(e))
 
 
+QUESTIONS = STATE / "questions"
+QUESTION_TTL_S = 24 * 3600
+
+
+def record_question(data):
+    """PreToolUse for AskUserQuestion: keep the open question, which the transcript gets only once it is
+    answered. One file per session, replaced by the next question."""
+    sid = data.get("session_id") or ""
+    if data.get("tool_name") != "AskUserQuestion" or not SESSION_RE.match(sid) or data.get("agent_id"):
+        return
+    questions = question_row(data.get("tool_input"))
+    if not questions or not data.get("tool_use_id"):
+        return
+    try:
+        QUESTIONS.mkdir(parents=True, exist_ok=True)
+        tmp = QUESTIONS / f".{sid}.tmp"
+        tmp.write_text(json.dumps({"session": sid, "id": data["tool_use_id"], "questions": questions,
+                                   "ts": round(time.time(), 3)}, ensure_ascii=False))
+        tmp.replace(QUESTIONS / f"{sid}.json")
+    except OSError as e:
+        log("question-record-failed", error=str(e))
+
+
+def open_question(sid: str, seen: set, last_prompt: float):
+    """The question the session is showing now, as a transcript row; None when its tool call is in the
+    transcript (answered or cancelled), a prompt was typed after it, or it is a day old."""
+    try:
+        q = json.loads((QUESTIONS / f"{sid}.json").read_text())
+    except (OSError, ValueError):
+        return None
+    if q.get("id") in seen or q.get("ts", 0) < last_prompt or time.time() - q.get("ts", 0) > QUESTION_TTL_S:
+        return None
+    return {"id": q["id"], "role": "question", "tool": "AskUserQuestion", "text": q["questions"][0]["question"],
+            "ok": None, "questions": q["questions"], "answers": []}
+
+
 def registry_entry(sid: str):
     try:
         return json.loads((SESSIONS / f"{sid}.json").read_text())
@@ -661,9 +725,77 @@ def tool_summary(name: str, value) -> str:
     return " ".join(str(text or "").split())[:200]
 
 
-def reduce_transcript(rows: list, limit: int) -> dict:
-    """Claude Code JSONL rows → title, model, branch, state and the last `limit` chat rows."""
+def question_row(value) -> list:
+    """AskUserQuestion's input as [{"question", "header", "multi", "options": [{"label", "description",
+    "preview"}]}], trimmed so one long preview cannot fill the reply."""
+    out = []
+    for q in (value.get("questions") if isinstance(value, dict) else None) or []:
+        if not isinstance(q, dict):
+            continue
+        options = []
+        for o in q.get("options") or []:
+            if isinstance(o, dict) and o.get("label"):
+                options.append({"label": str(o["label"])[:120], "description": str(o.get("description") or "")[:400],
+                                "preview": str(o.get("preview") or "")[:2000] or None})
+        out.append({"question": str(q.get("question") or "")[:600], "header": str(q.get("header") or "")[:40],
+                    "multi": bool(q.get("multiSelect")), "options": options})
+    return out
+
+
+def question_answers(questions: list, result) -> list:
+    """The answers Claude Code recorded ({question: answer}), in the questions' order."""
+    given = result.get("answers") if isinstance(result, dict) else None
+    if not isinstance(given, dict):
+        return []
+    return [{"question": q["question"], "answer": str(given[q["question"]])[:600]}
+            for q in questions if q["question"] in given]
+
+
+def row_time(row) -> float:
+    """A transcript row's ISO timestamp as epoch seconds; 0 when it has none."""
+    text = str((row or {}).get("timestamp") or "")
+    try:
+        return float(calendar.timegm(time.strptime(text[:19], "%Y-%m-%dT%H:%M:%S")))     # the rows are UTC
+    except ValueError:
+        return 0.0
+
+
+def subagents(folder, wanted) -> dict:
+    """Claude Code's record of a session's sub-agents (`<session>/subagents/agent-<id>.meta.json` and
+    `.jsonl` beside the transcript), by the tool call that started each: its type, model, whether it has
+    finished and how long it ran (first to last line of its own transcript; to now while it runs). Only
+    the tool calls in `wanted` are read."""
+    out = {}
+    for meta_path in Path(folder).glob("agent-*.meta.json") if wanted and Path(folder).is_dir() else []:
+        try:
+            meta = json.loads(meta_path.read_text())
+            if meta.get("toolUseId") not in wanted:
+                continue
+            log = meta_path.with_name(meta_path.name[:-len(".meta.json")] + ".jsonl")
+            with open(log, "rb") as f:
+                first = json.loads(f.readline(2_000_000) or b"{}")
+            tail = tail_rows(log, 200_000)
+            last = tail[-1] if tail else first
+            mtime = log.stat().st_mtime
+        except (OSError, ValueError):
+            continue
+        finished = bool(meta.get("finished"))
+        running = not finished and time.time() - mtime < 600      # stopped writing 10 min ago: not running
+        start, end = row_time(first), (time.time() if running else row_time(last))
+        model = meta.get("pickedEffortModel") or next(
+            ((r.get("message") or {}).get("model") for r in reversed(tail) if r.get("type") == "assistant"), None)
+        out[meta.get("toolUseId")] = {
+            "type": meta.get("agentType"), "model": model if model and not str(model).startswith("<") else None,
+            "state": "finished" if finished else ("running" if running else "stopped"),
+            "seconds": round(end - start) if start and end >= start else None}
+    return out
+
+
+def reduce_transcript(rows: list, limit: int, agents=None) -> dict:
+    """Claude Code JSONL rows → title, model, branch, state and the last `limit` chat rows. `agents`
+    (tool call ids → subagents()) describes the Agent tool calls among the rows that are kept."""
     msgs, tools = [], {}
+    last_prompt = 0.0
     title = prompt_title = model = branch = cwd = context = None
     state = "idle"
     for r in rows:
@@ -691,12 +823,20 @@ def reduce_transcript(rows: list, limit: int) -> dict:
                     tool = tools.get(b.get("tool_use_id"))
                     if tool is not None:
                         tool["ok"] = not b.get("is_error")
+                        if tool["role"] == "question":
+                            tool["answers"] = question_answers(tool["questions"], r.get("toolUseResult"))
+                        elif tool.get("agent") is not None and isinstance(r.get("toolUseResult"), dict):
+                            result = r["toolUseResult"]
+                            tool["agent"]["model"] = tool["agent"]["model"] or result.get("resolvedModel")
+                            if isinstance(result.get("totalDurationMs"), (int, float)):    # ran in the foreground
+                                tool["agent"].update(seconds=round(result["totalDurationMs"] / 1000), state="finished")
                     state = "working"
             text = content if isinstance(content, str) else "\n".join(
                 b.get("text", "") for b in blocks if isinstance(b, dict) and b.get("type") == "text")
             text = REMINDER_RE.sub("", text).strip()
             if text and not text.startswith("<"):
                 msgs.append({"id": uid, "role": "user", "text": text[:4000], "ts": ts})
+                last_prompt = row_time(r)
                 state = "working"
             continue
         model = message.get("model") or model
@@ -715,24 +855,47 @@ def reduce_transcript(rows: list, limit: int) -> dict:
                 else:
                     msgs.append({"id": f"{uid}.{i}", "role": "assistant", "text": text[:8000], "ts": ts, "mid": message.get("id")})
             elif b.get("type") == "tool_use":
-                row = {"id": f"{uid}.{i}", "role": "tool", "tool": b.get("name") or "tool",
-                       "text": tool_summary(b.get("name") or "", b.get("input")), "ok": None, "ts": ts}
+                name, value = b.get("name") or "tool", b.get("input")
+                row = {"id": f"{uid}.{i}", "role": "tool", "tool": name,
+                       "text": tool_summary(name, value), "ok": None, "ts": ts}
+                if name == "AskUserQuestion" and question_row(value):
+                    row.update(role="question", questions=question_row(value), answers=[])
+                    row["text"] = row["questions"][0]["question"]
+                elif name in ("Agent", "Task"):
+                    value = value if isinstance(value, dict) else {}
+                    row["agent"] = {"type": value.get("subagent_type"), "model": value.get("model"),
+                                    "state": None, "seconds": None}
+                    row["use"] = b.get("id")
                 tools[b.get("id")] = row
                 msgs.append(row)
         stop = message.get("stop_reason")
         if stop:
             state = "working" if stop == "tool_use" else "idle"
+    first_prompt = next((m["text"] for m in msgs if m["role"] == "user"), None)
+    msgs = msgs[-limit:]
+    started = {m["use"]: m for m in msgs if m.get("use")}
+    for use, known in (agents(set(started)) if agents and started else {}).items():
+        if use in started:
+            started[use]["agent"].update({k: v for k, v in known.items() if v is not None})
     for m in msgs:
         m.pop("mid", None)
+        m.pop("use", None)
+    if msgs and msgs[-1]["role"] == "question" and msgs[-1]["ok"] is None:
+        state = "asking"                    # Claude Code is showing the question and waiting
     if model and model.startswith("<"):
         model = None
-    first_prompt = next((m["text"] for m in msgs if m["role"] == "user"), None)
     return {"title": title or prompt_title or first_prompt, "model": model, "branch": branch, "cwd": cwd,
-            "state": state, "context": context, "messages": msgs[-limit:]}
+            "state": state, "context": context, "messages": msgs, "seen": set(tools), "last_prompt": last_prompt}
 
 
-def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int) -> dict:
-    info = reduce_transcript(tail_rows(path, rows_bytes), limit)
+def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int, details=False) -> dict:
+    folder = path.with_suffix("") / "subagents"
+    info = reduce_transcript(tail_rows(path, rows_bytes), limit,
+                             (lambda wanted: subagents(folder, wanted)) if details else None)
+    asked = open_question(sid, info.pop("seen"), info.pop("last_prompt"))
+    if asked:
+        info["messages"].append(asked)
+        info["state"] = "asking"
     mtime = path.stat().st_mtime
     if info["state"] == "working" and time.time() - mtime > 600:
         info["state"] = "idle"              # a turn that stopped writing 10 min ago is not running
@@ -784,7 +947,7 @@ def cmd_transcript(args):
     path = transcript_path(args.session, reg)
     if not path:
         print(json.dumps({"error": "no transcript for this session"})); return 1
-    info = session_info(args.session, path, reg, 3_000_000, max(1, min(args.limit, 300)))
+    info = session_info(args.session, path, reg, 3_000_000, max(1, min(args.limit, 300)), details=True)
     print(json.dumps({"version": VERSION, **info}, ensure_ascii=False))
     return 0
 
@@ -827,6 +990,173 @@ def cmd_prompt(args):
     return 0
 
 
+# Answering a question (1.7.0). Claude Code's AskUserQuestion prompt, as checked against 2.1.322:
+#   - options are numbered; a digit picks that option, and with option previews on screen it only moves
+#     the highlight, so Enter follows;
+#   - a question that takes several answers toggles each digit's box, and Tab moves on;
+#   - with more than one question (or a several-answer one) a review page ends it: "1. Submit answers".
+# Like the approval watcher, keys go in only while the screen shows what is expected.
+
+QUESTION_FOOT = "Enter to select"
+TAB_MARK_RE = re.compile(r"[☐☒]")
+CHOSEN_RE = re.compile(r"^\s*❯\s*(\d+)\.")
+
+
+def herdr_argv(term) -> list:
+    session = term.get("session") or "default"
+    return ["herdr"] if session == "default" else ["herdr", "--session", session]
+
+
+def read_screen(term) -> list:
+    """screen(), for a caller outside the agent's own environment (the app's SSH command)."""
+    if term["kind"] == "herdr":
+        return run([*herdr_argv(term), "pane", "read", term["pane"], "--source", "visible"]).splitlines()
+    return screen(term)
+
+
+def press_key(term, key: str):
+    """key: "enter", "tab" or one character."""
+    named = {"enter": "Enter", "tab": "Tab"}
+    if term["kind"] == "tmux":
+        tmux("send-keys", "-t", term["pane"], *([named[key]] if key in named else ["-l", key]))
+    elif term["kind"] == "hc":
+        run(["hc", "keys", term["pane"], key])
+    elif key in named:
+        run([*herdr_argv(term), "pane", "send-keys", term["pane"], key])
+    else:
+        run([*herdr_argv(term), "pane", "send-text", term["pane"], key])
+
+
+def squash(text: str) -> str:
+    return " ".join(text.split())
+
+
+def question_view(lines: list):
+    """What the question prompt shows, or None when there is none on screen: {"marks": the tab line's
+    boxes ("☐" open, "☒" answered), "chosen": the highlighted option's number, "options": {number: its
+    line's text}, "review": the Submit page is showing}."""
+    foot = [i for i, line in enumerate(lines) if QUESTION_FOOT in line]
+    review = any("Submit answers" in line for line in lines)
+    if not foot and not review:
+        return None
+    body = lines[:foot[-1]] if foot else lines
+    tabs = [line for line in body if TAB_MARK_RE.search(line) and "[" not in line]
+    options, chosen = {}, None
+    for line in body:
+        m = re.match(r"^\s*(❯)?\s*(\d+)\.\s+(.*)$", line)
+        if m:
+            options[int(m.group(2))] = squash(m.group(3))
+            if m.group(1):
+                chosen = int(m.group(2))
+    return {"marks": TAB_MARK_RE.findall(tabs[-1]) if tabs else [], "chosen": chosen, "options": options,
+            "review": review}
+
+
+def shows(view, index: int, question: dict) -> bool:
+    """Is this the question on screen, still open? Its tab box is open and its first options are listed
+    under their numbers (a checkbox, then the label, which a narrow terminal may cut short)."""
+    if not view or view["review"]:
+        return False
+    if index < len(view["marks"]) and view["marks"][index] != "☐":
+        return False
+    for n, option in enumerate(question["options"], 1):
+        shown = re.sub(r"^\[.\]\s*", "", view["options"].get(n, "")).rstrip("… ")
+        label = squash(option["label"])
+        size = min(len(shown), len(label), 24)
+        if not size or shown[:size] != label[:size]:
+            return False
+    return bool(question["options"])
+
+
+def wait_view(term, test, seconds=4.0):
+    """The first question_view() that passes `test`, polling the screen; None when none does in time."""
+    deadline = time.time() + seconds
+    while True:
+        view = question_view(read_screen(term))
+        if test(view):
+            return view
+        if time.time() >= deadline:
+            return None
+        time.sleep(0.3)
+
+
+def parse_choices(texts: list, questions: list) -> list:
+    """["2", "1,3"] → [[2], [1, 3]], checked against the questions (count, range, one answer unless multi)."""
+    if len(texts) != len(questions):
+        raise ValueError(f"{len(questions)} question(s) asked, {len(texts)} answer(s) given")
+    out = []
+    for text, q in zip(texts, questions):
+        tokens = [t.strip() for t in text.split(",")]
+        if not all(t.isdigit() for t in tokens) or len(set(tokens)) != len(tokens):
+            raise ValueError(f"bad answer {text!r}: option numbers, joined by commas")
+        picks = sorted(int(t) for t in tokens)
+        if picks[0] < 1 or picks[-1] > len(q["options"]):
+            raise ValueError(f"{q['header'] or 'the question'} has options 1 to {len(q['options'])}")
+        if len(picks) > 1 and not q["multi"]:
+            raise ValueError(f"{q['header'] or 'the question'} takes one answer")
+        out.append(picks)
+    return out
+
+
+def answer_question(term, questions: list, choices: list):
+    """Presses the answers into the prompt. Raises RuntimeError, having pressed nothing more, as soon as
+    the screen is not the question it expects."""
+    for index, (q, picks) in enumerate(zip(questions, choices)):
+        view = wait_view(term, lambda v: shows(v, index, q))
+        if not view:
+            raise RuntimeError(f"question {index + 1} is not on the terminal's screen" if index else
+                               "the question is not on the terminal's screen")
+        if q["multi"]:
+            for n in picks:
+                if not view["options"].get(n, "").startswith("[✔]"):
+                    press_key(term, str(n))
+                    time.sleep(0.25)
+            press_key(term, "tab")
+            continue
+        press_key(term, str(picks[0]))
+        time.sleep(0.5)
+        view = question_view(read_screen(term))
+        if shows(view, index, q) and view["chosen"] == picks[0]:      # previews on screen: the digit only moved
+            press_key(term, "enter")
+    if len(questions) > 1 or questions[-1]["multi"]:
+        view = wait_view(term, lambda v: v is None or v["review"])
+        if view and view["review"]:
+            if view["chosen"] != 1 or "Submit" not in view["options"].get(1, ""):
+                raise RuntimeError("the review page is not on Submit answers; finish it in the terminal")
+            press_key(term, "1")
+        elif view is not None:
+            raise RuntimeError("the answers were pressed but the prompt is still open; finish it in the terminal")
+
+
+def cmd_answer(args):
+    if not SESSION_RE.match(args.session):
+        print("bad session id", file=sys.stderr); return 2
+    reg = registry()
+    term = (reg.get(args.session) or {}).get("terminal")
+    path = transcript_path(args.session, reg)
+    if not term or not path:
+        print("no terminal known for this session yet (recorded when one of its turns ends)", file=sys.stderr)
+        return 1
+    messages = session_info(args.session, path, reg, 1_000_000, 40)["messages"]
+    asked = messages[-1] if messages and messages[-1]["role"] == "question" and messages[-1]["ok"] is None else None
+    if not asked:
+        print("this session is not asking a question now", file=sys.stderr); return 1
+    if args.id and args.id != asked["id"]:
+        print("the session has moved on to another question; reload it", file=sys.stderr); return 1
+    try:
+        choices = parse_choices(args.choices, asked["questions"])
+        answer_question(term, asked["questions"], choices)
+    except ValueError as e:
+        print(str(e), file=sys.stderr); return 2
+    except _FAILS as e:
+        log("answer-failed", session=args.session, error=str(e))
+        print(f"could not answer in {describe(term)}: {e}", file=sys.stderr)
+        return 1
+    log("answer-sent", session=args.session, terminal=describe(term), questions=len(choices))
+    print(json.dumps({"ok": True, "where": describe(term)}))
+    return 0
+
+
 def last_logged():
     """The newest line of hook.log as {ts, outcome}, reading only the file's tail."""
     try:
@@ -855,8 +1185,10 @@ def cmd_status(args):
         pass
     hooks = settings.get("hooks", {}) if isinstance(settings, dict) else {}
     wired = [e for e in EVENTS if any(_ours(x) for x in hooks.get(e, []) if isinstance(x, dict))]
+    # "claude" means pushes work (the four 1.6.0 events); `questions` says whether PreToolUse is wired too.
     source = "env" if os.environ.get("SSHTARS_HOOK_TOKEN") else ("proton" if PASS_SECRETS.exists() else "missing")
-    status = {"version": VERSION, "host": host_name(), "claude": len(wired) == len(EVENTS), "claude_events": wired,
+    status = {"version": VERSION, "host": host_name(), "claude": all(e in wired for e in EVENTS if e not in MATCHERS),
+              "questions": "PreToolUse" in wired, "claude_events": wired,
               "token": source, "last": last_logged()}
     if args.json:
         print(json.dumps(status, ensure_ascii=False))
@@ -1264,38 +1596,163 @@ def cmd_usage(args):
     return 0
 
 
+# ------------------------------------------------------------------ stats (1.7.0)
+# Moshi's Servers tab: this host's CPU, memory and network now. Two samples STATS_GAP_S apart give the
+# CPU busy share and the network rates; loopback and container bridges are left out of the network.
+
+STATS_GAP_S = 0.5
+SKIP_IFACE_RE = re.compile(r"^(lo|lo0|docker\d*|br-|veth|virbr|cni|flannel|tailscale|utun|awdl|llw|anpi|gif|stf|bridge|ap\d)")
+
+
+def parse_proc_stat(text: str):
+    """/proc/stat's first line → (busy, total) jiffies."""
+    f = [int(x) for x in text.split("\n", 1)[0].split()[1:]]
+    idle = f[3] + (f[4] if len(f) > 4 else 0)
+    return sum(f) - idle, sum(f)
+
+
+def parse_proc_net_dev(text: str) -> dict:
+    """/proc/net/dev → {iface: (rx bytes, tx bytes)}, real interfaces only."""
+    out = {}
+    for line in text.splitlines()[2:]:
+        name, _, rest = line.partition(":")
+        name, f = name.strip(), rest.split()
+        if len(f) >= 9 and not SKIP_IFACE_RE.match(name):
+            out[name] = (int(f[0]), int(f[8]))
+    return out
+
+
+def parse_meminfo(text: str):
+    """/proc/meminfo → (used, total) bytes; used = total - available, as `free` counts it."""
+    kb = {}
+    for line in text.splitlines():
+        key, _, value = line.partition(":")
+        if value.strip().split():
+            kb[key] = int(value.split()[0])
+    total = kb.get("MemTotal", 0)
+    return (total - kb.get("MemAvailable", kb.get("MemFree", 0))) * 1024, total * 1024
+
+
+def parse_netstat_ib(text: str) -> dict:
+    """macOS `netstat -ibn` → {iface: (rx, tx)} from each interface's link-level row."""
+    out = {}
+    for line in text.splitlines()[1:]:
+        f = line.split()
+        if len(f) >= 10 and f[2].startswith("<Link#") and not SKIP_IFACE_RE.match(f[0]) and f[-5].isdigit():
+            out[f[0]] = (int(f[-5]), int(f[-2]))
+    return out
+
+
+def parse_vm_stat(text: str, total: int):
+    """macOS `vm_stat` → used bytes the way Activity Monitor's "Memory Used" does: app (anonymous) pages,
+    wired and compressed."""
+    page = int((re.search(r"page size of (\d+)", text) or [0, 4096])[1])
+    n = {k.strip(): int(v.strip().rstrip(".")) for k, v in
+         (line.split(":", 1) for line in text.splitlines()[1:] if ":" in line) if v.strip().rstrip(".").isdigit()}
+    app = n.get("Anonymous pages", n.get("Pages active", 0)) - n.get("Pages purgeable", 0)
+    used = (app + n.get("Pages wired down", 0) + n.get("Pages occupied by compressor", 0)) * page
+    return min(max(used, 0), total), total
+
+
+def rates(a: dict, b: dict, seconds: float):
+    rx = sum(max(0, b[i][0] - a[i][0]) for i in b if i in a)
+    tx = sum(max(0, b[i][1] - a[i][1]) for i in b if i in a)
+    return round(rx / seconds), round(tx / seconds)
+
+
+def linux_stats() -> dict:
+    read = lambda p: Path(p).read_text()
+    cpu1, net1, t1 = parse_proc_stat(read("/proc/stat")), parse_proc_net_dev(read("/proc/net/dev")), time.time()
+    time.sleep(STATS_GAP_S)
+    cpu2, net2, t2 = parse_proc_stat(read("/proc/stat")), parse_proc_net_dev(read("/proc/net/dev")), time.time()
+    busy, total = cpu2[0] - cpu1[0], cpu2[1] - cpu1[1]
+    used, mem = parse_meminfo(read("/proc/meminfo"))
+    rx, tx = rates(net1, net2, t2 - t1)
+    return {"cpu": round(100 * busy / total, 1) if total > 0 else 0.0, "memUsed": used, "memTotal": mem,
+            "rx": rx, "tx": tx, "uptime": round(float(read("/proc/uptime").split()[0])),
+            "interfaces": sorted(net2)}
+
+
+def mac_stats() -> dict:
+    net1, t1 = parse_netstat_ib(run(["netstat", "-ibn"])), time.time()
+    top = run(["top", "-l", "2", "-n", "0", "-s", "1"], timeout=10)       # the second sample is the real one
+    net2, t2 = parse_netstat_ib(run(["netstat", "-ibn"])), time.time()
+    idle = [float(x) for x in re.findall(r"CPU usage:.*?([\d.]+)% idle", top)]
+    total = int(run(["sysctl", "-n", "hw.memsize"]).strip())
+    used, mem = parse_vm_stat(run(["vm_stat"]), total)
+    boot = int(re.search(r"sec = (\d+)", run(["sysctl", "-n", "kern.boottime"]))[1])
+    rx, tx = rates(net1, net2, t2 - t1)
+    return {"cpu": round(100 - idle[-1], 1) if idle else 0.0, "memUsed": used, "memTotal": mem,
+            "rx": rx, "tx": tx, "uptime": round(time.time() - boot), "interfaces": sorted(net2)}
+
+
+def cmd_stats(args):
+    try:
+        stats = mac_stats() if sys.platform == "darwin" else linux_stats()
+    except (*_FAILS, IndexError, TypeError) as e:
+        print(f"could not read this host's stats: {e}", file=sys.stderr)
+        return 1
+    load = os.getloadavg()
+    print(json.dumps({"version": VERSION, "host": host_name(), "cores": os.cpu_count() or 1,
+                      "load": [round(x, 2) for x in load], **stats}, ensure_ascii=False))
+    return 0
+
+
 # ------------------------------------------------------------------ install
 
 SETTINGS = Path.home() / ".claude/settings.json"
-EVENTS = {"Notification": 30, "Stop": 30, "UserPromptSubmit": 30, "SessionEnd": 5}   # event → hook timeout (s)
+EVENTS = {"Notification": 30, "Stop": 30, "UserPromptSubmit": 30, "SessionEnd": 5, "PreToolUse": 5}   # event → timeout (s)
+MATCHERS = {"PreToolUse": "AskUserQuestion"}      # only the tool calls the hook needs (an open question)
 
 
 def _ours(entry) -> bool:
     return any("sshtars-hook" in (h.get("command") or "") for h in entry.get("hooks", []))
 
 
+def hook_command(exe: str) -> str:
+    """The command Claude Code runs. A hook under the home folder is written with $HOME and a check that
+    it exists: ~/.claude/settings.json is often one dotfiles file linked on every host, where the home
+    folder can differ (macOS) and where the hook may not be installed (then the command does nothing)."""
+    home = str(Path.home())
+    if exe.startswith(home + "/") and not set(exe) & set('"$`\\'):
+        path = '"$HOME' + exe[len(home):] + '"'
+        return f"[ -x {path} ] && {path} claude-hook || true"
+    return f"{exe} claude-hook"
+
+
 def cmd_install_claude(args, remove=False):
-    exe = str(Path(args.exe or shutil.which("sshtars-hook") or sys.argv[0]).resolve())
-    settings = json.loads(SETTINGS.read_text()) if SETTINGS.exists() else {}
-    if SETTINGS.exists():
+    # absolute(), not resolve(): keep the ~/.local/bin link, which install.sh repoints on an update.
+    exe = str(Path(args.exe or shutil.which("sshtars-hook") or sys.argv[0]).expanduser().absolute())
+    # Written through a symlink (1.7.0): replacing a dotfiles link with a file lost every hook when the
+    # link was put back (tars, 2026-11-09: no pushes for two days).
+    target = SETTINGS.resolve() if SETTINGS.is_symlink() else SETTINGS
+    settings = json.loads(target.read_text()) if target.exists() else {}
+    if target.exists():
         backup = SETTINGS.with_name(f"settings.json.bak-sshtars-hook-{int(time.time())}")
-        shutil.copy2(SETTINGS, backup)
+        shutil.copy2(target, backup)
         print(f"backup      {backup}")
     hooks = settings.setdefault("hooks", {})
     for event in EVENTS:
         entries = [e for e in hooks.get(event, []) if not _ours(e)]
         if not remove:
-            entries.append({"hooks": [{"type": "command", "command": f"{exe} claude-hook", "timeout": EVENTS[event]}]})
+            entry = {"hooks": [{"type": "command", "command": hook_command(exe), "timeout": EVENTS[event]}]}
+            if event in MATCHERS:
+                entry = {"matcher": MATCHERS[event], **entry}
+            entries.append(entry)
         if entries:
             hooks[event] = entries
         else:
             hooks.pop(event, None)
     if not hooks:
         settings.pop("hooks", None)
-    tmp = SETTINGS.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(settings, indent=2) + "\n")
-    tmp.replace(SETTINGS)
-    print(("removed" if remove else "installed") + f"     {', '.join(EVENTS)} hooks in {SETTINGS}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_name(target.name + ".tmp")
+    tmp.write_text(json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
+    if target.exists():
+        shutil.copymode(target, tmp)
+    tmp.replace(target)
+    where = f"{SETTINGS} -> {target}" if target != SETTINGS else str(SETTINGS)
+    print(("removed" if remove else "installed") + f"     {', '.join(EVENTS)} hooks in {where}")
     return 0
 
 
@@ -1313,9 +1770,11 @@ def main(argv=None):
     tr = sub.add_parser("transcript"); tr.add_argument("session"); tr.add_argument("--limit", type=int, default=80)
     tr.add_argument("--json", action="store_true")
     pr = sub.add_parser("prompt"); pr.add_argument("session"); pr.add_argument("text")
+    an = sub.add_parser("answer"); an.add_argument("session"); an.add_argument("choices", nargs="+"); an.add_argument("--id")
     d = sub.add_parser("diff"); d.add_argument("--json", action="store_true"); d.add_argument("--tmux"); d.add_argument("--cwd")
     sv = sub.add_parser("servers"); sv.add_argument("--json", action="store_true")
     us = sub.add_parser("usage"); us.add_argument("--json", action="store_true"); us.add_argument("--refresh", action="store_true")
+    sub.add_parser("stats").add_argument("--json", action="store_true")
     i = sub.add_parser("install-claude"); i.add_argument("--exe")
     u = sub.add_parser("uninstall-claude"); u.add_argument("--exe")
     args = p.parse_args(argv)
@@ -1341,12 +1800,16 @@ def main(argv=None):
         return cmd_transcript(args)
     if args.cmd == "prompt":
         return cmd_prompt(args)
+    if args.cmd == "answer":
+        return cmd_answer(args)
     if args.cmd == "diff":
         return cmd_diff(args)
     if args.cmd == "servers":
         return cmd_servers(args)
     if args.cmd == "usage":
         return cmd_usage(args)
+    if args.cmd == "stats":
+        return cmd_stats(args)
     if args.cmd == "install-claude":
         return cmd_install_claude(args)
     if args.cmd == "uninstall-claude":

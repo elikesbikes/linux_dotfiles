@@ -62,6 +62,16 @@
             "statusMessage": "Logging git commit to syslog..."
           }
         ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"$HOME/.local/bin/sshtars-hook\" ] && \"$HOME/.local/bin/sshtars-hook\" claude-hook || true",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [

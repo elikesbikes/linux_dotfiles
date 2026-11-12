@@ -238,6 +238,15 @@
             "statusMessage": "Auto-committing elikesbikes.com..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"$HOME/.local/bin/sshtars-hook\" ] && \"$HOME/.local/bin/sshtars-hook\" claude-hook || true",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -248,6 +257,39 @@
             "type": "command",
             "command": "bash '/home/ecloaiza/.claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"$HOME/.local/bin/sshtars-hook\" ] && \"$HOME/.local/bin/sshtars-hook\" claude-hook || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"$HOME/.local/bin/sshtars-hook\" ] && \"$HOME/.local/bin/sshtars-hook\" claude-hook || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -x \"$HOME/.local/bin/sshtars-hook\" ] && \"$HOME/.local/bin/sshtars-hook\" claude-hook || true",
+            "timeout": 5
           }
         ]
       }

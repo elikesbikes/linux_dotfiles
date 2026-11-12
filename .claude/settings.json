@@ -279,7 +279,8 @@
       "autoCompactWindow": 400000
     },
     "claude-fable-5-2": {
-      "effortLevel": "high"
+      "effortLevel": "high",
+      "autoCompactWindow": 400000
     }
   },
   "tui": "fullscreen",

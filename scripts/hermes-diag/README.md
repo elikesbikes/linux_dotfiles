@@ -1,6 +1,6 @@
 ---
-revision: 6
-updated: 2026-11-12 19:19
+revision: 7
+updated: 2026-11-12 19:20
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -96,6 +96,7 @@ The tests cover hostile requests, each validation layer on its own, exact comman
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
+| 7 | 2026-11-12 19:20 | v1.16.1 | Session folder from the account's own home (not `$HOME`); self-test with `sudo -H`. 144 tests. |
 | 6 | 2026-11-12 19:19 | v1.16.0 | Own MCC key (run 4): `enable-mcc-key.sh`, `unseal-pat` (TPM `0x81010003`), Bearer key on the runner calls, unseal sudo rule; fetch functions looked up at call time (a test reached the live runner); hailmary's installed gate still had the pre-rename container names (fixed by the next `enable-mcc-key.sh`). 143 tests. |
 | 5 | 2026-11-09 13:20 | (this revision) | MCC containers renamed with the trust zones (TARS/CASE to TESSERACT/LAZARUS): `tesseract-mcc-bot`, `lazarus-mcc-bot`, `mcc-n8n` in the hailmary allowlist and the generated sudoers rule. |
 | 4 | 2026-10-29 | 308d601 | `fit` group: 36 read-only fitness/health/labs views from MCC's local API, hailmary only (129 tests). |

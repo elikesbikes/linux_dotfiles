@@ -7,6 +7,13 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.16.1] - 2026-11-12
+
+### Fixed
+- `scripts/hermes-diag/diag.py` (v1.16.0, not yet installed anywhere): the pass-cli home and session folder came from `$HOME`, which `sudo -u` or a caller could point elsewhere. They now come from the account's password-database entry; `enable-mcc-key.sh` runs its self-test with `sudo -H`. New test. 144 tests on Python 3.12 and 3.9.
+
+---
+
 ## [v1.16.0] - 2026-11-12
 
 ### Added

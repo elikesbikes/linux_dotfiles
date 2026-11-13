@@ -31,7 +31,7 @@ PASS_CLI_SRC="$(getent passwd "$OWNER" | cut -d: -f6)/.local/bin/pass-cli"
 
 say() { printf '\n==> %s\n' "$*"; }
 die() { echo "ERROR: $*" >&2; exit 1; }
-as_gate() { sudo -u "$ACCOUNT" env SSH_CLIENT="127.0.0.1 1 22" SSH_ORIGINAL_COMMAND="$1" /usr/bin/python3 "$LIB/diag.py"; }
+as_gate() { sudo -H -u "$ACCOUNT" env SSH_CLIENT="127.0.0.1 1 22" SSH_ORIGINAL_COMMAND="$1" /usr/bin/python3 "$LIB/diag.py"; }
 
 TMPD="$(mktemp -d /dev/shm/hermes-diag-key.XXXXXX)"; chmod 700 "$TMPD"
 trap 'rm -rf "$TMPD"' EXIT

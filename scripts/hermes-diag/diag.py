@@ -29,6 +29,7 @@ Python 3.9 compatible on purpose (macOS ships 3.9).
 
 import json
 import os
+import pwd
 import re
 import socket
 import subprocess
@@ -290,8 +291,13 @@ class KeyUnavailable(Exception):
     """This account's MCC key could not be read (the message is safe to show: it never holds a secret)."""
 
 
+def _home():
+    """This account's home from the password database, never $HOME (sudo -u or a caller could point it elsewhere)."""
+    return pwd.getpwuid(os.getuid()).pw_dir
+
+
 def _pp(args, extra_env=None, home=None):
-    home = home or os.path.expanduser("~")
+    home = home or _home()
     env = {"PATH": "/usr/bin:/bin", "HOME": home, "LANG": "C.UTF-8",
            "PROTON_PASS_SESSION_DIR": os.path.join(home, ".pp-session"), "PROTON_PASS_KEY_PROVIDER": "fs",
            "PROTON_PASS_NO_UPDATE_CHECK": "1", "PROTON_PASS_DISABLE_TELEMETRY": "1", "NO_COLOR": "1",
@@ -324,7 +330,7 @@ def mcc_key(pp=_pp, unseal=None, reset_session=None):
     if key:
         return key
     if reset_session is None:
-        session = os.path.join(os.path.expanduser("~"), ".pp-session")
+        session = os.path.join(_home(), ".pp-session")
         subprocess.run(["/bin/rm", "-rf", session], check=False)
         os.mkdir(session, 0o700)
     else:

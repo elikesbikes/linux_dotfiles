@@ -571,3 +571,13 @@ def test_fit_fetch_failure_is_reported_without_traceback():
         raise OSError("connection refused to http://127.0.0.1:5679/secret-path")
     code, text, outcome = diag.handle("fit pmc", fit_fetch=boom)
     assert code == 3 and text == "hermes-diag: error: OSError\n"
+
+
+def test_pass_cli_home_is_the_accounts_own_not_dollar_home(monkeypatch):
+    monkeypatch.setenv("HOME", "/somewhere/else")
+    seen = []
+    monkeypatch.setattr(diag.subprocess, "run", lambda argv, env, **k: seen.append(env) or None)
+    diag._pp(["share", "list"])
+    import pwd
+    home = pwd.getpwuid(os.getuid()).pw_dir
+    assert seen[0]["HOME"] == home and seen[0]["PROTON_PASS_SESSION_DIR"] == os.path.join(home, ".pp-session")

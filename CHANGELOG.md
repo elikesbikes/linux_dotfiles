@@ -7,6 +7,15 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.16.2] - 2026-11-12
+
+### Fixed
+- `scripts/hermes-diag/README.md` section 3a, setup step 1: the Proton Pass app cannot grant a token a single item. It now gives the `pass-cli personal-access-token access` commands (owner's own login in a temporary session; revoke a vault grant first, because an item grant inside a granted vault is refused with `NotAllowed`). Docs only.
+
+Tested: the hermes-diag own MCC key is live on hailmary; from the Hermes container on endurance `hdiag hailmary status`, `fit readiness` and `container-logs mcc-n8n` all answer.
+
+---
+
 ## [v1.16.1] - 2026-11-12
 
 ### Fixed

@@ -1,6 +1,6 @@
 ---
-revision: 7
-updated: 2026-11-12 19:20
+revision: 8
+updated: 2026-11-12 20:03
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -69,8 +69,21 @@ Since MCC security audit run 4 the MCC runner wants a key from every local calle
 
 Set it up once on hailmary (after the dotfiles pipeline has put this version there):
 
-1. In Proton Pass, create a personal access token named `hailmary-hermes-diag` and give it **Viewer** access to the single item `MCC - MCC_TOKEN_HERMES_DIAG` (HOMELAB). Copy the token.
+1. In Proton Pass, create a personal access token named `hailmary-hermes-diag` and copy it. The app can grant a token only whole vaults, so give it access to **one item** with `pass-cli` from your **own** login (a token session gets `NotAllowed`), in a temporary session folder so the host's own session stays:
+
+       export PROTON_PASS_SESSION_DIR="$(mktemp -d)" PROTON_PASS_KEY_PROVIDER=fs
+       pass-cli login                                   # web login, your account
+       pass-cli personal-access-token access list-access --personal-access-token-name hailmary-hermes-diag
+       # if it lists a Type=Vault grant, revoke it FIRST (an item grant inside a granted vault is NotAllowed):
+       pass-cli personal-access-token access revoke --personal-access-token-name hailmary-hermes-diag --share-id <vault grant id>
+       pass-cli personal-access-token access grant --personal-access-token-name hailmary-hermes-diag \
+         --vault-name HOMELAB --item-title "MCC - MCC_TOKEN_HERMES_DIAG" --role viewer
+       pass-cli logout --force; rm -rf "$PROTON_PASS_SESSION_DIR"
+
+   `list-access` must then show exactly one line, `MCC - MCC_TOKEN_HERMES_DIAG | Type=Item | Role=Viewer`.
 2. On hailmary: `sudo ~/devops/github/linux_dotfiles/scripts/hermes-diag/enable-mcc-key.sh` and paste the token when asked (hidden). It installs the current `diag.py` (the old one is kept as `diag.py.prev`), the helper and a pinned `pass-cli`, installs the repo sudoers file, seals the PAT, checks isolation, and ends with a real `status` and `fit readiness` as the account.
+
+Live on hailmary since 2026-11-12, verified from the Hermes container (`hdiag hailmary status`, `fit readiness`, `container-logs mcc-n8n`).
 
 Compromise runbook: delete `~hermes-diag/.pp-session`, revoke the PAT, rotate `MCC - MCC_TOKEN_HERMES_DIAG` (MCC reloads it on its next start). Undo: see the top of `enable-mcc-key.sh`.
 
@@ -96,6 +109,7 @@ The tests cover hostile requests, each validation layer on its own, exact comman
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
+| 8 | 2026-11-12 20:03 | v1.16.2 | Setup step 1: item-only grant through `pass-cli` (the app grants only vaults; revoke a vault grant first); live on hailmary, verified from Hermes. |
 | 7 | 2026-11-12 19:20 | v1.16.1 | Session folder from the account's own home (not `$HOME`); self-test with `sudo -H`. 144 tests. |
 | 6 | 2026-11-12 19:19 | v1.16.0 | Own MCC key (run 4): `enable-mcc-key.sh`, `unseal-pat` (TPM `0x81010003`), Bearer key on the runner calls, unseal sudo rule; fetch functions looked up at call time (a test reached the live runner); hailmary's installed gate still had the pre-rename container names (fixed by the next `enable-mcc-key.sh`). 143 tests. |
 | 5 | 2026-11-09 13:20 | (this revision) | MCC containers renamed with the trust zones (TARS/CASE to TESSERACT/LAZARUS): `tesseract-mcc-bot`, `lazarus-mcc-bot`, `mcc-n8n` in the hailmary allowlist and the generated sudoers rule. |

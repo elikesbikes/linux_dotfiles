@@ -39,7 +39,8 @@ bash security/setup-ssh-key.sh <hostname>
 See the script's own `usage()` for options (`--user`, `--password`, `--windows`, `--ip`).
 
 **Key model (since dotfiles v1.14.0, 2026-11-09):** the script installs the key of the host it runs **on**, `~/.ssh/identity.pub`
-(that host's Proton vault `SSH <host>`, the only key its agent serves). It no longer looks up a `<target> SSH Key` or writes
+(its key `<host> SSH identity` in the Proton HOMELAB vault, folder `SSH`; since v1.17.0 the agent serves every HOMELAB
+SSH key and the `Host *` pin makes ssh offer only this one). It no longer looks up a `<target> SSH Key` or writes
 `~/.ssh/pubkeys/<target>.pub` / per-target `IdentityFile` pins: each host signs only as itself, and the one pin lives under
 `Host *`. Run it from every host that should reach the new target. A host without an identity gets the setup steps printed
 (see `scripts/proton-pass/README.md`, "Adding a host").

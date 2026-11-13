@@ -7,10 +7,13 @@ vault (CouchDB on hailmary) and holds one ```yaml block:
     groups: [{name, parent?, username?, port?, key?, via_hailmary?}]
     hosts:  [{label, hostname, group?, port?, username?, key?, tags?, via_hailmary?}]
 
-`key` is a Proton Pass SSH key *name*: the item title in the device's own agent. Every device vault ("SSH <device>")
-holds one key titled "SSHTars device identity", so one catalog name serves every device.
+`key` is a Proton Pass SSH key *name*: the item title as the device's agent lists it. Since 2026-11-12 every SSH key
+lives in the HOMELAB vault (folder "SSH"), so the agent hailmary hands a device lists every key, and the device keys
+need distinct titles: "SSHTars <device> identity". The note keeps the one shared name "SSHTars device identity";
+with --device <name> (the broker passes it) that name is printed as "SSHTars <name> identity" for that device.
 
     catalog.py              -> JSON for the app ({"version": 1, "groups": [...], "hosts": [...]})
+    catalog.py --device X   -> same, with the shared device key name turned into X's own key title
     catalog.py --permitopen -> permitopen="host:port",... for devices' authorized_keys lines
 
 Source: sshtars-ios repo tools/broker/catalog.py.
@@ -26,6 +29,7 @@ MCC = os.path.expanduser("~/devops/projects/mcc")
 
 GROUP_KEYS = {"name", "parent", "username", "port", "key", "via_hailmary"}
 HOST_KEYS = {"label", "hostname", "group", "port", "username", "key", "tags", "via_hailmary"}
+DEVICE_KEY = "SSHTars device identity"
 
 
 def fail(message):
@@ -116,8 +120,29 @@ def permitopen(doc):
     return ",".join(f'permitopen="{t}"' for t in targets)
 
 
+def device_arg():
+    if "--device" not in sys.argv:
+        return None
+    i = sys.argv.index("--device")
+    name = sys.argv[i + 1] if i + 1 < len(sys.argv) else ""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,40}", name):
+        fail("bad --device name")
+    return name
+
+
+def per_device(doc, device):
+    """Turn the shared device key name into this device's own key title."""
+    for entry in doc["groups"] + doc["hosts"]:
+        if entry.get("key") == DEVICE_KEY:
+            entry["key"] = f"SSHTars {device} identity"
+    return doc
+
+
 def main():
+    device = device_arg()
     doc = parse(load_note())
+    if device:
+        doc = per_device(doc, device)
     if "--permitopen" in sys.argv:
         print(permitopen(doc))
     else:

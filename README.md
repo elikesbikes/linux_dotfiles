@@ -217,7 +217,7 @@ Beyond onboarding, `scripts/` ships standalone homelab tooling. Each directory h
 | `scripts/linux/idrive-monitor/`   | iDrive backup monitoring                     |
 | `scripts/linux/keybindings/`      | GNOME keybinding backup / restore            |
 | `scripts/linux/sudoers/`          | Local sudoers sync helper                    |
-| `scripts/proton-pass/`            | Proton Pass SSH agent (each host serves only its own key, vault `SSH <host>`), watchdog, git credential helper |
+| `scripts/proton-pass/`            | Proton Pass SSH agent (HOMELAB, folder `SSH`; each host signs as itself via its `Host *` pin), watchdog, git credential helper |
 | `scripts/proxmox/`                | Proxmox backup ntfy notifications            |
 | `scripts/truenas/`                | TrueNAS replication monitoring               |
 | `scripts/urbackup/`               | UrBackup snapshot tooling (LVM / non-LVM)    |

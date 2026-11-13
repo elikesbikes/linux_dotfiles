@@ -13,8 +13,9 @@ set -uo pipefail
 #   - Target user exists or needs creation
 #   - Debian/Ubuntu (sudo group) vs Arch (wheel group)
 #   - Windows admin (administrators_authorized_keys) vs non-admin (.ssh/)
-#   - Installs THIS host's own identity key (~/.ssh/identity.pub, Proton vault "SSH <this host>").
-#     Each host signs only as itself (dotfiles v1.14.0); there are no per-target keys or pins any more.
+#   - Installs THIS host's own identity key (~/.ssh/identity.pub, Proton HOMELAB vault, folder "SSH").
+#     Each host signs only as itself (dotfiles v1.14.0; since v1.17.0 by the Host * pin, not a per-host vault);
+#     there are no per-target keys or pins any more.
 #     Every other host that should reach the target runs this script itself, or appends its own identity.pub.
 #   - Garbage in authorized_keys from previous failed runs
 
@@ -27,7 +28,7 @@ Usage: $(basename "$0") [OPTIONS] <hostname>
 
 Sets up SSH key access for ${TARGET_USER} on a new host.
 Installs THIS host's own identity key (~/.ssh/identity.pub, served by the Proton Pass agent
-from the vault 'SSH <this host>') on the target. Run it from each host that should reach the target.
+from HOMELAB, folder 'SSH') on the target. Run it from each host that should reach the target.
 
 Options:
   --user <login_user>   User to SSH in as for setup (default: root)
@@ -84,9 +85,9 @@ if [[ ! -s "$OWN_PUB" ]]; then
     err "No ${OWN_PUB}. This host has no SSH identity yet."
     echo ""
     echo "Set one up first (see scripts/proton-pass/README.md, 'Adding a host'):"
-    echo "  pass-cli vault create --name 'SSH $(hostname -s)'"
-    echo "  pass-cli item create ssh-key generate --vault-name 'SSH $(hostname -s)' --title '$(hostname -s) SSH identity' --comment 'ecloaiza@$(hostname -s)' --key-type ed25519"
-    echo "  grant this host's PAT viewer on that vault, write its public key to ${OWN_PUB},"
+    echo "  pass-cli folder list --vault-name HOMELAB   (id of the folder 'SSH')"
+    echo "  pass-cli item create ssh-key generate --vault-name HOMELAB --folder-id <SSH folder id> --title '$(hostname -s) SSH identity' --comment 'ecloaiza@$(hostname -s)' --key-type ed25519"
+    echo "  write its public key to ${OWN_PUB} (the host's PAT already reads HOMELAB),"
     echo "  then: systemctl --user restart proton-pass-ssh-agent"
     exit 1
 fi
@@ -94,7 +95,7 @@ PUBKEY=$(head -n1 "$OWN_PUB")
 PUBKEY_FINGERPRINT=$(echo "$PUBKEY" | awk '{print $2}')
 if ! ssh-add -L 2>/dev/null | grep -qF "$PUBKEY_FINGERPRINT"; then
     err "The SSH agent does not hold the key in ${OWN_PUB}."
-    echo "  Check: ssh-add -l   (expect one key, '$(hostname -s) SSH identity')"
+    echo "  Check: ssh-add -l   (expect '$(hostname -s) SSH identity' among the HOMELAB keys)"
     echo "  Restart: systemctl --user restart proton-pass-ssh-agent"
     exit 1
 fi

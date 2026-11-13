@@ -7,6 +7,29 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.17.0] - 2026-11-12
+
+### Changed
+- All SSH keys are back in the Proton **HOMELAB** vault, folder `SSH` (owner decision: no per-host vaults). The nine
+  vaults `SSH <host>` / `SSH <device>` from v1.14.0 and v1.15.0 were emptied into it and deleted; the keys themselves
+  did not change (same fingerprints, no `authorized_keys` edits).
+- `scripts/proton-pass/ssh-agent-start.sh`: the agent serves HOMELAB (override file still honoured). Device mode
+  (`--device <name>`) serves HOMELAB on `~/.ssh/sshtars-<name>.sock`. pass-cli 2.7.0's agent cannot filter by item, so
+  **every agent holds every HOMELAB SSH key**; each host still signs only as itself through the `Host *` pin
+  (`IdentityFile ~/.ssh/identity.pub`, `IdentitiesOnly yes`), which all hosts already have.
+- SSHTars: device keys renamed `SSHTars <device> identity` so they stay distinct in one vault; `scripts/sshtars/broker`
+  runs `catalog.py --device <device>`, which prints the catalog's shared name `SSHTars device identity` as that title
+  (sshtars-ios 1.5.3).
+- `setup-ssh-key.sh` help text, `scripts/proton-pass/README.md`, onboarding READMEs: new key location and how to add a
+  host.
+
+### Tested
+- Proton: a temporary agent on HOMELAB loads a key inside a folder (throwaway key, deleted).
+- `catalog.py` with a fixture note: no device, `--device`, bad names, `--permitopen`; the broker's `catalog` request.
+- Rollout per host (key move, agent restart, logins) is recorded in the vault note `projects/SSH Identity Keys.md`.
+
+---
+
 ## [v1.16.2] - 2026-11-12
 
 ### Fixed

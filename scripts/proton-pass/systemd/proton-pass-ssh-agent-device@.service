@@ -1,5 +1,5 @@
 [Unit]
-Description=Proton Pass SSH agent for SSHTars device %i (vault "SSH %i")
+Description=Proton Pass SSH agent for SSHTars device %i (HOMELAB, socket sshtars-%i.sock)
 After=default.target proton-pass-ssh-agent.service
 
 [Service]

@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
-# Proton Pass SSH agent: serves ONLY this host's own identity key.
+# Proton Pass SSH agent for this host, from the HOMELAB vault (folder "SSH").
 #
-# Each host signs as itself (owner rule 2026-10-09, enforced 2026-11-09): the agent loads the vault "SSH <short hostname>",
-# which holds one key, "<host> SSH identity" (comment ecloaiza@<host>), and the host's PAT has viewer access to that vault.
-# Targets list each host's public key in authorized_keys; nothing pins another host's key any more.
+# Since v1.17.0 (2026-11-12, owner decision) every SSH key lives in HOMELAB, folder "SSH": one key per host,
+# "<host> SSH identity" (comment ecloaiza@<host>), plus the SSHTars device keys. pass-cli 2.7.0's agent can only filter
+# by vault, so the agent serves EVERY SSH key in HOMELAB. Each host still signs only as itself because ~/.ssh/config
+# pins the host's own public key under Host *:  IdentityFile ~/.ssh/identity.pub + IdentitiesOnly yes.
+# Anything that uses this socket without that config (e.g. a container mounting it) must pin identity.pub too.
 #
-# Vault choice, first match wins:
-#   1. ~/.config/proton-pass/ssh-agent-vault (one line): per-host override, e.g. hailmary keeps HOMELAB until the
-#      SSHTars device keys move to their own agents.
-#   2. "SSH <short hostname>" when that vault exists.
-#   3. HOMELAB, with a syslog warning: a host not migrated yet (case, gargantua) keeps working until it gets its vault.
+# Vault choice: ~/.config/proton-pass/ssh-agent-vault (one line) if present, else HOMELAB.
 #
-# Device mode (hailmary, SSHTars): `ssh-agent-start.sh --device <name>` serves the vault "SSH <name>" (one key titled
-# "SSHTars device identity") on ~/.ssh/sshtars-<name>.sock, for the SSHTars broker to hand to that one iPhone/iPad.
-# No fallback in device mode: a missing vault is an error. Run by the user unit proton-pass-ssh-agent-device@<name>.
+# Device mode (hailmary, SSHTars): `ssh-agent-start.sh --device <name>` serves the same HOMELAB keys on
+# ~/.ssh/sshtars-<name>.sock, for the SSHTars broker to hand to that one iPhone/iPad. The device's own key is
+# "SSHTars <name> identity"; the broker's catalog names it per device. Run by the user unit
+# proton-pass-ssh-agent-device@<name>.
 set -euo pipefail
 
 DEVICE=""
@@ -26,7 +25,7 @@ PASS_CLI="$HOME/.local/bin/pass-cli"
 PAT_FILE="$HOME/.secrets/proton-pass-pat"
 TPM_HANDLE="0x81010001"
 OVERRIDE="$HOME/.config/proton-pass/ssh-agent-vault"
-FALLBACK_VAULT="HOMELAB"
+VAULT_DEFAULT="HOMELAB"
 SOCKET="$HOME/.ssh/proton-pass-agent.sock"
 TAG="proton-pass-ssh-agent"
 
@@ -53,25 +52,16 @@ if ! "$PASS_CLI" info &>/dev/null; then
 fi
 
 if [[ -n "$DEVICE" ]]; then
-    VAULT="SSH $DEVICE"
     SOCKET="$HOME/.ssh/sshtars-$DEVICE.sock"
-    if ! "$PASS_CLI" vault list 2>/dev/null | sed -n 's/^- \[[^]]*\]: //p' | grep -Fxq "$VAULT"; then
-        log err "device agent: no vault '$VAULT' visible to this host's PAT"
-        exit 1
-    fi
     rm -f "$SOCKET"
-    exec "$PASS_CLI" ssh-agent start --vault-name "$VAULT" --socket-path "$SOCKET"
+    exec "$PASS_CLI" ssh-agent start --vault-name "$VAULT_DEFAULT" --socket-path "$SOCKET"
 fi
 
-own_vault="SSH $(hostname -s)"
 if [[ -s "$OVERRIDE" ]]; then
     VAULT="$(head -n1 "$OVERRIDE")"
     log notice "vault override from $OVERRIDE: '$VAULT'"
-elif "$PASS_CLI" vault list 2>/dev/null | sed -n 's/^- \[[^]]*\]: //p' | grep -Fxq "$own_vault"; then
-    VAULT="$own_vault"
 else
-    VAULT="$FALLBACK_VAULT"
-    log warning "no vault '$own_vault' visible to this host's PAT; falling back to $FALLBACK_VAULT (host not migrated to its own SSH identity yet)"
+    VAULT="$VAULT_DEFAULT"
 fi
 
 exec "$PASS_CLI" ssh-agent start --vault-name "$VAULT" --socket-path "$SOCKET"

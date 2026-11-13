@@ -1,0 +1,6 @@
+#!/bin/sh
+# Root-only helper for the hermes-diag account: print its OWN Proton Pass PAT, sealed at TPM handle 0x81010003.
+# Reached only through one exact sudo rule (no arguments, sudoers/sudoers.d/60-hermes-diag). The hermes-diag account
+# is NOT in the tss group, so this is its only way to the TPM, and it can never unseal the owner's PAT at 0x81010001
+# or hermes-vault's at 0x81010002.
+exec /usr/bin/tpm2_unseal -c 0x81010003

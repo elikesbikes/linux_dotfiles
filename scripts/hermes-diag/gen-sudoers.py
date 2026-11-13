@@ -39,6 +39,9 @@ def render():
         f"Cmnd_Alias HERMES_DIAG = \\\n{body}\n"
         f"Defaults:{ACCOUNT} !requiretty, logfile={LOG}\n"
         f"{ACCOUNT} {SUDO_HOST}=(root) NOPASSWD: HERMES_DIAG\n"
+        "# This account's OWN Proton Pass PAT (TPM handle " + diag.PAT_HANDLE + ", MCC runner key): ONE exact "
+        "command, no arguments (\"\" = none allowed).\n"
+        f"{ACCOUNT} {SUDO_HOST}=(root) NOPASSWD: {diag.UNSEAL} \"\"\n"
     )
 
 

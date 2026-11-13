@@ -7,3 +7,5 @@ Cmnd_Alias HERMES_DIAG = \
     /usr/bin/journalctl -u mcc-runner.service -n 200 --no-pager -o short-iso
 Defaults:hermes-diag !requiretty, logfile=/var/log/sudo-hermes-diag.log
 hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG
+# This account's OWN Proton Pass PAT (TPM handle 0x81010003, MCC runner key): ONE exact command, no arguments ("" = none allowed).
+hermes-diag hailmary=(root) NOPASSWD: /usr/local/lib/hermes-diag/unseal-pat ""

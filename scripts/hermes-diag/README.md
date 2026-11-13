@@ -1,6 +1,6 @@
 ---
-revision: 5
-updated: 2026-11-09 13:20
+revision: 6
+updated: 2026-11-12 19:19
 ---
 
 # hermes-diag: read-only diagnostics for the Hermes agent
@@ -27,7 +27,8 @@ Hermes is an AI agent, so nothing here depends on it behaving. Enforcement is on
 | sshd `Match User hermes-diag` | `/etc/ssh/sshd_config.d/60-hermes-diag.conf` | `ForceCommand` to the gate, public key only, no tty or forwarding, root-owned key file |
 | The gate | `/usr/local/lib/hermes-diag/diag.py` (root-owned) | allowlisted subcommands, exact-match arguments, no shell, secrets redacted, output capped, every request logged |
 | sudo | `/etc/sudoers.d/60-hermes-diag`, from `sudoers/sudoers.d/60-hermes-diag` in this repo | the account may run only four EXACT commands (no wildcards) as root: `docker logs --tail 200 <container>` and `journalctl -u mcc-runner.service …`. The rule names the host (`hermes-diag hailmary=…`), so it does nothing on any other machine |
-| Account | `hermes-diag` | not in `docker`, `sudo`, `adm` or `systemd-journal`; no password |
+| Account | `hermes-diag` | not in `docker`, `sudo`, `adm`, `systemd-journal` or `tss`; no password |
+| Its own MCC key (hailmary) | TPM handle `0x81010003`, `/usr/local/lib/hermes-diag/{unseal-pat,pass-cli}`, `~hermes-diag/.pp-session` | see section 3a |
 
 ## 2. What Hermes can ask
 
@@ -57,6 +58,22 @@ The sudoers rule is **not** written by hand: `gen-sudoers.py` generates it from 
 
 `install.sh` validates the key, the sudoers rules (`visudo -cf`) and the sshd config (`sshd -t`, then `sshd -T -C user=hermes-diag…` to confirm the settings are really in effect) before it reloads sshd, and removes its sshd drop-in again if the checks fail. The pipeline reaches only rocky and hailmary (tars and endurance do not run it).
 
+### 3a. The account's own MCC key (hailmary, since 2026-11-12)
+
+Since MCC security audit run 4 the MCC runner wants a key from every local caller, so `status`, `component` and `fit` get **401** without one. The account has its **own** read-only key, `MCC - MCC_TOKEN_HERMES_DIAG` (MCC allows it `GET /api/status`, `/api/life/fitness/`, `/api/life/health/`, `/api/life/medical/labs`, from loopback only), and reads it with its **own** Proton Pass PAT `hailmary-hermes-diag` (owner's rule: one PAT per host and user). Same pattern as `scripts/hermes-vault`:
+
+- The PAT is granted **Viewer on that one item only**, so it sees no vault: the gate finds the item's share id by title (`share list --only-items`) and reads its `note` field by share id.
+- It is sealed in the TPM at handle **`0x81010003`**. The account is **not** in `tss`; it reaches the TPM only through the root-owned `unseal-pat` via one exact sudo rule with no arguments (generated into `sudoers/sudoers.d/60-hermes-diag`). It cannot unseal the owner's PAT (`0x81010001`) or hermes-vault's (`0x81010002`); `enable-mcc-key.sh` proves it.
+- The pass-cli session is kept in `~hermes-diag/.pp-session` (mode 700), so a call does not cost a Proton login (Proton rate-limits logins); the PAT is unsealed and used only when that session is gone. The key lives only in the gate's process and is sent as `Authorization: Bearer` to `127.0.0.1:5679`; it is never printed.
+- Errors say what is wrong without a secret: `hermes-diag: MCC key: <reason>` (no key set up on this host, TPM read failed, Proton login failed or rate-limited, item not readable, runner refused with HTTP 401/403).
+
+Set it up once on hailmary (after the dotfiles pipeline has put this version there):
+
+1. In Proton Pass, create a personal access token named `hailmary-hermes-diag` and give it **Viewer** access to the single item `MCC - MCC_TOKEN_HERMES_DIAG` (HOMELAB). Copy the token.
+2. On hailmary: `sudo ~/devops/github/linux_dotfiles/scripts/hermes-diag/enable-mcc-key.sh` and paste the token when asked (hidden). It installs the current `diag.py` (the old one is kept as `diag.py.prev`), the helper and a pinned `pass-cli`, installs the repo sudoers file, seals the PAT, checks isolation, and ends with a real `status` and `fit readiness` as the account.
+
+Compromise runbook: delete `~hermes-diag/.pp-session`, revoke the PAT, rotate `MCC - MCC_TOKEN_HERMES_DIAG` (MCC reloads it on its next start). Undo: see the top of `enable-mcc-key.sh`.
+
 ## 4. Traceability and logging
 
 - Every request, accepted or rejected, is written to syslog as `hermes-diag` with the client address, outcome, size, time and the (escaped) request text. Syslog ships to Graylog.
@@ -73,12 +90,13 @@ The sudoers rule is **not** written by hand: `gen-sudoers.py` generates it from 
 
     python3 -m pytest scripts/hermes-diag/test_diag.py
 
-77 tests cover hostile requests, each validation layer on its own, exact commands, redaction, the output cap, the audit log and the committed sudoers file (no drift from the allowlists, no wildcards, host-restricted). The gate was also mutation-tested (each protection deliberately broken in a copy and the tests required to fail).
+The tests cover hostile requests, each validation layer on its own, exact commands, redaction, the output cap, the audit log and the committed sudoers file (no drift from the allowlists, no wildcards, host-restricted), and the own-key path: the kept session is used without a login, one login with the sealed PAT (passed in the environment, never argv) when it is gone, every failure says why without a secret, the runner call carries the key, a refused key is reported plainly, the unseal rule is one exact command and the helper names only `0x81010003`. A test that replaces `_api_fetch` really does now (before 2026-11-12 the `main()` test reached the live runner on the build host). The gate was also mutation-tested (each protection deliberately broken in a copy and the tests required to fail).
 
 ## 7. Revision History
 
 | Rev | Date | Commit | Change |
 |---|---|---|---|
+| 6 | 2026-11-12 19:19 | v1.16.0 | Own MCC key (run 4): `enable-mcc-key.sh`, `unseal-pat` (TPM `0x81010003`), Bearer key on the runner calls, unseal sudo rule; fetch functions looked up at call time (a test reached the live runner); hailmary's installed gate still had the pre-rename container names (fixed by the next `enable-mcc-key.sh`). 143 tests. |
 | 5 | 2026-11-09 13:20 | (this revision) | MCC containers renamed with the trust zones (TARS/CASE to TESSERACT/LAZARUS): `tesseract-mcc-bot`, `lazarus-mcc-bot`, `mcc-n8n` in the hailmary allowlist and the generated sudoers rule. |
 | 4 | 2026-10-29 | 308d601 | `fit` group: 36 read-only fitness/health/labs views from MCC's local API, hailmary only (129 tests). |
 | 3 | 2026-10-02 17:30 | (see git) | Multi-host: generic commands, Linux/macOS profiles, macOS installer (93 tests). |

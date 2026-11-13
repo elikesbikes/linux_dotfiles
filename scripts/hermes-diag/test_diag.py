@@ -1,4 +1,5 @@
 """Tests for the hermes-diag gate. The point of these tests is to try to BREAK it."""
+import json
 import os
 import subprocess
 import sys
@@ -250,6 +251,135 @@ def test_sudoers_rule_is_exact_host_restricted_and_has_no_wildcards():
     assert "hermes-diag hailmary=(root) NOPASSWD: HERMES_DIAG" in text
     for name in diag.CONTAINERS:
         assert f"/usr/bin/docker logs --tail 200 {name}" in cmds
+
+
+def test_sudoers_unseal_rule_is_one_exact_command_without_arguments():
+    text = open(_repo_sudoers()).read()
+    rules = [l for l in text.splitlines() if "unseal-pat" in l and not l.startswith("#")]
+    assert rules == ['hermes-diag hailmary=(root) NOPASSWD: /usr/local/lib/hermes-diag/unseal-pat ""']
+
+
+def test_unseal_helper_reads_only_this_accounts_handle():
+    helper = open(os.path.join(os.path.dirname(__file__), "unseal-pat")).read()
+    execs = [l for l in helper.splitlines() if not l.startswith("#")]
+    assert execs == ["exec /usr/bin/tpm2_unseal -c " + diag.PAT_HANDLE]
+    assert diag.PAT_HANDLE not in ("0x81010001", "0x81010002")   # the owner's PAT and hermes-vault's
+
+
+# ---------------------------------------------------------------- the account's own MCC runner key (run 4)
+FAKE_KEY = "mcc_" + "k" * 40
+
+
+class FakePass:
+    """pass-cli stand-in: `share list` and `item view` answer only once logged in (or with a kept session)."""
+    def __init__(self, logged_in=True, login_ok=True, has_item=True):
+        self.logged_in, self.login_ok, self.has_item, self.calls = logged_in, login_ok, has_item, []
+
+    def __call__(self, args, extra_env=None):
+        self.calls.append((list(args), dict(extra_env or {})))
+        ok = subprocess.CompletedProcess(args, 0, b"", b"")
+        if args[0] == "login":
+            self.logged_in = self.login_ok
+            return ok if self.login_ok else subprocess.CompletedProcess(args, 1, b"", b"rate limited")
+        if not self.logged_in:
+            return subprocess.CompletedProcess(args, 1, b"", b"not logged in")
+        if args[:2] == ["share", "list"]:
+            shares = [{"name": diag.MCC_KEY_TITLE, "id": "share-1"}] if self.has_item else []
+            return subprocess.CompletedProcess(args, 0, json.dumps({"shares": shares}).encode(), b"")
+        if args[:2] == ["item", "view"]:
+            assert args[args.index("--share-id") + 1] == "share-1"
+            return subprocess.CompletedProcess(args, 0, (FAKE_KEY + "\n").encode(), b"")
+        raise AssertionError(args)
+
+
+def _unseal(ok=True):
+    calls = []
+    def unseal():
+        calls.append(1)
+        return subprocess.CompletedProcess([], 0 if ok else 1, (FAKE_PAT + "\n").encode() if ok else b"", b"")
+    return unseal, calls
+
+
+def test_key_comes_from_the_kept_session_without_a_login():
+    pp = FakePass(logged_in=True)
+    unseal, calls = _unseal()
+    assert diag.mcc_key(pp, unseal, reset_session=lambda: None) == FAKE_KEY
+    assert calls == [] and not any(a[0] == "login" for a, _ in pp.calls)
+
+
+def test_one_login_with_the_sealed_pat_when_the_session_is_gone():
+    pp = FakePass(logged_in=False)
+    unseal, calls = _unseal()
+    resets = []
+    assert diag.mcc_key(pp, unseal, reset_session=lambda: resets.append(1)) == FAKE_KEY
+    logins = [(a, env) for a, env in pp.calls if a[0] == "login"]
+    assert calls == [1] and resets == [1] and len(logins) == 1
+    args, env = logins[0]
+    assert args == ["login"] and env == {"PROTON_PASS_PERSONAL_ACCESS_TOKEN": FAKE_PAT}   # never in argv
+
+
+@pytest.mark.parametrize("pp,unseal_ok,why", [
+    (FakePass(logged_in=False), False, "TPM"),
+    (FakePass(logged_in=False, login_ok=False), True, "login failed"),
+    (FakePass(logged_in=False, has_item=False), True, "could not be read"),
+])
+def test_key_failures_say_why_and_hold_no_secret(pp, unseal_ok, why):
+    unseal, _ = _unseal(unseal_ok)
+    with pytest.raises(diag.KeyUnavailable) as e:
+        diag.mcc_key(pp, unseal, reset_session=lambda: None)
+    assert why in str(e.value) and FAKE_PAT not in str(e.value) and FAKE_KEY not in str(e.value)
+
+
+def test_runner_calls_send_the_accounts_key(monkeypatch):
+    seen = []
+
+    class Resp:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self, *a): return b'{"components": []}'
+
+    def urlopen(req, timeout):
+        seen.append((req.full_url, req.get_header("Authorization"), timeout))
+        return Resp()
+    monkeypatch.setattr(diag.urllib.request, "urlopen", urlopen)
+    assert diag._get_json(diag.MCC_API, key_source=lambda: FAKE_KEY) == {"components": []}
+    assert seen == [(diag.MCC_API, "Bearer " + FAKE_KEY, diag.TIMEOUT_S)]
+
+
+@pytest.mark.parametrize("code", [401, 403])
+def test_a_refused_key_is_reported_plainly(monkeypatch, code):
+    def urlopen(req, timeout):
+        raise diag.urllib.error.HTTPError(req.full_url, code, "no", {}, None)
+    monkeypatch.setattr(diag.urllib.request, "urlopen", urlopen)
+    with pytest.raises(diag.KeyUnavailable, match="HTTP %d" % code):
+        diag._get_json(diag.MCC_API, key_source=lambda: FAKE_KEY)
+
+
+def test_handle_reports_a_missing_key_without_a_traceback_or_secret():
+    def api_fetch():
+        raise diag.KeyUnavailable("could not read this account's Proton Pass PAT from the TPM")
+    code, text, outcome = diag.handle("status", api_fetch=api_fetch)
+    assert code == 3 and outcome == "error"
+    assert text == "hermes-diag: MCC key: could not read this account's Proton Pass PAT from the TPM\n"
+
+
+@pytest.mark.parametrize("missing", ["UNSEAL", "PASS_CLI"])
+def test_no_key_setup_on_this_host_is_reported(monkeypatch, missing):
+    monkeypatch.setattr(diag, missing, "/nonexistent/hermes-diag/" + missing.lower())
+    with pytest.raises(diag.KeyUnavailable, match="enable-mcc-key.sh"):
+        diag.mcc_key()
+
+
+def test_main_never_reaches_a_live_runner(monkeypatch, capsys):
+    """main() resolves _api_fetch at call time: a test's replacement is used, the build host's runner is not."""
+    monkeypatch.setattr(diag.syslog, "openlog", lambda *a, **k: None)
+    monkeypatch.setattr(diag.syslog, "syslog", lambda prio, msg: None)
+    def no_network(*a, **k):
+        raise AssertionError("reached the network")
+    monkeypatch.setattr(diag.urllib.request, "urlopen", no_network)
+    monkeypatch.setattr(diag, "_api_fetch", lambda: API)
+    monkeypatch.setenv("SSH_ORIGINAL_COMMAND", "status")
+    assert diag.main() == 0 and "int-garmin" in capsys.readouterr().out
 
 
 # ---------------------------------------------------------------- multi-host generic commands

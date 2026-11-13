@@ -35,12 +35,26 @@ import subprocess
 import sys
 import syslog
 import time
+import urllib.error
 import urllib.request
 
 MAX_BYTES = 64 * 1024
 TIMEOUT_S = 15
 MCC_API = "http://127.0.0.1:5679/api/status"
 LIFE_API = "http://127.0.0.1:5679/api/life/"
+
+# The MCC runner wants a key from every local caller (MCC security audit run 4, 2026-11-12). This account has its
+# OWN read-only key, `MCC - MCC_TOKEN_HERMES_DIAG` (GET /api/status and the /api/life/ reads above, loopback only),
+# read with its OWN Proton Pass PAT (owner's rule: one PAT per host and user). The PAT is sealed in the TPM at
+# PAT_HANDLE and reached only through the root-owned helper UNSEAL via one exact sudo rule with no arguments; the
+# account is not in `tss`, so it can never unseal the owner's PAT at 0x81010001. The pass-cli session is kept in
+# ~/.pp-session (mode 700) so a call does not cost a Proton login (Proton rate-limits logins). Same pattern as
+# scripts/hermes-vault. Installed by enable-mcc-key.sh (hailmary only).
+LIB = "/usr/local/lib/hermes-diag"
+UNSEAL = LIB + "/unseal-pat"
+PASS_CLI = LIB + "/pass-cli"
+PAT_HANDLE = "0x81010003"
+MCC_KEY_TITLE = "MCC - MCC_TOKEN_HERMES_DIAG"
 
 # `fit <name> [n]`: name -> (path under LIFE_API, query with {n}, default n, max n). n=None: takes no number.
 # Every URL is built from these constants plus a validated integer: no caller text ever reaches the URL.
@@ -272,14 +286,77 @@ def parse(request):
     raise Rejected("unknown subcommand (try: help)")
 
 
+class KeyUnavailable(Exception):
+    """This account's MCC key could not be read (the message is safe to show: it never holds a secret)."""
+
+
+def _pp(args, extra_env=None, home=None):
+    home = home or os.path.expanduser("~")
+    env = {"PATH": "/usr/bin:/bin", "HOME": home, "LANG": "C.UTF-8",
+           "PROTON_PASS_SESSION_DIR": os.path.join(home, ".pp-session"), "PROTON_PASS_KEY_PROVIDER": "fs",
+           "PROTON_PASS_NO_UPDATE_CHECK": "1", "PROTON_PASS_DISABLE_TELEMETRY": "1", "NO_COLOR": "1",
+           "PROTON_PASS_AGENT_REASON": "hermes-diag: read its own MCC runner key"}
+    env.update(extra_env or {})
+    return subprocess.run([PASS_CLI] + list(args), env=env, capture_output=True, timeout=30)
+
+
+def _view_key(pp):
+    # The PAT is granted the single ITEM, not the vault: it sees no vault by name, the item is its own share. So:
+    # share id by title from `share list`, then view by share id (as scripts/hermes-vault, verified 2026-10-28).
+    r = pp(["share", "list", "--only-items", "true", "--output", "json"])
+    if r.returncode != 0:
+        return ""
+    try:
+        shares = {s["name"]: s["id"] for s in json.loads(r.stdout)["shares"]}
+    except (ValueError, KeyError, TypeError):
+        return ""
+    if MCC_KEY_TITLE not in shares:
+        return ""
+    r = pp(["item", "view", "--share-id", shares[MCC_KEY_TITLE], "--item-title", MCC_KEY_TITLE, "--field", "note"])
+    return r.stdout.decode().strip() if r.returncode == 0 else ""
+
+
+def mcc_key(pp=_pp, unseal=None, reset_session=None):
+    """This account's MCC runner key: from the kept pass-cli session, one PAT login only when the session is gone."""
+    if pp is _pp and not (os.path.exists(PASS_CLI) and os.path.exists(UNSEAL)):
+        raise KeyUnavailable("this host has no MCC key set up for hermes-diag (enable-mcc-key.sh not run)")
+    key = _view_key(pp)
+    if key:
+        return key
+    if reset_session is None:
+        session = os.path.join(os.path.expanduser("~"), ".pp-session")
+        subprocess.run(["/bin/rm", "-rf", session], check=False)
+        os.mkdir(session, 0o700)
+    else:
+        reset_session()
+    pat = (unseal or (lambda: subprocess.run(["/usr/bin/sudo", "-n", UNSEAL], capture_output=True, timeout=15)))()
+    if pat.returncode != 0 or not pat.stdout.strip():
+        raise KeyUnavailable("could not read this account's Proton Pass PAT from the TPM")
+    r = pp(["login"], {"PROTON_PASS_PERSONAL_ACCESS_TOKEN": pat.stdout.decode().strip()})
+    if r.returncode != 0:
+        raise KeyUnavailable("Proton Pass login failed (rate limit? wait about 5 minutes and retry)")
+    key = _view_key(pp)
+    if not key:
+        raise KeyUnavailable("logged in to Proton Pass, but the MCC key item could not be read")
+    return key
+
+
+def _get_json(url, key_source=None):
+    req = urllib.request.Request(url, headers={"Authorization": "Bearer " + (key_source or mcc_key)()})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        raise KeyUnavailable("the MCC runner refused the request (HTTP %d)" % e.code) if e.code in (401, 403) \
+            else e
+
+
 def _api_fetch():
-    with urllib.request.urlopen(MCC_API, timeout=TIMEOUT_S) as resp:
-        return json.load(resp)
+    return _get_json(MCC_API)
 
 
 def _fit_fetch(url):
-    with urllib.request.urlopen(url, timeout=TIMEOUT_S) as resp:
-        return json.load(resp)
+    return _get_json(url)
 
 
 def fit_url(name, arg=None):
@@ -422,15 +499,21 @@ def execute(cmd, args, api_fetch=_api_fetch, run=_run, profile=None, osname=None
     raise Rejected("unknown subcommand")  # unreachable: parse() already filtered
 
 
-def handle(request, api_fetch=_api_fetch, run=_run, profile=None, osname=None, exists=os.path.exists,
-           fit_fetch=_fit_fetch):
+def handle(request, api_fetch=None, run=_run, profile=None, osname=None, exists=os.path.exists,
+           fit_fetch=None):
     """Full pipeline for one request. Returns (exit_code, text, outcome)."""
+    # Looked up at call time (not bound as defaults), so a test that replaces _api_fetch/_fit_fetch really does;
+    # before 2026-11-12 the main() test reached the live runner on the build host.
+    api_fetch = api_fetch or _api_fetch
+    fit_fetch = fit_fetch or _fit_fetch
     try:
         cmd, args = parse(request)
         out = execute(cmd, args, api_fetch, run, profile, osname, exists, fit_fetch)
         return 0, cap(redact(out)), "ok"
     except Rejected as e:
         return 2, "hermes-diag: rejected: %s\n" % e, "rejected"
+    except KeyUnavailable as e:
+        return 3, "hermes-diag: MCC key: %s\n" % e, "error"
     except subprocess.TimeoutExpired:
         return 3, "hermes-diag: command timed out\n", "timeout"
     except Exception as e:  # never leak a traceback (it can contain paths/arguments)

@@ -7,6 +7,22 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.16.0] - 2026-11-12
+
+### Added
+- `scripts/hermes-diag`: the hermes-diag account's **own MCC runner key**. Since MCC security audit run 4 (2026-11-12) the runner wants a key from every local caller, so `status`, `component` and `fit` returned 401. `diag.py` now reads `MCC - MCC_TOKEN_HERMES_DIAG` with the account's own Proton Pass PAT (TPM handle `0x81010003`, root-only `unseal-pat` through one exact sudo rule, kept pass-cli session so a call costs no Proton login) and sends it as `Authorization: Bearer`. New `enable-mcc-key.sh` sets it up on hailmary (asks for the PAT hidden, seals it, proves the account cannot unseal `0x81010001`/`0x81010002`, ends with a real `status` and `fit readiness`). The generated `sudoers/sudoers.d/60-hermes-diag` gains the one unseal rule. README section 3a.
+
+### Fixed
+- `scripts/hermes-diag/diag.py`: `handle()` bound `_api_fetch`/`_fit_fetch` as default arguments, so the `main()` test's replacement was never used and the test called the live runner on the build host. They are looked up at call time now (new test proves no network is reached).
+- Found: hailmary's installed gate (`/usr/local/lib/hermes-diag/diag.py`, 10-29) still lists the pre-rename containers (`tars-mcc-bot`, `case-mcc-bot`, `tars-n8n`), while the deployed sudoers names the new ones, so `container-logs` has failed there since the 11-09 rename. `enable-mcc-key.sh` installs the current gate.
+
+### Changed (recorded late)
+- bdf888a (2026-11-12, no version at the time): `scripts/sshtars-hook` 1.7.1 talks to MCC over HTTPS through hailmary's Traefik.
+
+Tested: 143 gate tests on Python 3.12 and 3.9; generated sudoers validated with `visudo -cf` on hailmary and in sync with `diag.py`. Not tested yet: the real setup on hailmary (needs the owner's PAT) and a call from Hermes on endurance.
+
+---
+
 ## [v1.15.2] - 2026-11-11
 
 ### Fixed

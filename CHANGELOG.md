@@ -7,16 +7,26 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.15.2] - 2026-11-11
 ## [v1.17.0] - 2026-11-12
 
+### Fixed
 ### Changed
+- `scripts/gitlab-runner/gitlab-runner-proton.sh` and `gitlab-runner-proton-macos.sh` started the runner with the `umask 077` they set for the RAM config. The runner passes its umask to every job, so since 2026-11-08 every file a shell-runner job wrote (deploy `git reset --hard`, builds) was owner-only on murph, rocky, hailmary, tars, endurance and kipp. Visible break: the Hermes vault gate (user `hermes-vault` on hailmary) failed every read with `PermissionError`, because it imports MCC's `shared/auth_policy.py`, which a deploy had written as `600`. Both launchers now set `umask 022` just before `exec`; the config stays private inside its `700` RAM folder.
 - All SSH keys are back in the Proton **HOMELAB** vault, folder `SSH` (owner decision: no per-host vaults). The nine
+
   vaults `SSH <host>` / `SSH <device>` from v1.14.0 and v1.15.0 were emptied into it and deleted; the keys themselves
+Repair of files already written owner-only (only files from the repos, changed since 2026-11-08; state, data and secrets untouched): git checkouts on murph 106, rocky 328, hailmary 333 (mcc, adastra, tutorials, dotfiles); deployed `~/devops/docker` copies on rocky 27 and hailmary 29 (ntfytars-relay, watchyourlan, gitlab-runner / gitlab) and endurance 11 files + 4 folders (hermes, `data/` left at 700). All six runners restarted 13:02-13:04 (no job running); Linux runner processes show `Umask: 0022`.
   did not change (same fingerprints, no `authorized_keys` edits).
+
 - `scripts/proton-pass/ssh-agent-start.sh`: the agent serves HOMELAB (override file still honoured). Device mode
+Tested: the Hermes container on endurance (as user `hermes`) lists and reads Homelab notes through the gate again (`outcome=ok`, 106 notes); affected containers healthy. Not tested: a new deploy writing a file (next pipeline will show it); kipp's runner umask (macOS has no /proc; next iOS job).
   (`--device <name>`) serves HOMELAB on `~/.ssh/sshtars-<name>.sock`. pass-cli 2.7.0's agent cannot filter by item, so
+
   **every agent holds every HOMELAB SSH key**; each host still signs only as itself through the `Host *` pin
+---
   (`IdentityFile ~/.ssh/identity.pub`, `IdentitiesOnly yes`), which all hosts already have.
+
 - SSHTars: device keys renamed `SSHTars <device> identity` so they stay distinct in one vault; `scripts/sshtars/broker`
   runs `catalog.py --device <device>`, which prints the catalog's shared name `SSHTars device identity` as that title
   (sshtars-ios 1.5.3).

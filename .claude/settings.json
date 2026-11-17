@@ -409,5 +409,6 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
-  }
+  },
+  "switchModelsOnFlag": false
 }

@@ -5,6 +5,7 @@
       "Bash(scp:*)"
     ]
   },
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -330,9 +331,12 @@
       "autoCompactWindow": 400000
     },
     "claude-fable-5-2": {
-      "effortLevel": "high",
+      "effortLevel": "xhigh",
       "autoCompactWindow": 400000
     }
+  },
+  "remote": {
+    "defaultEnvironmentId": "env_01RCstERhqH3wcBqs5DWqsXm"
   },
   "tui": "fullscreen",
   "voice": {
@@ -405,8 +409,5 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
-  },
-  "remote": {
-    "defaultEnvironmentId": "env_01RCstERhqH3wcBqs5DWqsXm"
   }
 }

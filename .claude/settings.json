@@ -5,7 +5,7 @@
       "Bash(scp:*)"
     ]
   },
-  "model": "fable",
+  "model": "claude-opus-4-8",
   "hooks": {
     "PreToolUse": [
       {
@@ -345,6 +345,7 @@
   },
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
+  "switchModelsOnFlag": false,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "autoMode": {
@@ -409,6 +410,5 @@
       "type": "sse",
       "url": "https://ansible-mcp.home.elikesbikes.com/sse"
     }
-  },
-  "switchModelsOnFlag": false
+  }
 }

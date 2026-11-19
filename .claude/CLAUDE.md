@@ -22,6 +22,18 @@ Do not assume how software behaves. Verify claims with source code, documentatio
 - Bugs and broken things found along the way are reported, not fixed: open a GitLab issue for each (see [Issues and Backlog](#issues-and-backlog--gitlab-user-rule-2026-11-18)) with date, host, what is wrong and evidence.
 - Exception: a **show-stopper** (data loss risk, a security hole being exploited, production down, or something that blocks the plan itself). Then stop, say it is a show-stopper and why, and fix it first.
 
+## Issues and Backlog — GitLab (user rule 2026-11-18)
+
+Issues are kept in GitLab (`gitlab.home.elikesbikes.com`), never in a vault note, a markdown file or GitHub. This replaces the vault `Findings Backlog.md` (closed to new rows 2026-11-18, kept as an archive) and overrides any project CLAUDE.md line that still sends findings there.
+
+- **Where:** the repo that owns the work. Run `issue repos` for the table: MCC → `mcc`; each iOS app → its own `*-ios` repo; Docker services → `tutorials`; dotfiles/shell/Claude settings → `linux_dotfiles`; Hermes → `hermes-config`; Home Assistant → `home-assistant` (issues only); no repo (hosts, UniFi, NAS, vault docs, skills) → `adastra`.
+- **Two kinds:** `finding` (a bug or broken thing) and `feature` (the owner's backlog of things to build).
+- **Fixed right away:** still gets an issue, so there is a record. In a code commit write `Closes #N`; otherwise `issue fixed <repo> "title" --commit <sha>`.
+- **Not fixed now:** stays open. Found along the way and not in the plan → open it, do not fix it (show-stoppers excepted, see above).
+- **Each issue says:** date found, host, what is wrong or wanted, evidence. Labels: `host:<name>`, `security`, `owner-action` when only the owner can do the next step. **No secrets** in a title or body.
+- **How:** `~/scripts/gitlab/issue` (`open`, `fixed`, `close`, `note`, `list`); it uses the git credential helper and logs each write to syslog. Docs: `linux_dotfiles/scripts/gitlab/README.md`.
+- **Report:** name the issues opened or closed (`repo#N`) in the Close-out.
+
 ## Definition of Done — every change, every project (user rule 2026-11-07)
 
 The owner called the work sloppy: docs, versions, the vault and clean-up were being skipped while the code shipped. A change is not done, and must not be reported as done, until each item below is handled (or is plainly not applicable, and the report says why). Check the list before committing and again before the final report. A project's CLAUDE.md can add specifics (the iOS apps' list is in each repo).

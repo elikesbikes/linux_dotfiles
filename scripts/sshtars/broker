@@ -1,6 +1,8 @@
 #!/bin/sh
 # sshtars broker: forced command for SSHTars device keys on hailmary.
-# authorized_keys:  restrict,port-forwarding,permitopen="…",command="/home/ecloaiza/scripts/sshtars/broker <device>" ecdsa-sha2-nistp256 AAAA… sshtars-<device>
+# authorized_keys:  restrict,port-forwarding,permitopen="…",permitlisten="no-listen.invalid:1",command="/home/ecloaiza/scripts/sshtars/broker <device>" ecdsa-sha2-nistp256 AAAA… sshtars-<device>
+#   permitopen (local forwards: the catalog's via-hailmary hosts) and permitlisten (remote forwards: none, sshtars-ios
+#   #104) are written by refresh-permitopen; run it after adding a device line or changing the catalog's hosts.
 #
 # Allowed requests (SSH_ORIGINAL_COMMAND):
 #   agent   pipe to THIS device's Proton Pass SSH agent: list keys + sign. No key export.

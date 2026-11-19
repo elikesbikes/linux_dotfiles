@@ -7,6 +7,22 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.18.2] - 2026-11-19
+
+### Changed
+- `scripts/sshtars-hook/sshtars-hook` 1.7.4 (sshtars-ios 8a59b37, issues #90 to #102). Approvals: a prompt is its
+  question, its options and the command or diff, so Approve cannot land on a later prompt; only the live dialog at
+  the bottom of the screen counts; a dialog whose command cannot be read, or one with other wording, is a notice.
+  `prompt` refuses an ended session or a reused terminal. Events carry their own id (used for retries once MCC
+  honours it). State files are 0600 and pruned at SessionEnd. (1.7.2 and 1.7.3 came in with bb3be9b and before,
+  without an entry here.)
+- `scripts/sshtars/refresh-permitopen`, `catalog.py`, `broker` (sshtars-ios #103, #104, #105):
+  `refresh-permitopen` handles every device line whatever its option order, replaces every `permitopen`, adds
+  `permitlisten="no-listen.invalid:1"` (remote forwards were open), stops with exit 2 on a line it cannot read,
+  and has `--check` (dry run). `catalog.py` checks field types. `broker`: header comment only.
+
+---
+
 ## [v1.18.1] - 2026-11-18
 
 ### Changed

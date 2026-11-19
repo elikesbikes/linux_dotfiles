@@ -14,11 +14,15 @@ with --device <name> (the broker passes it) that name is printed as "SSHTars <na
 
     catalog.py              -> JSON for the app ({"version": 1, "groups": [...], "hosts": [...]})
     catalog.py --device X   -> same, with the shared device key name turned into X's own key title
-    catalog.py --permitopen -> permitopen="host:port",... for devices' authorized_keys lines
+    catalog.py --permitopen -> permitopen="host:port",... for devices' authorized_keys lines; when no host is
+                               reached through hailmary, one placeholder that allows no destination (NO_HOSTS)
 
 `hostname` and `port` end up inside permitopen="host:port" in hailmary's authorized_keys (refresh-permitopen), so
 they are checked strictly (sshtars-ios #1): a hostname is DNS labels or an IPv4 address (letters, digits, dots and
 hyphens) or an IPv6 address in brackets, a port a whole number 1-65535. Anything else fails the whole catalog.
+Field types are checked too (sshtars-ios #105): `via_hailmary` is true or false, never a quoted "false" (a non-empty
+string is truthy and would grant the host); names, usernames and key names are text (YAML reads `name: on` as a
+bool and `username: 1000` as a number, and the app cannot decode either).
 
 Source: sshtars-ios repo tools/broker/catalog.py. Tests: tools/broker/test_catalog.py.
 """
@@ -34,7 +38,11 @@ MCC = os.path.expanduser("~/devops/projects/mcc")
 
 GROUP_KEYS = {"name", "parent", "username", "port", "key", "via_hailmary"}
 HOST_KEYS = {"label", "hostname", "group", "port", "username", "key", "tags", "via_hailmary"}
+TEXT_FIELDS = ("name", "label", "parent", "group", "username", "key")
 DEVICE_KEY = "SSHTars device identity"
+# --permitopen with no via_hailmary host (#105): an empty list would leave a device line with port-forwarding and
+# no permitopen, which is every destination. `.invalid` never resolves, so this one allows none.
+NO_HOSTS = 'permitopen="no-hosts.invalid:1"'
 LABEL_RE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
 IPV6_RE = re.compile(r"\[([0-9A-Fa-f:.]{2,45})\]")      # no zone ids: "%" could carry anything
 
@@ -82,6 +90,15 @@ def check_port(entry, what):
         fail(f"{what}: port must be a whole number from 1 to 65535, not {entry['port']!r}")
 
 
+def check_types(entry, what):
+    """#105: the app decodes these as String / Bool, and `via_hailmary` decides what a device key may reach."""
+    for field in TEXT_FIELDS:
+        if entry.get(field) is not None and not isinstance(entry[field], str):
+            fail(f"{what}: {field} must be text, not {entry[field]!r} (put it in quotes)")
+    if entry.get("via_hailmary") is not None and not isinstance(entry["via_hailmary"], bool):
+        fail(f"{what}: via_hailmary must be true or false without quotes, not {entry['via_hailmary']!r}")
+
+
 def parse(text):
     import yaml  # PyYAML (present on hailmary)
 
@@ -96,10 +113,13 @@ def parse(text):
         fail("the yaml block must be a mapping with groups: and hosts:")
 
     groups, hosts = doc.get("groups") or [], doc.get("hosts") or []
+    if not isinstance(groups, list) or not isinstance(hosts, list):
+        fail("groups: and hosts: must be lists")
     names = set()
     for i, g in enumerate(groups):
         if not isinstance(g, dict) or not g.get("name"):
             fail(f"groups[{i}] needs a name")
+        check_types(g, f"groups[{i}]" if not isinstance(g["name"], str) else f"group {g['name']}")
         unknown = set(g) - GROUP_KEYS
         if unknown:
             fail(f"group {g['name']}: unknown field(s) {sorted(unknown)}")
@@ -114,6 +134,9 @@ def parse(text):
     for i, h in enumerate(hosts):
         if not isinstance(h, dict) or not h.get("label") or not h.get("hostname"):
             fail(f"hosts[{i}] needs label and hostname")
+        check_types(h, f"hosts[{i}]" if not isinstance(h["label"], str) else f"host {h['label']}")
+        if h.get("tags") is not None and not isinstance(h["tags"], list):
+            fail(f"host {h['label']}: tags must be a list like [a, b], not {h['tags']!r}")
         unknown = set(h) - HOST_KEYS
         if unknown:
             fail(f"host {h['label']}: unknown field(s) {sorted(unknown)}")
@@ -154,6 +177,9 @@ def permitopen(doc):
                 fail(f"host {h['label']}: refusing permitopen target {target[:80]!r}")
             if target not in targets:
                 targets.append(target)
+    if not targets:
+        print("no host is reached through hailmary: printing a permitopen that allows no destination", file=sys.stderr)
+        return NO_HOSTS
     return ",".join(f'permitopen="{t}"' for t in targets)
 
 

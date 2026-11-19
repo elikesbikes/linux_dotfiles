@@ -1,45 +1,171 @@
 #!/usr/bin/env python3
-"""Rewrite every SSHTars device line's permitopen list from the host catalog.
+"""Rewrite every SSHTars device line's forwarding limits from the host catalog.
 
 Run on hailmary after the catalog note's hosts change:  ~/scripts/sshtars/refresh-permitopen
-A device line is one whose command= runs ~/scripts/sshtars/broker. Only its permitopen options
-change; the key, the forced command and every other line stay as they are. Backs up first.
-Source: sshtars-ios repo tools/broker/refresh-permitopen.
+                                         dry run first:  ~/scripts/sshtars/refresh-permitopen --check
+
+A device line is a key line whose command= option runs ~/scripts/sshtars/broker, whatever the order of its options
+(sshtars-ios #103). On each one, every permitopen and permitlisten option is taken out, wherever it sits, and the
+catalog's permitopen list plus one permitlisten that allows no listener (#104) go in; the key, the forced command,
+every other option and every other line stay byte for byte. A device line the script cannot read, or one without
+`restrict`, is named by line number and nothing is changed. Backs up first.
+
+--check changes nothing: it prints what would change (key material masked) and exits 0 when the file already
+matches, 1 when it would change. Exit 2: an error, nothing changed.
+Source: sshtars-ios repo tools/broker/refresh-permitopen. Tests: tools/broker/test_catalog.py.
 """
-import os, re, shutil, subprocess, sys, time
+import os, re, shutil, stat, subprocess, sys, tempfile, time
 
-AK = os.path.expanduser("~/.ssh/authorized_keys")
+AK = os.path.realpath(os.path.expanduser("~/.ssh/authorized_keys"))
 CATALOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalog.py")
+BROKER = "/scripts/sshtars/broker"
+# sshtars-ios #104: `port-forwarding` re-enables remote (-R) forwards too, and permitopen limits only local ones.
+# authorized_keys has no "none" for permitlisten and refuses port 0, so the one listener allowed is one sshd cannot
+# open for a normal user: port 1 (below 1024), and only when the client asks for this exact host name. Checked with
+# a throwaway sshd (OpenSSH 10.6): -R on any other host or port is denied, -R on this one fails at bind.
+# It does not cover -R onto a unix socket path: sshd has no per-key limit for those (AllowStreamLocalForwarding).
+PERMITLISTEN = 'permitlisten="no-listen.invalid:1"'
+# catalog.py prints this when no host is reached through hailmary (#105): .invalid never resolves.
+NO_HOSTS = 'permitopen="no-hosts.invalid:1"'
+KEY_RE = re.compile(r'((?:ssh|ecdsa|sk)-[A-Za-z0-9@.-]+)[ \t]+[A-Za-z0-9+/=]+')
 
-out = subprocess.run(["python3", CATALOG, "--permitopen"], capture_output=True, text=True)
-if out.returncode != 0 or not out.stdout.startswith("permitopen="):
-    sys.exit(f"catalog error, nothing changed: {out.stdout.strip() or out.stderr.strip()}")
-permitopen = out.stdout.strip()
-# sshtars-ios #1: this text goes into authorized_keys. A newline would start a new, unrestricted key line; a quote
-# or a backslash would end or escape the option. catalog.py checks hostnames and ports; refuse here as well.
-if any(c in permitopen for c in '\n\r\\') or not re.fullmatch(r'permitopen="[^"]+"(,permitopen="[^"]+")*', permitopen):
-    sys.exit("catalog output is not a plain permitopen list (newline, quote or backslash), nothing changed")
 
-lines = open(AK).read().splitlines()
-changed = 0
-for i, line in enumerate(lines):
-    if "/scripts/sshtars/broker" not in line or not line.startswith("restrict"):
-        continue
-    # A function, not a replacement string: re.sub would turn backslash escapes in a string into newlines.
-    new = re.sub(r'(,permitopen="[^"]*")+', lambda m: "," + permitopen, line, count=1)
-    if new != line:
-        lines[i] = new
-        changed += 1
+def die(message):
+    print(f"refresh-permitopen: {message}", file=sys.stderr)
+    sys.exit(2)
 
-if not changed:
-    print("device lines already match the catalog")
-    sys.exit(0)
-backup = f"{AK}.bak-sshtars-permitopen-{time.strftime('%Y%m%d-%H%M%S')}"
-shutil.copy2(AK, backup)
-tmp = AK + ".tmp"
-with open(tmp, "w") as f:
-    f.write("\n".join(lines) + "\n")
-os.chmod(tmp, 0o600)
-os.replace(tmp, AK)
-print(f"updated {changed} device line(s); {permitopen.count('permitopen=')} destinations; backup {os.path.basename(backup)}")
-subprocess.run(["logger", "-t", "sshtars-broker", f"permitopen refreshed for {changed} device line(s)"])
+
+def split_options(line):
+    """(options, rest) for an authorized_keys line that starts with options: split at top-level commas up to the
+    first unquoted blank, as sshd does. None when a quote never closes."""
+    options, start, i, quoted = [], 0, 0, False
+    while i < len(line):
+        c = line[i]
+        if quoted:
+            if c == "\\" and line[i + 1:i + 2] == '"':
+                i += 1
+            elif c == '"':
+                quoted = False
+        elif c == '"':
+            quoted = True
+        elif c == ",":
+            options.append(line[start:i])
+            start = i + 1
+        elif c in " \t":
+            break
+        i += 1
+    if quoted:
+        return None
+    options.append(line[start:i])
+    return options, line[i:]
+
+
+def name(option):
+    return option.split("=", 1)[0].lower()          # sshd reads option names without regard to case
+
+
+def rewrite(line, permitopen):
+    """The line with its forwarding limits replaced, or raise ValueError saying why it cannot be handled."""
+    parsed = split_options(line)
+    if parsed is None:
+        raise ValueError("a quote in its options never closes")
+    options, rest = parsed
+    if not any(name(o) == "command" and BROKER in o for o in options):
+        raise ValueError("the broker path is not inside a command= option")
+    if not KEY_RE.match(rest.lstrip(" \t")):
+        raise ValueError("no key type and key after the options")
+    if not any(name(o) == "restrict" for o in options):
+        raise ValueError("it has no `restrict` option, so the key is not confined; add it by hand")
+    limits = [i for i, o in enumerate(options) if name(o) in ("permitopen", "permitlisten")]
+    if limits:
+        at = limits[0]
+    else:                                            # none yet (#103): after port-forwarding, else after restrict
+        names = [name(o) for o in options]
+        at = names.index("port-forwarding" if "port-forwarding" in names else "restrict") + 1
+    kept = [o for i, o in enumerate(options) if i not in limits]
+    at -= sum(1 for i in limits if i < at)
+    return ",".join(kept[:at] + [permitopen, PERMITLISTEN] + kept[at:]) + rest
+
+
+def is_device_line(line):
+    """A key line that mentions the broker, other than in the comment of a key with no options."""
+    stripped = line.lstrip(" \t")
+    if not stripped or stripped.startswith("#") or BROKER not in line:
+        return False
+    return not (KEY_RE.match(stripped) and BROKER not in KEY_RE.match(stripped).group(0))
+
+
+def masked(line):
+    return KEY_RE.sub(r"\1 <key>", line)
+
+
+def main():
+    args = sys.argv[1:]
+    if any(a not in ("--check",) for a in args):
+        die("usage: refresh-permitopen [--check]")
+    check = "--check" in args
+
+    out = subprocess.run([sys.executable, CATALOG, "--permitopen"], capture_output=True, text=True)
+    if out.returncode != 0 or not out.stdout.startswith("permitopen="):
+        die(f"catalog error, nothing changed: {out.stdout.strip() or out.stderr.strip() or 'catalog.py printed nothing'}")
+    permitopen = out.stdout.strip()
+    # sshtars-ios #1: this text goes into authorized_keys. A newline would start a new, unrestricted key line; a
+    # quote or a backslash would end or escape the option. catalog.py checks hostnames and ports; refuse here too.
+    if any(c in permitopen for c in '\n\r\\') or not re.fullmatch(r'permitopen="[^"]+"(,permitopen="[^"]+")*', permitopen):
+        die("catalog output is not a plain permitopen list (newline, quote or backslash), nothing changed")
+    destinations = 0 if permitopen == NO_HOSTS else permitopen.count("permitopen=")
+
+    # newline="": no translation. Split on "\n" only: splitlines() also breaks on U+2028, U+0085 and form feed, and
+    # a comment holding one would come back as a second key line (#103).
+    with open(AK, encoding="utf-8", errors="surrogateescape", newline="") as f:
+        lines = f.read().split("\n")
+    new, changed, devices, problems = list(lines), [], 0, []
+    for i, line in enumerate(lines):
+        if not is_device_line(line):
+            continue
+        devices += 1
+        try:
+            new[i] = rewrite(line, permitopen)
+        except ValueError as why:
+            problems.append(f"line {i + 1}: {why}")
+            continue
+        if new[i] != line:
+            changed.append(i)
+    if problems:
+        die("nothing changed; device line(s) that could not be handled in " + AK + ":\n  " + "\n  ".join(problems))
+
+    summary = f"{devices} device line(s); {destinations} destination(s)"
+    if destinations == 0:
+        summary += " (no host is reached through hailmary: local forwards closed)"
+    if not changed:
+        print(f"device lines already match the catalog: {summary}" if devices else f"no device line in {AK}")
+        return 0
+    if check:
+        print("--- authorized_keys\n+++ authorized_keys (after refresh)")
+        for i in changed:                            # one hunk per line, under its real line number
+            print(f"@@ -{i + 1} +{i + 1} @@\n-{masked(lines[i])}\n+{masked(new[i])}")
+        print(f"would update {len(changed)} of {summary} (line {', '.join(str(i + 1) for i in changed)}); nothing changed")
+        return 1
+
+    backup = f"{AK}.bak-sshtars-permitopen-{time.strftime('%Y%m%d-%H%M%S')}"
+    shutil.copy2(AK, backup)
+    mode = stat.S_IMODE(os.stat(AK).st_mode)
+    fd, tmp = tempfile.mkstemp(prefix=".authorized_keys.", dir=os.path.dirname(AK))     # same folder: atomic replace
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
+            f.write("\n".join(new))
+            f.flush()
+            os.fchmod(f.fileno(), mode)
+            os.fsync(f.fileno())
+        os.replace(tmp, AK)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+    print(f"updated {len(changed)} of {summary}; backup {os.path.basename(backup)}")
+    subprocess.run(["logger", "-t", "sshtars-broker", f"permitopen refreshed for {len(changed)} device line(s)"])
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

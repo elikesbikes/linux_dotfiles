@@ -91,6 +91,21 @@ Activity state posted in that window was lost (HTTP 502). The hooks' detached ch
 never received (502/503/504, a refused or reset connection; not a timeout, which may have been stored) for up to
 3 minutes, backing off 2 s → 30 s. An older activity state gives up once a newer one for the same session was posted.
 `notify` and `ask` from a script still try once.
+
+1.7.4 (fixes, sshtars-ios #90 to #102). Approvals: a prompt is the question, its options and what it asks to run,
+so Approve never lands on a later prompt for another command (#90); the command or diff is read across blank rows
+and the dashed rules up to the dialog's top, and a prompt whose command cannot be read is a notice, not an approval
+(#91); only the live dialog at the bottom of the screen counts (#93; layout from Claude Code 2.1.328); a prompt
+that changed while MCC was away is not posted (#90); a failed screen read is not "answered at the terminal" (#97);
+tmux copy mode is left before the key, and a key that did not reach the prompt is told to the phone instead of
+logged as applied (#95); "working" is posted only while "waiting" is still the session's newest state, and never
+after a deny (#96). Events carry an id made here, so with an MCC that stores it a lost answer is looked up and a
+retry cannot make a second event (#94). `prompt` refuses a session that has ended, one whose terminal a newer
+session runs in, and a tmux pane at a shell prompt (#92). `sessions` no longer shows an answered question as open
+once the conversation went on (#98) and reports `ended`. `diff` survives output that is not UTF-8 (#99).
+`install-claude`/`uninstall-claude` remove only this tool's own commands, and quote the path (#100). An http.client
+error on an activity post no longer drops the event after it (#101). State files are for this user only, and
+SessionEnd prunes them (#102).
 """
 import argparse
 import calendar
@@ -98,6 +113,7 @@ import http.client
 import json
 import os
 import re
+import shlex
 import shutil
 import socket
 import subprocess
@@ -105,9 +121,10 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 
-VERSION = "1.7.3"
+VERSION = "1.7.4"
 DEFAULT_URL = "https://cooper.home.elikesbikes.com"   # hailmary's MCC runner through Traefik, HTTPS (1.7.1)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -119,7 +136,13 @@ SEEN_WAIT_S = int(os.environ.get("SSHTARS_HOOK_SEEN_WAIT_S", "20"))   # herdr/hc
 POLL_MAX_S = 30.0                   # backoff ceiling while MCC can't be reached (1.7.2)
 PROMPT_RE = re.compile(r"Do you want to (proceed|make this edit|create|allow|run)", re.I)
 OPTION_RE = re.compile(r"^\s*[❯>]?\s*\d\.\s+\S")
+OPTION_HEAD_RE = re.compile(r"^\s*[❯>]?\s*(?=\d\.)")          # what stands before an option's number
 YES_OPTION_RE = re.compile(r"^[❯>]?\s*1\.\s+Yes\b")
+TOP_EDGE = set("─━╭╮╰╯ ")           # the rule (or an old box's edge) a permission dialog starts under
+DASHES = set("╌╍┄┈ ")               # the dashed rules around the command or diff inside the dialog
+FOOT_ROWS = 12                      # rows of Claude Code's own (key hints, its agents list) under a dialog
+CONTEXT_SCAN, CONTEXT_MAX = 60, 40  # rows looked at above the question; lines of the dialog kept
+OPTION_ROWS = 24                    # rows the options may take (a long option wraps)
 
 
 # ------------------------------------------------------------------ plumbing
@@ -255,7 +278,9 @@ def api_retrying(method, path, body=None, *, still_wanted=None, budget_s=None):
 # herdr and hc are called without a session flag, so they talk to the session the agent inherited.
 
 def run(argv, timeout=5) -> str:
-    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    # errors="replace" (#99): one Latin-1 byte in a diff or a file name raised UnicodeDecodeError, a ValueError
+    # no caller expects, and `diff` died with a traceback for the whole repository.
+    r = subprocess.run(argv, capture_output=True, encoding="utf-8", errors="replace", timeout=timeout)
     if r.returncode != 0:
         raise RuntimeError(f"{' '.join(argv[:2])}: {(r.stderr or r.stdout).strip()[:200]}")
     return r.stdout
@@ -418,23 +443,52 @@ def unseen(term) -> bool:
 
 
 def prompt_block(lines: list):
-    """The permission prompt on screen: up to 8 lines above "Do you want to …" and its numbered
-    options. None when no prompt is showing."""
+    """The permission dialog Claude Code is showing: {"context": the dialog's lines above the question
+    (title, description, the command or diff), "question", "options"}. None when there is none.
+
+    Layout as captured from Claude Code 2.1.328 (2026-11-19): a full-width rule, the title ("Bash command"),
+    a description, the command or diff between two dashed rules, "Do you want to …?", the numbered options
+    (a long one wraps onto indented rows), a blank row and a hint row ("Esc to cancel · Tab to amend").
+
+    - Only the live dialog counts (#93): it is the last thing on the screen. Under its options there may be
+      a few rows of Claude Code's own (the key hints; its list of background agents), but nothing that
+      belongs to another dialog or to the prompt box: no rule, no numbered option, no "❯", no second question.
+      The same words higher up (model output, an echoed file, a plan's text inside a dialog with other
+      wording) are followed by exactly those, so they are not a prompt; "1" there could mean anything.
+    - The context is read up to the dialog's top rule, across blank rows and the dashed rules (#91): stopping
+      at the first blank row sent approvals that showed only the question."""
     idx = [i for i, line in enumerate(lines) if PROMPT_RE.search(line)]
     if not idx:
         return None
     at = idx[-1]
-    end = at + 1
-    while end < len(lines) and (OPTION_RE.match(lines[end]) or not lines[end].strip()) and end - at < 8:
+    options, end, column, gap = [], at + 1, 0, False
+    while end < len(lines) and end - at <= OPTION_ROWS:
+        line = lines[end]
+        if not line.strip(" │"):
+            gap = True
+        elif OPTION_RE.match(line):
+            options.append(line.strip(" │"))
+            column, gap = len(OPTION_HEAD_RE.match(line).group(0)), False
+        elif options and not gap and len(line) - len(line.lstrip()) > column:
+            options[-1] += " " + line.strip(" │")          # the option above, wrapped onto this row
+        else:
+            break
         end += 1
-    options = [l for l in lines[at + 1:end] if OPTION_RE.match(l)]
     if not options:
         return None
-    start = at
-    while start > 0 and at - start < 8 and lines[start - 1].strip() and not set(lines[start - 1].strip()) <= set("─━-╭╮╰╯│ "):
-        start -= 1
-    return {"context": [l.strip(" │") for l in lines[start:at] if l.strip(" │")],
-            "question": lines[at].strip(" │"), "options": [o.strip(" │") for o in options]}
+    below = [line.strip(" │") for line in lines[end:] if line.strip(" │")]
+    if len(below) > FOOT_ROWS or any(set(t) <= TOP_EDGE or set(t) <= DASHES or "❯" in t or OPTION_RE.match(t)
+                                     or PROMPT_RE.search(t) for t in below):
+        return None
+    context, i = [], at - 1
+    while i >= 0 and at - i <= CONTEXT_SCAN and len(context) < CONTEXT_MAX:
+        text = lines[i].strip(" │")
+        if text and set(text) <= TOP_EDGE:
+            break
+        if text and not set(text) <= DASHES:
+            context.append(text)
+        i -= 1
+    return {"context": context[::-1], "question": lines[at].strip(" │"), "options": options}
 
 
 def yes_is_first(prompt) -> bool:
@@ -443,21 +497,98 @@ def yes_is_first(prompt) -> bool:
     return bool(prompt) and any(YES_OPTION_RE.match(o) for o in prompt["options"])
 
 
+def prompt_key(prompt) -> tuple:
+    """What makes a prompt this prompt: the question, the options and what it asks to run (#90). Without
+    whitespace and the highlight mark: the dialog is drawn again, wrapped differently, when the terminal
+    changes size (the phone attaching to the tmux session does that)."""
+    def squeeze(text):
+        return "".join(text.split())
+    return (squeeze(prompt["question"]), [squeeze(re.sub(r"^[❯>]\s*", "", o)) for o in prompt["options"]],
+            squeeze("".join(prompt["context"])))
+
+
 def same_prompt(a, b) -> bool:
-    return bool(a and b) and a["question"] == b["question"] and \
-        [re.sub(r"^[❯>]\s*", "", o) for o in a["options"]] == [re.sub(r"^[❯>]\s*", "", o) for o in b["options"]]
+    """Same question, same options and the same command or diff (#90): comparing only the question and the
+    options let Approve for `ls build` press "1" into a later prompt for another command."""
+    return bool(a and b) and prompt_key(a) == prompt_key(b)
 
 
 # ------------------------------------------------------------------ events
 
-def post_event(kind, title, body=None, *, target=None, push=True, retry=False, **extra):
+EVENTS_PATH = "/api/sshtars/hook/events"
+IDS_MARK = "mcc-event-ids"          # in STATE: MCC stores an event under the id the hook sends (#94)
+
+
+def ids_honoured() -> bool:
+    return (STATE / IDS_MARK).exists()
+
+
+def learn_ids(event_id: str, response):
+    """MCC that knows the hook's ids answers with the id it was sent; an older one answers with its own.
+    Remembered in the state folder, because the call that needs to know is the one whose answer was lost."""
+    try:
+        mark = STATE / IDS_MARK
+        if isinstance(response, dict) and response.get("id") == event_id:
+            if not mark.exists():
+                STATE.mkdir(parents=True, exist_ok=True)
+                mark.write_text(str(round(time.time())))
+        elif mark.exists():
+            mark.unlink()
+    except OSError:
+        pass
+    return response
+
+
+def answer_lost(e) -> bool:
+    """The request may or may not have been handled: a timeout, a response cut short, a 5xx. Sending it
+    again is only safe when MCC stores the event under the hook's id (a repeat is then ignored there)."""
+    if isinstance(e, MCCHTTPError):
+        return e.code >= 500
+    return isinstance(e, (OSError, http.client.HTTPException, ValueError))
+
+
+def stored_event(event_id: str):
+    """The event MCC holds under this id, as a create answer; None when it has none (404)."""
+    try:
+        state = api("GET", f"{EVENTS_PATH}/{event_id}")
+    except MCCHTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+    if not isinstance(state, dict) or state.get("id") != event_id:
+        return None
+    return {"id": event_id, "status": state.get("status"), "recovered": True}
+
+
+def post_event(kind, title, body=None, *, target=None, push=True, retry=False, still_wanted=None, **extra):
     """retry=True only from a detached child (the hooks): waits out an MCC restart. Scripts' notify and
-    ask stay one try, so a caller is never held for minutes."""
-    payload = {"kind": kind, "title": title[:200], "body": (body or "")[:1500], "push": push,
+    ask stay one try, so a caller is never held for minutes.
+
+    The hook names the event (#94): `id` goes with the body, and an MCC that knows about it stores the event
+    under that id and ignores a repeat. Once MCC has answered with the hook's id (learn_ids), a lost answer
+    (a timeout after MCC stored and pushed the approval left Approve/Deny on the phone with no watcher; a
+    502 from Traefik after the store made a second event on the retry) is looked up by id and, when MCC has
+    nothing, sent again under the same id. Until then a timeout is not retried, as before (1.7.3).
+    `still_wanted()` returning False between tries stops them (the prompt on screen changed, #90)."""
+    event_id = uuid.uuid4().hex
+    payload = {"id": event_id, "kind": kind, "title": title[:200], "body": (body or "")[:1500], "push": push,
                "tmux": target, **{k: v for k, v in extra.items() if v is not None}}
-    if retry:
-        return api_retrying("POST", "/api/sshtars/hook/events", payload)
-    return api("POST", "/api/sshtars/hook/events", payload)
+    if not retry:
+        return learn_ids(event_id, api("POST", EVENTS_PATH, payload))
+    deadline = time.time() + EVENT_RETRY_S
+    delay, again = POLL_S, False
+    while True:
+        try:
+            found = stored_event(event_id) if again and ids_honoured() else None
+            return found or learn_ids(event_id, api("POST", EVENTS_PATH, payload))
+        except NET_FAILS as e:
+            if not (not_received(e) or (ids_honoured() and answer_lost(e))) or time.time() + delay > deadline:
+                raise
+            log("mcc-retry", path=EVENTS_PATH, error=str(e), retry_s=delay)
+        time.sleep(delay)
+        delay, again = min(delay * 2, POLL_MAX_S), True
+        if still_wanted and not still_wanted():
+            raise RuntimeError(f"MCC POST {EVENTS_PATH}: no longer wanted while MCC was away")
 
 
 def activity_ticket(sid: str) -> str:
@@ -478,6 +609,8 @@ def activity_current(sid: str, ticket: str) -> bool:
         return True
     try:
         return (STATE / "activity" / sid).read_text() == ticket
+    except FileNotFoundError:
+        return False                # SessionEnd removed it after posting "ended" (#102): nothing older may land
     except OSError:
         return True
 
@@ -488,10 +621,11 @@ def short(text, limit=140) -> str:
 
 
 def post_activity(state, data, *, project=None, target=None, detail=None):
-    """Report one session's state for the Live Activity. Called from a detached child; failures only log."""
+    """Report one session's state for the Live Activity. Called from a detached child; failures only log.
+    Returns this post's ticket (None when nothing was posted), for activity_current()."""
     sid = data.get("session_id") or ""
     if not SESSION_RE.match(sid) or data.get("agent_id"):
-        return
+        return None
     title = data.get("session_title") or (registry_entry(sid) or {}).get("title") or project or "Claude"
     ticket = activity_ticket(sid)
     try:
@@ -499,8 +633,11 @@ def post_activity(state, data, *, project=None, target=None, detail=None):
                      {"session": sid, "state": state, "title": title[:80], "detail": short(detail),
                       "agent": "claude", "cwd": data.get("cwd"), "tmux": target},
                      still_wanted=lambda: activity_current(sid, ticket))
-    except _FAILS as e:
+    except (*_FAILS, http.client.HTTPException) as e:
+        # http.client's errors too (#101): a response cut mid-body (IncompleteRead) escaped, and the event
+        # the caller posts right after this never went out.
         log("activity-failed", state=state, error=str(e))
+    return ticket
 
 
 def session_name(data, project) -> str:
@@ -537,28 +674,131 @@ def close_event(event_id: str, reason: str):
         log("watch-close-failed", event=event_id, error=str(e))
 
 
+class _ReadFailed:
+    """read_prompt()'s answer when the screen could not be read (#97). Not "no prompt": falsy, so
+    same_prompt() is False for it, and told apart with `is READ_FAILED`."""
+
+    def __bool__(self):
+        return False
+
+
+READ_FAILED = _ReadFailed()
+READ_MISSES = 3                     # screen reads that must fail in a row before the watcher gives up (#97)
+
+
 def read_prompt(term):
+    """The prompt on the terminal's screen; None when it shows none; READ_FAILED when the screen could not be
+    read (a slow or failed tmux, hc or herdr call)."""
     try:
         return prompt_block(screen(term))
+    except _FAILS as e:
+        log("screen-read-failed", kind=term.get("kind"), error=str(e))
+        return READ_FAILED
+
+
+def read_prompt_sure(term):
+    """read_prompt(), tried again a few times when the read itself fails."""
+    for attempt in range(READ_MISSES):
+        if attempt:
+            time.sleep(0.5)
+        now = read_prompt(term)
+        if now is not READ_FAILED:
+            return now
+    return READ_FAILED
+
+
+def prompt_still(term, prompt) -> bool:
+    """Is `prompt` still the one on screen? A failed read counts as yes: it says nothing either way."""
+    now = read_prompt(term)
+    return now is READ_FAILED or same_prompt(prompt, now)
+
+
+def pane_in_mode(term) -> bool:
+    """tmux: the pane is in copy mode (someone scrolled up and left), a tree or the clock. capture-pane still
+    shows the program's screen, but keys go to the mode and never reach Claude Code (#95)."""
+    if term["kind"] != "tmux":
+        return False
+    try:
+        return tmux("display-message", "-p", "-t", term["pane"], "#{pane_in_mode}").strip() == "1"
     except _FAILS:
-        return None
+        return False
 
 
-def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, activity=None):
+def leave_mode(term) -> bool:
+    """True when keys will reach the program: the pane is in no mode, or copy mode could be left (only the
+    scroll position is lost; a tree or the clock cannot be left this way)."""
+    if not pane_in_mode(term):
+        return True
+    try:
+        tmux("send-keys", "-t", term["pane"], "-X", "cancel")
+    except _FAILS:
+        pass
+    return not pane_in_mode(term)
+
+
+def still_there(term, prompt, seconds=3.0, step=0.5) -> bool:
+    """After the key: True when the same prompt is still on screen for `seconds` (the key was swallowed)."""
+    seen = False
+    for _ in range(int(seconds / step)):
+        time.sleep(step)
+        now = read_prompt(term)
+        if now is READ_FAILED:
+            continue
+        if not same_prompt(prompt, now):
+            return False
+        seen = True
+    return seen
+
+
+def not_applied(event_id: str, term: dict, status: str, why: str, name=None):
+    """The phone's answer could not be typed (#95). MCC already holds the event as approved or denied, so
+    closing it changes nothing there: the phone is told with a notice instead of being left with "approved"
+    while Claude Code still waits."""
+    close_event(event_id, why)
+    log("watch-not-applied", event=event_id, status=status, reason=why)
+    verb = "Approve" if status == "approved" else "Deny"
+    try:
+        post_event("notify", "Claude still needs approval" + (f" · {name}" if name else ""),
+                   f"{verb} from the phone did not reach the prompt: {why}. Answer it at the terminal.",
+                   target=term, agent="claude", category="approval_required", retry=True)
+    except NET_FAILS as e:
+        log("watch-notice-failed", event=event_id, error=str(e))
+
+
+def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, activity=None, ticket=None, name=None):
     """Poll MCC for the phone's answer and type it into the terminal, but only into the same prompt
     (and, in herdr or herdr-core, only while the agent still says it is blocked). Approve presses "1"
     (Claude Code's Select takes an option's digit whatever is highlighted), Deny presses Escape; the
-    screen is read again right before the key. MCC out of reach: keep polling, backing off, until the
-    approval expires (1.7.2)."""
+    screen is read again right before the key, and once more after it: a key that did not reach the prompt
+    is reported, not logged as applied (#95). MCC out of reach: keep polling, backing off, until the
+    approval expires (1.7.2). `ticket` is the activity ticket of the "waiting" post that went with this
+    approval (#96)."""
     log("watch-start", event=event_id, terminal=describe(term))
-    delay = POLL_S
+    sid = (activity or {}).get("session_id") or ""
+
+    def resumed(detail):
+        # "working" only while "waiting" is still the session's newest state (#96): posted after SessionEnd's
+        # "ended" or a Stop's "done" it left a dead or finished session showing as working.
+        if activity and activity_current(sid, ticket):
+            post_activity("working", activity, target=term, detail=detail)
+
+    delay, misses = POLL_S, 0
     while time.time() < expires:
         time.sleep(min(delay, max(0.0, expires - time.time())))
-        if not same_prompt(prompt, read_prompt(term)):
+        now = read_prompt(term)
+        if now is READ_FAILED:
+            # One failed read out of the ~900 an approval takes is not "the prompt is gone" (#97).
+            misses += 1
+            if misses < READ_MISSES:
+                continue
+            close_event(event_id, "the terminal could not be read")
+            log("watch-closed", event=event_id, reason="terminal unreadable")
+            return
+        misses = 0
+        if not same_prompt(prompt, now):
             close_event(event_id, "answered at the terminal")
             log("watch-closed", event=event_id, reason="prompt gone")
-            if activity:
-                post_activity("working", activity, target=term, detail="answered at the terminal")
+            resumed("answered at the terminal")
             return
         try:
             state = api("GET", f"/api/sshtars/hook/events/{event_id}")
@@ -576,7 +816,10 @@ def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, acti
                 return
             # The poll took time: read the screen again right before the key, and press only into the
             # same prompt. "1" must be Yes (a reject-first or too-short prompt is left alone).
-            now = read_prompt(term)
+            now = read_prompt_sure(term)
+            if now is READ_FAILED:
+                not_applied(event_id, term, status, "the terminal could not be read", name)
+                return
             if not same_prompt(prompt, now):
                 close_event(event_id, "the prompt changed before the answer arrived")
                 log("watch-closed", event=event_id, reason="prompt changed")
@@ -585,13 +828,19 @@ def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, acti
                 close_event(event_id, "option 1 is not Yes; answer it at the terminal")
                 log("watch-closed", event=event_id, reason="option 1 not yes")
                 return
+            if not leave_mode(term):
+                not_applied(event_id, term, status, "the tmux pane is in a mode that takes the keys", name)
+                return
             if status == "approved":
                 press_key(term, "1")
             else:
                 press(term, "esc")
+            if still_there(term, prompt):
+                not_applied(event_id, term, status, "the prompt is still open after the key", name)
+                return
             log("watch-applied", event=event_id, status=status)
-            if activity:
-                post_activity("working", activity, target=term, detail=f"{status} from the phone")
+            if status == "approved":        # nothing after a deny (#96): Escape leaves Claude Code waiting, not working
+                resumed("approved from the phone")
             return
         if status not in ("pending",):
             log("watch-ended", event=event_id, status=status)
@@ -612,7 +861,12 @@ def claude_hook(stdin_text: str):
         return
     if event == "SessionEnd":
         # Claude Code gives SessionEnd hooks about 1.5 s in all: no terminal lookup, straight to the child.
-        detach(lambda: post_activity("ended", data, project=project, detail=data.get("reason") or "session ended"))
+        mark_ended(data)               # one small file; `prompt` must never type into this terminal again (#92)
+
+        def ended():
+            post_activity("ended", data, project=project, detail=data.get("reason") or "session ended")
+            tidy_state(data.get("session_id") or "")
+        detach(ended)
         return
     target = terminal()
     record_session(data, target)
@@ -661,23 +915,34 @@ def permission_prompt(data, cwd, project, target, name=None):
             prompt = prompt_block(screen(target))
         except _FAILS as e:
             log("capture-failed", kind=target["kind"], error=str(e))
-    if not prompt:
-        # A plain terminal, or the prompt is not on screen: the phone can only be told, not answer.
+    shown = [line for line in prompt["context"] if not line.startswith("Tip:")] if prompt else []
+    if not shown:
+        # A plain terminal, the prompt is not on screen, or what it asks to run could not be read (#91): the
+        # phone can only be told, never asked to approve something it cannot show.
         def told():
             post_activity("waiting", data, project=project, target=target, detail=message)
             post_event("notify", f"Claude needs approval · {name}", f"{message}. Answer it at the terminal.",
                        target=target, cwd=cwd, agent="claude", category="approval_required", retry=True)
         detach(told)
         return
-    body = "\n".join(prompt["context"][-6:] + [prompt["question"]])
+    body = "\n".join(shown[-6:] + [prompt["question"]])
     expires = time.time() + APPROVAL_TTL_S
 
     def run():
-        post_activity("waiting", data, project=project, target=target, detail=prompt["question"])
+        ticket = post_activity("waiting", data, project=project, target=target, detail=prompt["question"])
+        # The activity post can wait minutes for MCC to come back (1.7.3), and so can the event's own. The
+        # prompt read above may be answered by then, or replaced by one for another command (#90): post it
+        # only while it is still the one on screen.
+        if not prompt_still(target, prompt):
+            log("approval-skipped", reason="the prompt changed before it was posted")
+            if activity_current(data.get("session_id") or "", ticket):
+                post_activity("working", data, project=project, target=target, detail="answered at the terminal")
+            return
         created = post_event("approval", f"Claude needs approval · {name}", body, target=target, cwd=cwd,
                              agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
-                             category="approval_required", retry=True)
-        watch_approval(created["id"], target, prompt, expires, activity=data)
+                             category="approval_required", retry=True,
+                             still_wanted=lambda: prompt_still(target, prompt))
+        watch_approval(created["id"], target, prompt, expires, activity=data, ticket=ticket, name=name)
     detach(run)
 
 
@@ -773,14 +1038,67 @@ def record_session(data, target):
     if not SESSION_RE.match(sid) or data.get("agent_id"):
         return
     try:
-        SESSIONS.mkdir(parents=True, exist_ok=True)
-        tmp = SESSIONS / f".{sid}.tmp"
         title = data.get("session_title") or (registry_entry(sid) or {}).get("title")
-        tmp.write_text(json.dumps({"session": sid, "transcript": data.get("transcript_path"), "cwd": data.get("cwd"),
-                                   "terminal": target, "title": title, "ts": round(time.time(), 3)}))
-        tmp.replace(SESSIONS / f"{sid}.json")
+        save_entry({"session": sid, "transcript": data.get("transcript_path"), "cwd": data.get("cwd"),
+                    "terminal": target, "title": title, "ts": round(time.time(), 3)})
     except OSError as e:
         log("session-record-failed", error=str(e))
+
+
+def save_entry(entry: dict):
+    SESSIONS.mkdir(parents=True, exist_ok=True)
+    tmp = SESSIONS / f".{entry['session']}.tmp"
+    tmp.write_text(json.dumps(entry))
+    tmp.replace(SESSIONS / f"{entry['session']}.json")
+
+
+def mark_ended(data):
+    """SessionEnd: the session's terminal is somebody else's from now on (a shell, or the next session after
+    /clear), so `prompt` must not type into it for this session (#92). The entry stays, for the transcript;
+    any later hook call of the same session (a resume) writes it again without the mark."""
+    sid = data.get("session_id") or ""
+    if not SESSION_RE.match(sid) or data.get("agent_id"):
+        return
+    entry = registry_entry(sid)
+    if not isinstance(entry, dict) or entry.get("session") != sid:
+        return
+    try:
+        save_entry({**entry, "ended": round(time.time(), 3)})
+    except OSError as e:
+        log("session-record-failed", error=str(e))
+
+
+PRUNE_S = 30 * 86400
+
+
+def tidy_state(sid: str):
+    """SessionEnd's child (#102): nothing here was ever deleted (63 session files in 13 days on tars, each
+    stale one a glob over ~/.claude/projects on every `sessions` call). Removes the ended session's open
+    question and activity ticket (an older state still retrying then gives up, see activity_current), every
+    session, question and ticket file not touched for 30 days, and closes folders made before 1.7.4 set its
+    umask."""
+    tickets = STATE / "activity"
+    for path in ((QUESTIONS / f"{sid}.json", tickets / sid) if SESSION_RE.match(sid) else ()):
+        try:
+            path.unlink()
+        except OSError:
+            pass
+    cutoff = time.time() - PRUNE_S
+    for folder in (SESSIONS, QUESTIONS, tickets):
+        try:
+            old = [f for f in folder.iterdir() if f.is_file() and f.stat().st_mtime < cutoff]
+        except OSError:
+            continue
+        for f in old:
+            try:
+                f.unlink()
+            except OSError:
+                pass
+    for path, mode in ((STATE, 0o700), (SESSIONS, 0o700), (QUESTIONS, 0o700), (tickets, 0o700), (LOG, 0o600)):
+        try:
+            os.chmod(path, mode)
+        except OSError:
+            pass
 
 
 QUESTIONS = STATE / "questions"
@@ -806,14 +1124,24 @@ def record_question(data):
         log("question-record-failed", error=str(e))
 
 
-def open_question(sid: str, seen: set, last_prompt: float):
+QUESTION_MOVED_S = 5
+
+
+def open_question(sid: str, seen: set, last_prompt: float, last_row: float = 0.0):
     """The question the session is showing now, as a transcript row; None when its tool call is in the
-    transcript (answered or cancelled), a prompt was typed after it, or it is a day old."""
+    transcript (answered or cancelled), a prompt was typed after it, the conversation went on after it, or
+    it is a day old.
+
+    "Went on" (#98): while a question is open Claude Code waits and writes no conversation row, so a row
+    newer than the question means it was answered, even when the answer itself is no longer among the rows
+    read (a turn that wrote more than the 400 KB tail `sessions` reads showed the question as open for a day)."""
     try:
         q = json.loads((QUESTIONS / f"{sid}.json").read_text())
     except (OSError, ValueError):
         return None
     if q.get("id") in seen or q.get("ts", 0) < last_prompt or time.time() - q.get("ts", 0) > QUESTION_TTL_S:
+        return None
+    if last_row > q.get("ts", 0) + QUESTION_MOVED_S:
         return None
     return {"id": q["id"], "role": "question", "tool": "AskUserQuestion", "text": q["questions"][0]["question"],
             "ok": None, "questions": q["questions"], "answers": []}
@@ -951,7 +1279,7 @@ def reduce_transcript(rows: list, limit: int, agents=None) -> dict:
     """Claude Code JSONL rows → title, model, branch, state and the last `limit` chat rows. `agents`
     (tool call ids → subagents()) describes the Agent tool calls among the rows that are kept."""
     msgs, tools = [], {}
-    last_prompt = 0.0
+    last_prompt = last_row = 0.0
     title = prompt_title = model = branch = cwd = context = None
     state = "idle"
     for r in rows:
@@ -973,6 +1301,7 @@ def reduce_transcript(rows: list, limit: int, agents=None) -> dict:
         if kind == "user":
             if r.get("isMeta"):
                 continue
+            last_row = max(last_row, row_time(r))
             blocks = content if isinstance(content, list) else []
             for b in blocks:
                 if isinstance(b, dict) and b.get("type") == "tool_result":
@@ -995,6 +1324,7 @@ def reduce_transcript(rows: list, limit: int, agents=None) -> dict:
                 last_prompt = row_time(r)
                 state = "working"
             continue
+        last_row = max(last_row, row_time(r))
         model = message.get("model") or model
         usage = message.get("usage")
         if isinstance(usage, dict):         # tokens the model saw this turn = how full the context is
@@ -1041,14 +1371,15 @@ def reduce_transcript(rows: list, limit: int, agents=None) -> dict:
     if model and model.startswith("<"):
         model = None
     return {"title": title or prompt_title or first_prompt, "model": model, "branch": branch, "cwd": cwd,
-            "state": state, "context": context, "messages": msgs, "seen": set(tools), "last_prompt": last_prompt}
+            "state": state, "context": context, "messages": msgs, "seen": set(tools), "last_prompt": last_prompt,
+            "last_row": last_row}
 
 
 def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int, details=False) -> dict:
     folder = path.with_suffix("") / "subagents"
     info = reduce_transcript(tail_rows(path, rows_bytes), limit,
                              (lambda wanted: subagents(folder, wanted)) if details else None)
-    asked = open_question(sid, info.pop("seen"), info.pop("last_prompt"))
+    asked = open_question(sid, info.pop("seen"), info.pop("last_prompt"), info.pop("last_row"))
     if asked:
         info["messages"].append(asked)
         info["state"] = "asking"
@@ -1059,7 +1390,7 @@ def session_info(sid: str, path: Path, reg: dict, rows_bytes: int, limit: int, d
     title = " ".join((info["title"] or "").split())[:120]
     return {"session": sid, "title": title, "cwd": info["cwd"], "project": Path(info["cwd"] or "").name or None,
             "model": info["model"], "branch": info["branch"], "state": info["state"], "updated": round(mtime, 3),
-            "context": info["context"],
+            "context": info["context"], "ended": bool((reg.get(sid) or {}).get("ended")),
             "terminal": term, "where": describe(term) if term else None, "messages": info["messages"]}
 
 
@@ -1127,15 +1458,58 @@ def type_into(term: dict, text: str):
         run([*herdr, "pane", "send-keys", term["pane"], "enter"])
 
 
+SHELLS = {"bash", "zsh", "sh", "fish", "dash", "ksh", "tcsh", "csh", "nu", "login"}
+
+
+def same_terminal(a, b) -> bool:
+    """Two registry terminals are the same place. A tmux pane id is one pane whatever its session is called
+    now; herdr's pane ids repeat across its sessions."""
+    if not a or not b or a.get("kind") != b.get("kind") or a.get("pane") != b.get("pane"):
+        return False
+    return a["kind"] != "herdr" or (a.get("session") or "default") == (b.get("session") or "default")
+
+
+def prompt_refusal(entry: dict, reg: dict):
+    """Why `prompt` must not type for this session, as a sentence for the app's composer; None when it may.
+    The text is typed with Enter into a terminal: once the session is gone that terminal is a shell, which
+    runs what it is given, or the next conversation after /clear (#92)."""
+    term = entry["terminal"]
+    if entry.get("ended"):
+        return "This session has ended, so nothing was sent. Its terminal may be running something else now."
+    for other in reg.values():
+        if other.get("session") != entry.get("session") and (other.get("ts") or 0) > (entry.get("ts") or 0) \
+                and same_terminal(other.get("terminal"), term):
+            return "Another Claude Code session now runs in this session's terminal, so nothing was sent."
+    if term["kind"] == "tmux":
+        # A session that was killed leaves no SessionEnd behind. Refused only when sure: a shell in front and
+        # no claude process on the pane's terminal (a wrapper script runs claude under a shell).
+        try:
+            command, tty = tmux("display-message", "-p", "-t", term["pane"],
+                                "#{pane_current_command}|#{pane_tty}").strip().rsplit("|", 1)
+            running = run(["ps", "-t", tty.replace("/dev/", "", 1), "-o", "command="]) if command.lstrip("-") in SHELLS else "claude"
+        except _FAILS:
+            return None             # a pane that is gone fails in type_into, with its own message
+        if "claude" not in running.lower():
+            return f"The session's terminal is at a shell prompt ({command}), not in Claude Code, so nothing was sent."
+    return None
+
+
 def cmd_prompt(args):
     if not SESSION_RE.match(args.session):
         print("bad session id", file=sys.stderr); return 2
     text = " ".join(CONTROL_RE.sub(" ", args.text).split())
     if not text:
         print("nothing to send", file=sys.stderr); return 2
-    term = (registry().get(args.session) or {}).get("terminal")
+    reg = registry()
+    entry = reg.get(args.session) or {}
+    term = entry.get("terminal")
     if not term:
         print("no terminal known for this session yet (recorded when one of its turns ends)", file=sys.stderr)
+        return 1
+    refusal = prompt_refusal(entry, reg)
+    if refusal:
+        log("prompt-refused", session=args.session, terminal=describe(term), reason=refusal)
+        print(refusal, file=sys.stderr)
         return 1
     try:
         type_into(term, text[:4000])
@@ -1387,7 +1761,9 @@ EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
 def git(cwd: str, *args, timeout=10) -> str:
     # Fixed output whatever the user's git config says (diff.mnemonicPrefix, quotepath, external diff).
-    return run(["git", "-c", "core.quotepath=false", "-C", cwd, *args], timeout)
+    # --no-optional-locks: `status` and `diff` only read. They otherwise rewrite .git/index when its cached
+    # stat data is stale, and under this hook's umask (#102) that file would come out 0600.
+    return run(["git", "--no-optional-locks", "-c", "core.quotepath=false", "-C", cwd, *args], timeout)
 
 
 def unquote_path(path: str) -> str:
@@ -1878,8 +2254,32 @@ EVENTS = {"Notification": 30, "Stop": 30, "UserPromptSubmit": 30, "SessionEnd": 
 MATCHERS = {"PreToolUse": "AskUserQuestion"}      # only the tool calls the hook needs (an open question)
 
 
+OUR_COMMAND_RE = re.compile(r"""sshtars-hook["']?\s+claude-hook(\s*\|\|\s*true)?\s*$""")
+
+
+def _our_command(hook) -> bool:
+    """A hook this tool wrote: its command ends in `sshtars-hook claude-hook` (any path, quoted or not, with
+    or without the `|| true`). A command that only mentions the name is somebody else's (#100)."""
+    return isinstance(hook, dict) and bool(OUR_COMMAND_RE.search(hook.get("command") or ""))
+
+
 def _ours(entry) -> bool:
-    return any("sshtars-hook" in (h.get("command") or "") for h in entry.get("hooks", []))
+    hooks = entry.get("hooks") if isinstance(entry, dict) else None
+    return any(_our_command(h) for h in hooks if isinstance(hooks, list)) if isinstance(hooks, list) else False
+
+
+def without_ours(entries) -> list:
+    """An event's hook groups without this tool's own commands. Another hook in the same group stays; the
+    group goes only when nothing is left in it (#100: the whole group was dropped)."""
+    out = []
+    for entry in entries if isinstance(entries, list) else []:
+        if not _ours(entry):
+            out.append(entry)
+            continue
+        rest = [h for h in entry["hooks"] if not _our_command(h)]
+        if rest:
+            out.append({**entry, "hooks": rest})
+    return out
 
 
 def hook_command(exe: str) -> str:
@@ -1890,7 +2290,7 @@ def hook_command(exe: str) -> str:
     if exe.startswith(home + "/") and not set(exe) & set('"$`\\'):
         path = '"$HOME' + exe[len(home):] + '"'
         return f"[ -x {path} ] && {path} claude-hook || true"
-    return f"{exe} claude-hook"
+    return f"{shlex.quote(exe)} claude-hook"         # quoted (#100): a space in the path broke every hook event
 
 
 def cmd_install_claude(args, remove=False):
@@ -1906,7 +2306,7 @@ def cmd_install_claude(args, remove=False):
         print(f"backup      {backup}")
     hooks = settings.setdefault("hooks", {})
     for event in EVENTS:
-        entries = [e for e in hooks.get(event, []) if not _ours(e)]
+        entries = without_ours(hooks.get(event, []))
         if not remove:
             entry = {"hooks": [{"type": "command", "command": hook_command(exe), "timeout": EVENTS[event]}]}
             if event in MATCHERS:
@@ -1930,6 +2330,9 @@ def cmd_install_claude(args, remove=False):
 
 
 def main(argv=None):
+    # Session titles, working folders, transcript paths and question text are written under STATE: for this
+    # user only (#102; they were 0644 in 0755 folders).
+    os.umask(0o077)
     p = argparse.ArgumentParser(prog="sshtars-hook", description=__doc__.split("\n")[0])
     p.add_argument("--version", action="version", version=VERSION)
     sub = p.add_subparsers(dest="cmd", required=True)

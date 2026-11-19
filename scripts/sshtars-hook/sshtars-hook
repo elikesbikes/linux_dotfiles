@@ -85,6 +85,12 @@ retries with backoff until the approval expires) and makes `ask` exit 4, not 1; 
 `--`, so a prompt starting with "-" is typed, not read as an option; MCC and usage API calls refuse redirects (urllib
 would follow one and send the Authorization header along); `answer` presses Enter after a digit only for a question
 with previews, after the screen has redrawn, never as a guess.
+
+1.7.3 (fix, sshtars-ios#49): an MCC deploy restarts the runner for about two minutes, and every event and Live
+Activity state posted in that window was lost (HTTP 502). The hooks' detached children now retry what MCC certainly
+never received (502/503/504, a refused or reset connection; not a timeout, which may have been stored) for up to
+3 minutes, backing off 2 s → 30 s. An older activity state gives up once a newer one for the same session was posted.
+`notify` and `ask` from a script still try once.
 """
 import argparse
 import calendar
@@ -101,7 +107,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.7.2"
+VERSION = "1.7.3"
 DEFAULT_URL = "https://cooper.home.elikesbikes.com"   # hailmary's MCC runner through Traefik, HTTPS (1.7.1)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -196,7 +202,47 @@ def api(method: str, path: str, body=None, cfg=None, timeout=10):
             detail = json.loads(e.read() or b"{}").get("error", "")
         except ValueError:
             detail = ""
-        raise RuntimeError(f"MCC {method} {path}: HTTP {e.code} {detail}".strip()) from None
+        raise MCCHTTPError(e.code, f"MCC {method} {path}: HTTP {e.code} {detail}".strip()) from None
+
+
+class MCCHTTPError(RuntimeError):
+    """MCC (or Traefik in front of it) answered with an error status."""
+
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
+EVENT_RETRY_S = float(os.environ.get("SSHTARS_HOOK_EVENT_RETRY_S", "180"))   # 1.7.3, sshtars-ios#49
+
+
+def not_received(e) -> bool:
+    """True when MCC certainly never handled the request, so sending it again can't make a duplicate:
+    Traefik's 502/503/504 while the runner restarts for a deploy, or a connection that was refused or
+    reset before any answer. A timeout is not one of them: the event may have been stored."""
+    if isinstance(e, MCCHTTPError):
+        return e.code in (502, 503, 504)
+    reason = getattr(e, "reason", e)                    # URLError wraps the socket error
+    return isinstance(reason, (ConnectionRefusedError, ConnectionResetError, ConnectionAbortedError))
+
+
+def api_retrying(method, path, body=None, *, still_wanted=None, budget_s=None):
+    """api() for the detached children (1.7.3, sshtars-ios#49): an MCC deploy restarts the runner for about
+    two minutes and every event in that window was lost. Retries what `not_received` allows, backing off
+    2 s → 30 s, for up to EVENT_RETRY_S. `still_wanted()` returning False stops early (a newer state)."""
+    deadline = time.time() + (EVENT_RETRY_S if budget_s is None else budget_s)
+    delay = POLL_S
+    while True:
+        try:
+            return api(method, path, body)
+        except NET_FAILS as e:
+            if not not_received(e) or time.time() + delay > deadline:
+                raise
+            log("mcc-retry", path=path, error=str(e), retry_s=delay)
+        time.sleep(delay)
+        delay = min(delay * 2, POLL_MAX_S)
+        if still_wanted and not still_wanted():
+            raise RuntimeError(f"MCC {method} {path}: superseded while MCC was away")
 
 
 # ------------------------------------------------------------------ terminals: tmux, herdr, herdr-core
@@ -404,10 +450,36 @@ def same_prompt(a, b) -> bool:
 
 # ------------------------------------------------------------------ events
 
-def post_event(kind, title, body=None, *, target=None, push=True, **extra):
+def post_event(kind, title, body=None, *, target=None, push=True, retry=False, **extra):
+    """retry=True only from a detached child (the hooks): waits out an MCC restart. Scripts' notify and
+    ask stay one try, so a caller is never held for minutes."""
     payload = {"kind": kind, "title": title[:200], "body": (body or "")[:1500], "push": push,
                "tmux": target, **{k: v for k, v in extra.items() if v is not None}}
+    if retry:
+        return api_retrying("POST", "/api/sshtars/hook/events", payload)
     return api("POST", "/api/sshtars/hook/events", payload)
+
+
+def activity_ticket(sid: str) -> str:
+    """Marks this session's newest activity post, so an older one still retrying gives up instead of
+    landing after it (a 'working' arriving after 'done' would leave the Live Activity wrong)."""
+    ticket = str(time.time_ns())
+    try:
+        d = STATE / "activity"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / sid).write_text(ticket)
+    except OSError:
+        return ""
+    return ticket
+
+
+def activity_current(sid: str, ticket: str) -> bool:
+    if not ticket:
+        return True
+    try:
+        return (STATE / "activity" / sid).read_text() == ticket
+    except OSError:
+        return True
 
 
 def short(text, limit=140) -> str:
@@ -421,10 +493,12 @@ def post_activity(state, data, *, project=None, target=None, detail=None):
     if not SESSION_RE.match(sid) or data.get("agent_id"):
         return
     title = data.get("session_title") or (registry_entry(sid) or {}).get("title") or project or "Claude"
+    ticket = activity_ticket(sid)
     try:
-        api("POST", "/api/sshtars/hook/activity",
-            {"session": sid, "state": state, "title": title[:80], "detail": short(detail), "agent": "claude",
-             "cwd": data.get("cwd"), "tmux": target})
+        api_retrying("POST", "/api/sshtars/hook/activity",
+                     {"session": sid, "state": state, "title": title[:80], "detail": short(detail),
+                      "agent": "claude", "cwd": data.get("cwd"), "tmux": target},
+                     still_wanted=lambda: activity_current(sid, ticket))
     except _FAILS as e:
         log("activity-failed", state=state, error=str(e))
 
@@ -561,7 +635,7 @@ def claude_hook(stdin_text: str):
             def waiting():
                 post_activity("waiting", data, project=project, target=target, detail=msg)
                 post_event("notify", f"Claude is waiting · {name}", msg, target=target,
-                           push=True, cwd=cwd, agent="claude", category="waiting")
+                           push=True, cwd=cwd, agent="claude", category="waiting", retry=True)
             detach(waiting)
         return
     if event == "Stop":
@@ -574,7 +648,7 @@ def claude_hook(stdin_text: str):
         def finished():
             post_activity("done", data, project=project, target=target, detail=text.split("\n\n")[-1])
             post_event("notify", f"Claude finished · {name}", text[-600:], target=target,
-                       push=unseen(target), cwd=cwd, agent="claude", category="task_complete")
+                       push=unseen(target), cwd=cwd, agent="claude", category="task_complete", retry=True)
         detach(finished)
 
 
@@ -592,7 +666,7 @@ def permission_prompt(data, cwd, project, target, name=None):
         def told():
             post_activity("waiting", data, project=project, target=target, detail=message)
             post_event("notify", f"Claude needs approval · {name}", f"{message}. Answer it at the terminal.",
-                       target=target, cwd=cwd, agent="claude", category="approval_required")
+                       target=target, cwd=cwd, agent="claude", category="approval_required", retry=True)
         detach(told)
         return
     body = "\n".join(prompt["context"][-6:] + [prompt["question"]])
@@ -602,7 +676,7 @@ def permission_prompt(data, cwd, project, target, name=None):
         post_activity("waiting", data, project=project, target=target, detail=prompt["question"])
         created = post_event("approval", f"Claude needs approval · {name}", body, target=target, cwd=cwd,
                              agent="claude", tool=message, expires_s=APPROVAL_TTL_S,
-                             category="approval_required")
+                             category="approval_required", retry=True)
         watch_approval(created["id"], target, prompt, expires, activity=data)
     detach(run)
 

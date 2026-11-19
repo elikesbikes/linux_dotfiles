@@ -154,6 +154,7 @@ def cmd_list(args):
         if len(rows) < 100 or not args.all:
             break
         page += 1
+    sys.stdout.flush()
     print(f"({shown} shown{'' if args.all else '; --all for every page'})", file=sys.stderr)
 
 

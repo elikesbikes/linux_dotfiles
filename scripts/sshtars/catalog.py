@@ -16,8 +16,13 @@ with --device <name> (the broker passes it) that name is printed as "SSHTars <na
     catalog.py --device X   -> same, with the shared device key name turned into X's own key title
     catalog.py --permitopen -> permitopen="host:port",... for devices' authorized_keys lines
 
-Source: sshtars-ios repo tools/broker/catalog.py.
+`hostname` and `port` end up inside permitopen="host:port" in hailmary's authorized_keys (refresh-permitopen), so
+they are checked strictly (sshtars-ios #1): a hostname is DNS labels or an IPv4 address (letters, digits, dots and
+hyphens) or an IPv6 address in brackets, a port a whole number 1-65535. Anything else fails the whole catalog.
+
+Source: sshtars-ios repo tools/broker/catalog.py. Tests: tools/broker/test_catalog.py.
 """
+import ipaddress
 import json
 import os
 import re
@@ -30,6 +35,8 @@ MCC = os.path.expanduser("~/devops/projects/mcc")
 GROUP_KEYS = {"name", "parent", "username", "port", "key", "via_hailmary"}
 HOST_KEYS = {"label", "hostname", "group", "port", "username", "key", "tags", "via_hailmary"}
 DEVICE_KEY = "SSHTars device identity"
+LABEL_RE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
+IPV6_RE = re.compile(r"\[([0-9A-Fa-f:.]{2,45})\]")      # no zone ids: "%" could carry anything
 
 
 def fail(message):
@@ -49,6 +56,30 @@ def load_note():
     if out.returncode != 0:
         fail(f"could not read {NOTE} from the vault: {out.stderr.strip()[:200]}")
     return out.stdout
+
+
+def valid_hostname(value) -> bool:
+    """DNS name or IPv4 (labels of letters, digits and inner hyphens, joined by dots), or [IPv6]."""
+    if not isinstance(value, str) or not value or len(value) > 253:
+        return False
+    v6 = IPV6_RE.fullmatch(value)
+    if v6:
+        try:
+            ipaddress.IPv6Address(v6.group(1))
+            return True
+        except ValueError:
+            return False
+    return all(LABEL_RE.fullmatch(label) for label in value.split("."))
+
+
+def valid_port(value) -> bool:
+    # bool is an int in Python (YAML `port: yes`); a string "22" is refused too: the note writes numbers.
+    return isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 65535
+
+
+def check_port(entry, what):
+    if entry.get("port") is not None and not valid_port(entry["port"]):
+        fail(f"{what}: port must be a whole number from 1 to 65535, not {entry['port']!r}")
 
 
 def parse(text):
@@ -74,6 +105,7 @@ def parse(text):
             fail(f"group {g['name']}: unknown field(s) {sorted(unknown)}")
         if g["name"] in names:
             fail(f"group {g['name']} is listed twice")
+        check_port(g, f"group {g['name']}")
         names.add(g["name"])
     for g in groups:
         if g.get("parent") and g["parent"] not in names:
@@ -92,6 +124,9 @@ def parse(text):
             fail(f"host {h['label']}: group {h['group']} isn't a group")
         h["tags"] = [str(t) for t in (h.get("tags") or [])]
         h["hostname"] = str(h["hostname"])
+        if not valid_hostname(h["hostname"]):
+            fail(f"host {h['label']}: hostname {h['hostname'][:80]!r} is not a DNS name, an IPv4 address or an [IPv6] address")
+        check_port(h, f"host {h['label']}")
     return {"version": 1, "groups": groups, "hosts": hosts}
 
 
@@ -115,6 +150,8 @@ def permitopen(doc):
     for h in doc["hosts"]:
         if effective(h, groups, "via_hailmary", False):
             target = f'{h["hostname"]}:{effective(h, groups, "port", 22)}'
+            if not re.fullmatch(r"[A-Za-z0-9.\-\[\]:]+:[0-9]{1,5}", target):      # parse() checked; belt and braces
+                fail(f"host {h['label']}: refusing permitopen target {target[:80]!r}")
             if target not in targets:
                 targets.append(target)
     return ",".join(f'permitopen="{t}"' for t in targets)

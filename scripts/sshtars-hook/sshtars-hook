@@ -35,8 +35,9 @@ fires the Notification hook (`notification_type: permission_prompt`). This hook 
 from the terminal's screen, posts it as an approval, and leaves a detached watcher behind. The terminal
 prompt stays usable the whole time. The watcher polls MCC; on the phone's answer it re-reads the screen
 and, only if the same prompt is still there (and herdr or herdr-core still report the agent blocked),
-presses Enter (the highlighted "Yes") or Escape ("No"). If the prompt goes away first (answered at the
-desk), the approval is closed on MCC.
+presses "1" ("Yes", by its number; 1.7.2, was Enter on whatever was highlighted) or Escape ("No"), reading the
+screen once more right before the key. If the prompt goes away first (answered at the desk), the approval is
+closed on MCC.
 
 Credentials: the host's own MCC caller token (`sshtars-hook-<host>`), read at run time from Proton Pass
 item "MCC - MCC_TOKEN_SSHTARS_HOOK_<HOST>" through ~/scripts/proton-pass/pass-secrets.sh (TPM-sealed PAT
@@ -76,9 +77,18 @@ of plain HTTP to :5679 on the LAN, so the token, the prompt text and the phone's
 clear and nobody in between can answer "approved" (MCC security audit run 4 follow-up). It needs DNS: when the
 router's DNS fails the hook logs the failure and the phone gets nothing; Claude Code at the desk is unaffected.
 A hook must never break the agent: every failure is logged and the hook exits 0 with no output.
+
+1.7.2 (fixes, sshtars-ios #2 #8 #10 #11 #12): the phone's Approve presses "1" (Claude Code's Select picks an option
+by its digit, whatever is highlighted) and only after re-reading the screen right before the key and finding the same
+prompt with "1. Yes" (Deny stays Escape); a network error while polling MCC no longer kills the approval watcher (it
+retries with backoff until the approval expires) and makes `ask` exit 4, not 1; text typed into tmux or hc goes after
+`--`, so a prompt starting with "-" is typed, not read as an option; MCC and usage API calls refuse redirects (urllib
+would follow one and send the Authorization header along); `answer` presses Enter after a digit only for a question
+with previews, after the screen has redrawn, never as a guess.
 """
 import argparse
 import calendar
+import http.client
 import json
 import os
 import re
@@ -91,7 +101,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.7.1"
+VERSION = "1.7.2"
 DEFAULT_URL = "https://cooper.home.elikesbikes.com"   # hailmary's MCC runner through Traefik, HTTPS (1.7.1)
 STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "sshtars-hook"
 LOG = STATE / "hook.log"
@@ -100,8 +110,10 @@ AWAY_S = int(os.environ.get("SSHTARS_HOOK_AWAY_S", "60"))          # no keystrok
 APPROVAL_TTL_S = int(os.environ.get("SSHTARS_HOOK_APPROVAL_TTL_S", "1800"))
 POLL_S = 2.0
 SEEN_WAIT_S = int(os.environ.get("SSHTARS_HOOK_SEEN_WAIT_S", "20"))   # herdr/hc: time to look before a push
+POLL_MAX_S = 30.0                   # backoff ceiling while MCC can't be reached (1.7.2)
 PROMPT_RE = re.compile(r"Do you want to (proceed|make this edit|create|allow|run)", re.I)
 OPTION_RE = re.compile(r"^\s*[❯>]?\s*\d\.\s+\S")
+YES_OPTION_RE = re.compile(r"^[❯>]?\s*1\.\s+Yes\b")
 
 
 # ------------------------------------------------------------------ plumbing
@@ -150,6 +162,22 @@ def token(cfg) -> str:
     return value
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse every redirect (1.7.2). urllib's own handler follows one and copies every request header but the
+    content ones, the bearer token included, to wherever it points; MCC never redirects these calls. Returning
+    None makes urllib raise the 3xx as an HTTPError."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+OPENER = urllib.request.build_opener(NoRedirect)
+
+# What a call to MCC can fail with: our own RuntimeError (HTTP status, no token), the network (URLError,
+# TimeoutError and every socket error are OSErrors), a broken HTTP exchange, or a body that isn't JSON.
+NET_FAILS = (RuntimeError, OSError, http.client.HTTPException, ValueError)
+
+
 def api(method: str, path: str, body=None, cfg=None, timeout=10):
     cfg = cfg or config()
     data = json.dumps(body).encode() if body is not None else None
@@ -159,9 +187,11 @@ def api(method: str, path: str, body=None, cfg=None, timeout=10):
     if data is not None:
         req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with OPENER.open(req, timeout=timeout) as resp:
             return json.loads(resp.read() or b"{}")
     except urllib.error.HTTPError as e:
+        if 300 <= e.code < 400:
+            raise RuntimeError(f"MCC {method} {path}: HTTP {e.code} redirect refused") from None
         try:
             detail = json.loads(e.read() or b"{}").get("error", "")
         except ValueError:
@@ -361,6 +391,12 @@ def prompt_block(lines: list):
             "question": lines[at].strip(" │"), "options": [o.strip(" │") for o in options]}
 
 
+def yes_is_first(prompt) -> bool:
+    """Option 1 is "Yes". Claude Code can list the reject option first (it holds the first row then), and a
+    terminal too short for the prompt offers only No: pressing "1" must approve, or nothing is pressed."""
+    return bool(prompt) and any(YES_OPTION_RE.match(o) for o in prompt["options"])
+
+
 def same_prompt(a, b) -> bool:
     return bool(a and b) and a["question"] == b["question"] and \
         [re.sub(r"^[❯>]\s*", "", o) for o in a["options"]] == [re.sub(r"^[❯>]\s*", "", o) for o in b["options"]]
@@ -419,35 +455,66 @@ def detach(fn, *args):
     os._exit(0)
 
 
+def close_event(event_id: str, reason: str):
+    """Close the approval on MCC; a failure is only logged (the watcher is ending anyway)."""
+    try:
+        api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": reason})
+    except NET_FAILS as e:
+        log("watch-close-failed", event=event_id, error=str(e))
+
+
+def read_prompt(term):
+    try:
+        return prompt_block(screen(term))
+    except _FAILS:
+        return None
+
+
 def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, activity=None):
     """Poll MCC for the phone's answer and type it into the terminal, but only into the same prompt
-    (and, in herdr or herdr-core, only while the agent still says it is blocked)."""
+    (and, in herdr or herdr-core, only while the agent still says it is blocked). Approve presses "1"
+    (Claude Code's Select takes an option's digit whatever is highlighted), Deny presses Escape; the
+    screen is read again right before the key. MCC out of reach: keep polling, backing off, until the
+    approval expires (1.7.2)."""
     log("watch-start", event=event_id, terminal=describe(term))
+    delay = POLL_S
     while time.time() < expires:
-        time.sleep(POLL_S)
-        try:
-            now = prompt_block(screen(term))
-        except _FAILS:
-            now = None
-        if not same_prompt(prompt, now):
-            api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "answered at the terminal"})
+        time.sleep(min(delay, max(0.0, expires - time.time())))
+        if not same_prompt(prompt, read_prompt(term)):
+            close_event(event_id, "answered at the terminal")
             log("watch-closed", event=event_id, reason="prompt gone")
             if activity:
                 post_activity("working", activity, target=term, detail="answered at the terminal")
             return
         try:
             state = api("GET", f"/api/sshtars/hook/events/{event_id}")
-        except RuntimeError as e:
-            log("watch-poll-failed", event=event_id, error=str(e))
+            status = state.get("status") if isinstance(state, dict) else None
+        except NET_FAILS as e:
+            log("watch-poll-failed", event=event_id, error=f"{type(e).__name__}: {e}", retry_s=delay)
+            delay = min(delay * 2, POLL_MAX_S)
             continue
-        status = state.get("status")
+        delay = POLL_S
         if status in ("approved", "denied"):
             state = agent_state(term)
             if state not in (None, "blocked"):
-                api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": f"agent is {state}, not waiting"})
+                close_event(event_id, f"agent is {state}, not waiting")
                 log("watch-closed", event=event_id, reason=f"agent {state}")
                 return
-            press(term, "enter" if status == "approved" else "esc")
+            # The poll took time: read the screen again right before the key, and press only into the
+            # same prompt. "1" must be Yes (a reject-first or too-short prompt is left alone).
+            now = read_prompt(term)
+            if not same_prompt(prompt, now):
+                close_event(event_id, "the prompt changed before the answer arrived")
+                log("watch-closed", event=event_id, reason="prompt changed")
+                return
+            if status == "approved" and not yes_is_first(now):
+                close_event(event_id, "option 1 is not Yes; answer it at the terminal")
+                log("watch-closed", event=event_id, reason="option 1 not yes")
+                return
+            if status == "approved":
+                press_key(term, "1")
+            else:
+                press(term, "esc")
             log("watch-applied", event=event_id, status=status)
             if activity:
                 post_activity("working", activity, target=term, detail=f"{status} from the phone")
@@ -455,7 +522,7 @@ def watch_approval(event_id: str, term: dict, prompt: dict, expires: float, acti
         if status not in ("pending",):
             log("watch-ended", event=event_id, status=status)
             return
-    api("POST", f"/api/sshtars/hook/events/{event_id}/close", {"reason": "expired on the host"})
+    close_event(event_id, "expired on the host")
     log("watch-expired", event=event_id)
 
 
@@ -562,13 +629,21 @@ def cmd_ask(args):
         answer = input(f"{args.question} [y/N] ").strip().lower()
         return 0 if answer in ("y", "yes") else 1
     deadline = time.time() + args.timeout
+    delay, failed = POLL_S, None
     while time.time() < deadline:
-        time.sleep(POLL_S)
+        time.sleep(min(delay, max(0.0, deadline - time.time())))
         try:
             state = api("GET", f"/api/sshtars/hook/events/{r['id']}")
-        except RuntimeError as e:
-            log("ask-poll-failed", error=str(e))
+            if not isinstance(state, dict):
+                raise ValueError("MCC answered something other than an object")
+        except NET_FAILS as e:
+            # 1.7.2: the network (URLError, timeouts) is retried with backoff too, and when the answer
+            # could never be read the exit is 4 (error), never 1 (denied) from a traceback.
+            failed = f"{type(e).__name__}: {e}"
+            log("ask-poll-failed", error=failed, retry_s=delay)
+            delay = min(delay * 2, POLL_MAX_S)
             continue
+        delay, failed = POLL_S, None
         if state.get("status") == "approved":
             if state.get("choice"):
                 print(state["choice"])
@@ -577,6 +652,9 @@ def cmd_ask(args):
             return 1
         if state.get("status") not in ("pending",):
             return 3
+    if failed:                          # the last word from MCC never came: an error, not "expired"
+        print(f"sshtars-hook: could not read the answer from MCC: {failed}", file=sys.stderr)
+        return 4
     return 3
 
 
@@ -960,15 +1038,17 @@ CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
 def type_into(term: dict, text: str):
-    """Type text into the terminal and press Enter: the same thing a person at the keyboard does."""
+    """Type text into the terminal and press Enter: the same thing a person at the keyboard does. For tmux and
+    hc the text goes after `--` (1.7.2): without it a prompt starting with "-" is read as an option and refused
+    ("unknown flag", "unexpected argument"). herdr 0.9.1's `pane send-text` takes such text as it is and would
+    type a `--` literally, so it gets none (all three checked on tars, 2026-11-18)."""
     if term["kind"] == "tmux":
-        tmux("send-keys", "-t", term["pane"], "-l", text)
+        tmux("send-keys", "-t", term["pane"], "-l", "--", text)
         tmux("send-keys", "-t", term["pane"], "Enter")
     elif term["kind"] == "hc":
-        run(["hc", "send", term["pane"], text])
+        run(["hc", "send", term["pane"], "--", text])
     else:
-        session = term.get("session") or "default"
-        herdr = ["herdr"] if session == "default" else ["herdr", "--session", session]
+        herdr = herdr_argv(term)
         run([*herdr, "pane", "send-text", term["pane"], text])
         run([*herdr, "pane", "send-keys", term["pane"], "enter"])
 
@@ -1022,7 +1102,7 @@ def press_key(term, key: str):
     """key: "enter", "tab" or one character."""
     named = {"enter": "Enter", "tab": "Tab"}
     if term["kind"] == "tmux":
-        tmux("send-keys", "-t", term["pane"], *([named[key]] if key in named else ["-l", key]))
+        tmux("send-keys", "-t", term["pane"], *([named[key]] if key in named else ["-l", "--", key]))
     elif term["kind"] == "hc":
         run(["hc", "keys", term["pane"], key])
     elif key in named:
@@ -1072,16 +1152,26 @@ def shows(view, index: int, question: dict) -> bool:
     return bool(question["options"])
 
 
-def wait_view(term, test, seconds=4.0):
-    """The first question_view() that passes `test`, polling the screen; None when none does in time."""
-    deadline = time.time() + seconds
-    while True:
+def wait_for(term, test, seconds=4.0, step=0.25):
+    """(True, view) for the first question_view() that passes `test`, reading the screen every `step` for
+    about `seconds`; (False, None) when none does in time. The view itself is None once no question shows."""
+    for attempt in range(int(seconds / step) + 1):
+        if attempt:
+            time.sleep(step)
         view = question_view(read_screen(term))
         if test(view):
-            return view
-        if time.time() >= deadline:
-            return None
-        time.sleep(0.3)
+            return True, view
+    return False, None
+
+
+def wait_view(term, test, seconds=4.0):
+    """The first question_view() that passes `test`; None when none does in time."""
+    return wait_for(term, test, seconds)[1]
+
+
+def has_previews(question: dict) -> bool:
+    """With option previews on screen a digit only moves the highlight, and Enter picks it."""
+    return any(o.get("preview") for o in question["options"])
 
 
 def parse_choices(texts: list, questions: list) -> list:
@@ -1118,10 +1208,15 @@ def answer_question(term, questions: list, choices: list):
             press_key(term, "tab")
             continue
         press_key(term, str(picks[0]))
-        time.sleep(0.5)
-        view = question_view(read_screen(term))
-        if shows(view, index, q) and view["chosen"] == picks[0]:      # previews on screen: the digit only moved
+        # 1.7.2: Enter only when the question is known to need it (previews), and only once the screen shows
+        # the highlight on the pick; never as a guess on a screen that hasn't redrawn yet (that Enter landed on
+        # the next question or the prompt line).
+        if has_previews(q):
+            if not wait_view(term, lambda v: shows(v, index, q) and v["chosen"] == picks[0], seconds=2.0):
+                raise RuntimeError(f"option {picks[0]} was not highlighted after its number; finish it in the terminal")
             press_key(term, "enter")
+        elif not wait_for(term, lambda v: not shows(v, index, q), seconds=2.0)[0]:
+            raise RuntimeError(f"option {picks[0]} was pressed but the question is still open; finish it in the terminal")
     if len(questions) > 1 or questions[-1]["multi"]:
         view = wait_view(term, lambda v: v is None or v["review"])
         if view and view["review"]:
@@ -1568,7 +1663,7 @@ def claude_usage() -> dict:
                                                      "anthropic-beta": "oauth-2025-04-20",
                                                      "User-Agent": f"sshtars-hook/{VERSION}"})
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with OPENER.open(req, timeout=10) as r:          # carries the Claude sign-in token: no redirects (1.7.2)
             body = json.loads(r.read())
     except urllib.error.HTTPError as e:
         raise RuntimeError(f"the usage API answered {e.code}")
@@ -1793,7 +1888,13 @@ def main(argv=None):
     if args.cmd == "notify":
         cmd_notify(args); return 0
     if args.cmd == "ask":
-        return cmd_ask(args)
+        # Exit 1 means "denied": anything unexpected must be 4 (error), never a traceback's 1 (1.7.2).
+        try:
+            return cmd_ask(args)
+        except Exception as e:
+            log("ask-failed", error=f"{type(e).__name__}: {e}")
+            print(f"sshtars-hook: {type(e).__name__}: {e}", file=sys.stderr)
+            return 4
     if args.cmd == "doctor":
         return cmd_doctor(args)
     if args.cmd == "status":

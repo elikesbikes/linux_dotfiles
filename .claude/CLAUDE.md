@@ -19,7 +19,7 @@ Do not assume how software behaves. Verify claims with source code, documentatio
 
 **Guard against scope creep.** Work to the agreed plan. When the plan is complete, say so plainly ("the plan is complete") and stop.
 - Anything I do that was not in the plan, I label as **"Outside the plan:"** before doing it, and do it only if the user agrees.
-- Bugs and broken things found along the way are reported, not fixed: add each to the findings backlog (vault `IT/github/adastra/Homelab/projects/Findings Backlog.md`) with date, host, what is wrong and evidence.
+- Bugs and broken things found along the way are reported, not fixed: open a GitLab issue for each (see [Issues and Backlog](#issues-and-backlog--gitlab-user-rule-2026-11-18)) with date, host, what is wrong and evidence.
 - Exception: a **show-stopper** (data loss risk, a security hole being exploited, production down, or something that blocks the plan itself). Then stop, say it is a show-stopper and why, and fix it first.
 
 ## Definition of Done — every change, every project (user rule 2026-11-07)

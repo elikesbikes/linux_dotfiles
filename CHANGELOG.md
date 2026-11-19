@@ -7,6 +7,24 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.18.0] - 2026-11-18
+
+### Added
+- `scripts/gitlab/issue`: open, close, note and list GitLab issues the same way from every session
+  (owner decision 2026-11-18: issues live in GitLab, in the repo that owns the work). Token from the
+  git credential helper; every write logs a `gitlab-issue` syslog line. Docs in
+  `scripts/gitlab/README.md`.
+
+### Changed
+- GitLab: `linux_dotfiles` issues are members only (the repo is public); the same labels exist in
+  every live project; new issues-only project `home-assistant`.
+
+### Tested
+- On tars: `repos`, `list`, `open` (linux_dotfiles#1), the unknown `--host` refusal, the syslog line;
+  anonymous issue list empty while linux_dotfiles#1 exists. Not tested: `fixed`, `close`, `note`, other hosts.
+
+---
+
 ## [v1.15.2] - 2026-11-11
 ## [v1.17.0] - 2026-11-12
 

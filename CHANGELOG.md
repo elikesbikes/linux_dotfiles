@@ -13,8 +13,8 @@ This project follows a pragmatic versioning model inspired by
 - `.claude/CLAUDE.md`: new section **Issues and Backlog — GitLab** (owner rule 2026-11-18). Findings and the
   feature backlog are GitLab issues in the owning repo; a bug fixed at once still gets an issue. The scope rule and
   Definition-of-Done item 4 point there instead of the vault Findings Backlog, which is closed to new rows
-  (vault rev 340) and overridden in project CLAUDE.md files that still name it (reviere#, sshtars-ios#,
-  ntfytars-ios# track updating those with each repo's next release).
+  (vault rev 340) and overridden in project CLAUDE.md files that still name it (reviere#1, sshtars-ios#14,
+  ntfytars-ios#1 track updating those with each repo's next release).
 
 ---
 

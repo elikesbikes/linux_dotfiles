@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""issue - open, close and list GitLab issues the same way from every session and host.
+
+Issues live in the repo that owns the work (rule in ~/.claude/CLAUDE.md, "Issues and Backlog").
+Token: the GitLab credential helper (`git credential fill` for gitlab.home.elikesbikes.com),
+the same one git uses on every host. Every write is logged to syslog (tag `gitlab-issue`),
+which each host ships to Graylog.
+
+  issue open  <repo> "title" [--feature] [--host tars,rocky] [--security] [--owner-action] [--body TEXT|-]
+  issue fixed <repo> "title" --commit SHA [--host ...] [--body TEXT|-]   opened and closed in one go
+  issue close <repo> <iid> [--note TEXT]
+  issue note  <repo> <iid> TEXT
+  issue list  [repo] [--label finding] [--closed] [--all]
+  issue repos                                                              where things go
+
+<repo> is a project path under ecloaiza (mcc, adastra, cooper-ios, home-assistant ...).
+A body of `-` is read from stdin. Never put a secret in a title or body.
+"""
+import argparse
+import json
+import subprocess
+import sys
+import syslog
+import urllib.error
+import urllib.parse
+import urllib.request
+
+HOST = "gitlab.home.elikesbikes.com"
+API = f"https://{HOST}/api/v4"
+OWNER = "ecloaiza"
+HOSTS = ("tars", "rocky", "hailmary", "kipp", "endurance", "gargantua")
+
+ROUTING = """\
+MCC (runner, NOC, Cooper web, domains)          mcc
+an iOS app                                       its <name>-ios repo (cooper-ios, sshtars-ios, ...)
+Reviere web                                      reviere
+Groceries web                                    groceries
+Docker services (Traefik, Authelia, Graylog...)  tutorials
+dotfiles, shell functions, Claude settings       linux_dotfiles
+Hermes                                           hermes-config
+website                                          elikesbikes.com
+Home Assistant                                   home-assistant (issues only)
+no repo (hosts, UniFi, NAS, vault docs, skills)  adastra"""
+
+
+def token():
+    try:
+        out = subprocess.run(["git", "credential", "fill"], input=f"protocol=https\nhost={HOST}\n\n",
+                             capture_output=True, text=True, timeout=60, check=True).stdout
+    except (subprocess.SubprocessError, OSError) as err:
+        sys.exit(f"issue: no GitLab credential ({err})")
+    for line in out.splitlines():
+        if line.startswith("password="):
+            return line[len("password="):]
+    sys.exit("issue: the credential helper returned no token for " + HOST)
+
+
+TOKEN = None
+
+
+def call(method, path, data=None):
+    global TOKEN
+    TOKEN = TOKEN or token()
+    req = urllib.request.Request(f"{API}{path}", method=method,
+                                 data=json.dumps(data).encode() if data is not None else None,
+                                 headers={"PRIVATE-TOKEN": TOKEN, "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read() or b"null")
+    except urllib.error.HTTPError as err:
+        detail = err.read()[:300].decode(errors="replace")
+        sys.exit(f"issue: {method} {path} -> HTTP {err.code} {detail}")
+    except urllib.error.URLError as err:
+        sys.exit(f"issue: cannot reach {HOST}: {err.reason}")
+
+
+def proj(repo):
+    return urllib.parse.quote(repo if "/" in repo else f"{OWNER}/{repo}", safe="")
+
+
+def audit(action, repo, iid, outcome="ok"):
+    syslog.openlog("gitlab-issue")
+    syslog.syslog(syslog.LOG_INFO, f"action={action} repo={repo} iid={iid} outcome={outcome}")
+
+
+def labels(args, kind):
+    out = [kind]
+    for h in filter(None, (args.host or "").split(",")):
+        if h not in HOSTS:
+            sys.exit(f"issue: unknown host {h!r}; known: {', '.join(HOSTS)}")
+        out.append(f"host:{h}")
+    if getattr(args, "security", False):
+        out.append("security")
+    if getattr(args, "owner_action", False):
+        out.append("owner-action")
+    return ",".join(out)
+
+
+def body(args):
+    return sys.stdin.read() if args.body == "-" else (args.body or "")
+
+
+def show(i):
+    return f"{i['references']['full']}  {i['state']}  {','.join(i['labels'])}  {i['title']}\n    {i['web_url']}"
+
+
+def cmd_open(args):
+    i = call("POST", f"/projects/{proj(args.repo)}/issues", {
+        "title": args.title, "description": body(args),
+        "labels": labels(args, "feature" if args.feature else "finding")})
+    audit("open", args.repo, i["iid"])
+    print(show(i))
+
+
+def cmd_fixed(args):
+    text = body(args)
+    text = (text + "\n\n" if text else "") + f"**Fixed at once** by {args.commit}."
+    i = call("POST", f"/projects/{proj(args.repo)}/issues",
+             {"title": args.title, "description": text, "labels": labels(args, "finding")})
+    i = call("PUT", f"/projects/{proj(args.repo)}/issues/{i['iid']}", {"state_event": "close"})
+    audit("fixed", args.repo, i["iid"])
+    print(show(i))
+
+
+def cmd_close(args):
+    if args.note:
+        call("POST", f"/projects/{proj(args.repo)}/issues/{args.iid}/notes", {"body": args.note})
+    i = call("PUT", f"/projects/{proj(args.repo)}/issues/{args.iid}", {"state_event": "close"})
+    audit("close", args.repo, args.iid)
+    print(show(i))
+
+
+def cmd_note(args):
+    call("POST", f"/projects/{proj(args.repo)}/issues/{args.iid}/notes", {"body": args.text})
+    audit("note", args.repo, args.iid)
+    print(f"noted on {args.repo}#{args.iid}")
+
+
+def cmd_list(args):
+    q = {"state": "closed" if args.closed else "opened", "per_page": 100, "order_by": "created_at"}
+    if args.label:
+        q["labels"] = args.label
+    if args.repo:
+        path = f"/projects/{proj(args.repo)}/issues"
+    else:
+        path, q["scope"] = "/issues", "all"
+    page, shown = 1, 0
+    while True:
+        q["page"] = page
+        rows = call("GET", f"{path}?{urllib.parse.urlencode(q)}")
+        for i in rows:
+            print(show(i))
+        shown += len(rows)
+        if len(rows) < 100 or not args.all:
+            break
+        page += 1
+    print(f"({shown} shown{'' if args.all else '; --all for every page'})", file=sys.stderr)
+
+
+def main():
+    p = argparse.ArgumentParser(prog="issue", description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    o = sub.add_parser("open")
+    o.add_argument("repo"), o.add_argument("title")
+    o.add_argument("--feature", action="store_true", help="a backlog feature, not a finding")
+    o.add_argument("--host"), o.add_argument("--body")
+    o.add_argument("--security", action="store_true")
+    o.add_argument("--owner-action", action="store_true")
+
+    f = sub.add_parser("fixed")
+    f.add_argument("repo"), f.add_argument("title")
+    f.add_argument("--commit", required=True)
+    f.add_argument("--host"), f.add_argument("--body")
+    f.add_argument("--security", action="store_true")
+
+    c = sub.add_parser("close")
+    c.add_argument("repo"), c.add_argument("iid", type=int), c.add_argument("--note")
+
+    n = sub.add_parser("note")
+    n.add_argument("repo"), n.add_argument("iid", type=int), n.add_argument("text")
+
+    lst = sub.add_parser("list")
+    lst.add_argument("repo", nargs="?")
+    lst.add_argument("--label"), lst.add_argument("--closed", action="store_true")
+    lst.add_argument("--all", action="store_true")
+
+    sub.add_parser("repos")
+
+    args = p.parse_args()
+    if args.cmd == "repos":
+        print(ROUTING)
+        return
+    {"open": cmd_open, "fixed": cmd_fixed, "close": cmd_close,
+     "note": cmd_note, "list": cmd_list}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()

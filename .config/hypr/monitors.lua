@@ -43,3 +43,62 @@ hl.workspace_rule({ workspace = "6", monitor = ultrawide })
 hl.workspace_rule({ workspace = "7", monitor = ultrawide })
 hl.workspace_rule({ workspace = "8", monitor = ultrawide })
 hl.workspace_rule({ workspace = "9", monitor = dell, default = true })
+
+-- Workspace 9 goes back to the Dell every time a monitor (re)connects (2026-11-20, linux_dotfiles#25).
+--
+-- With Omarchy's re-sorting off (above), nothing returns 9 after the Dell drops off: Hyprland parks 9
+-- on the ultrawide, and when the Dell comes back it opens an empty workspace 11 instead. This happens
+-- when both screens power-cycle (three times in one morning on 2026-11-20).
+--
+-- The check runs half a second after the event (timer timeout is in milliseconds), because both
+-- screens come back one after the other and Hyprland is still placing workspaces in between. It is
+-- safe to run any number of times: it does nothing when 9 is already showing on the Dell.
+-- It does not undo a move made by hand (Super + Shift + Alt + arrows) until the next reconnect.
+local dell_description = dell:gsub("^desc:", "")
+
+local function dell_monitor()
+  for _, monitor in ipairs(hl.get_monitors()) do
+    if monitor.description == dell_description then
+      return monitor
+    end
+  end
+
+  return nil
+end
+
+local function return_nine_to_dell()
+  local monitor = dell_monitor()
+  local nine = hl.get_workspace(9)
+
+  -- No Dell, or no workspace 9 (it has no windows): nothing to bring back.
+  if not monitor or not nine or not nine.monitor then
+    return
+  end
+
+  local focused = hl.get_active_window()
+  local changed = false
+
+  if nine.monitor.name ~= monitor.name then
+    hl.dispatch(hl.dsp.workspace.move({ workspace = "9", monitor = monitor.name }))
+    changed = true
+  end
+
+  -- Read both again: the move changes what each of them reports.
+  monitor = dell_monitor()
+  nine = hl.get_workspace(9)
+
+  if monitor and nine and nine.monitor and nine.monitor.name == monitor.name
+    and (not monitor.active_workspace or monitor.active_workspace.id ~= 9) then
+    monitor:set_workspace({ workspace = nine.name })
+    changed = true
+  end
+
+  -- Moving a workspace can take the focus with it; give it back to the window that had it.
+  if changed and focused and hl.get_window("address:" .. focused.address) then
+    hl.dispatch(hl.dsp.focus({ window = "address:" .. focused.address }))
+  end
+end
+
+hl.on("monitor.added", function()
+  hl.timer(return_nine_to_dell, { type = "oneshot", timeout = 500 })
+end)

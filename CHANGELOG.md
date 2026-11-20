@@ -7,6 +7,32 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.19.1] - 2026-11-20
+
+### Fixed
+- Hyprland on tars: workspace 9 goes back to the Dell by itself after the screens reconnect (issue #25, seen
+  2026-11-11, 11-17, 11-19 and 11-20). Since v1.12.0 switched off Omarchy's re-sorting, nothing returned 9 once
+  it landed on the ultrawide: the Dell came back showing an empty workspace 10 or 11.
+  - `.config/hypr/monitors.lua`: a `monitor.added` handler waits 500 ms, then moves workspace 9 to the Dell if it
+    is elsewhere, shows it there, and gives the focus back to the window that had it. It does nothing when 9 is
+    already showing on the Dell, or when 9 has no windows.
+  - A move made by hand (`SUPER + SHIFT + ALT + arrows`) is not undone until the next reconnect.
+
+Tested live on tars (Hyprland 0.56.2), 2026-11-20:
+- `hyprctl reload`, then `hyprctl configerrors`: empty.
+- Workspace 9 moved to the ultrawide by command (Dell on an empty 10), left for 2 s: nothing changed. A temporary
+  headless output was then added to fire a real `monitor.added`: Hyprland moved 9 back to the Dell at once but
+  left the Dell showing 10; the handler switched the Dell to 9 half a second later. Focus stayed on the same
+  window. The headless output was removed.
+- Dell switched off and on with a runtime monitor rule: 9 was back on the Dell and showing. Hyprland does this
+  case by itself, so it does not prove the handler.
+
+Not tested: both screens power-cycling together, which is the case that broke it (it would mean switching off the
+last screen on a desktop in use). In that case the handler's own "move 9" step runs; that step uses the same
+`hl.dsp.workspace.move` call that was run by hand in the test above. A Hyprland restart was not tested either.
+
+---
+
 ## [v1.19.0] - 2026-11-20
 
 ### Added

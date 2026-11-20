@@ -5,7 +5,8 @@ Run inside a git checkout whose `origin` is on gitlab.home.elikesbikes.com.
 Token: the GitLab credential helper (`git credential fill`), the same one git uses.
 Every write is logged to syslog (tag `gitlab-mr`), which each host ships to Graylog.
 
-  mr open   <branch> "title"   open an MR <branch> -> main, or refresh the open one; prints its URL.
+  mr open   <branch> "title"   open an MR <branch> -> main, or refresh the open one (its title is kept,
+                               the description is rewritten); prints its URL.
                                The description lists the branch's commits and repeats every
                                `Closes #N` / `Fixes #N` / `Resolves #N` found in their messages,
                                so the issues close when the MR is merged.

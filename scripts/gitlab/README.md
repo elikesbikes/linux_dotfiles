@@ -3,6 +3,7 @@
 | Script | What it does |
 |---|---|
 | `issue` | Open, close, note and list GitLab issues the same way from every session and host |
+| `mr` | Open or check the merge request for a branch (used by `gacp_worktree_done`) |
 | `refresh-gitlab-rocky.sh` | Refresh the GitLab dev replica on rocky from prod on hailmary (see the script header) |
 
 ## issue
@@ -38,3 +39,20 @@ mcc#2 and de47fbd, 2026-11-18).
 **Tested on tars 2026-11-18:** `repos`, `list` (one repo, all repos, `--closed`), `open`, the unknown
 `--host` refusal, the syslog line. **Not tested:** `fixed`, `close`, `note` (first real use will),
 and running it on rocky, hailmary, kipp or endurance.
+
+## mr
+
+Used by `gacp_worktree_done` (v1.19.0), which pushes the worktree branch and then calls it. Run it
+inside the checkout; the project comes from `origin`, which must be on this GitLab.
+
+```bash
+mr open wt/my-task "Short title"   # opens the MR into main, or refreshes the open one; prints the URL
+mr status wt/my-task               # "merged <url>" (exit 0), or opened / closed / none (exit 1)
+```
+
+The description lists the branch's commits and repeats every `Closes #N` / `Fixes #N` from their
+messages, so the issues close when the MR is merged. Same token and audit as `issue` (syslog tag
+`gitlab-mr`). The title is cut to its first line and 255 characters.
+
+**Tested 2026-11-20:** `open` and `status` on mcc (pilot MR !1); a GitHub origin is refused with a
+clear message.

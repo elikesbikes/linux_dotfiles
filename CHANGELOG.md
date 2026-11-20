@@ -7,6 +7,23 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.19.0] - 2026-11-20
+
+### Added
+- `scripts/gitlab/mr`: open or refresh a GitLab merge request for a branch (`mr open <branch> "title"`) and check it
+  (`mr status <branch>`). The description lists the branch's commits and repeats each `Closes #N`, so issues close
+  on merge. Writes log to syslog, tag `gitlab-mr`.
+
+### Changed
+- `gacp_worktree_done` lands through a merge request (owner decision 2026-11-20): it commits, merges `origin/main`
+  in, pushes `wt/<name>` and opens the MR, then stops. Nothing reaches `main` until the owner clicks Merge. Run it
+  again after the merge to fast-forward the main checkout and remove the worktree (`--keep` keeps it). A Claude
+  session may run this form. `--direct` keeps the old push to `main` with its y/N prompt, for hotfixes.
+  MR title is the first line of the message (a multi-line message made the first pilot run fail with HTTP 400).
+- `.claude/CLAUDE.md` Git section: worktree repos land through merge requests.
+
+---
+
 ## [v1.18.2] - 2026-11-19
 
 ### Changed

@@ -52,6 +52,7 @@ Never run `git add`, `git commit`, `git push`, or any manual git commands. Claud
 
 - `gacp_adastra "message"` — commit + push adastra repo + sync to Obsidian
 - `gacp_dotfiles "message"` — commit + push linux_dotfiles repo
+- **Worktree repos (mcc) land through GitLab merge requests (owner rule 2026-11-20).** `gacp_worktree_done "message"` pushes the branch and opens an MR (a session may run it; it deploys nothing); only the owner clicks **Merge**, which deploys like a push to `main`. `--direct` is the owner-only hotfix push. Repos whose hooks auto-push every edit (linux_dotfiles, hermes-config, adastra) keep pushing to `main`.
 
 ## Pipeline Workflow
 

@@ -7,6 +7,18 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.19.2] - 2026-11-20
+
+### Added
+- `scripts/gitlab-runner/docker-rocky.toml`: second runner `rocky-docker-branches` (GitLab runner 13, mcc only,
+  not protected, untagged jobs) so merge-request branches get their tests run. Every other runner stays
+  protected-only (security audit run 4). Clean on purpose: its job containers get no `docker.sock`, no `~/.ssh` and
+  no Proton SSH agent (runner 6 has all three). Token: Proton HOMELAB "gitlab-runner token - rocky-docker-branches".
+- `scripts/gitlab-runner/gitlab-runner-docker-proton.sh`: a template may hold several runners; `@TOKEN_<NAME>@` is
+  filled from "gitlab-runner token - <host>-docker-<name>". hailmary's one-runner template works as before.
+
+---
+
 ## [v1.19.1] - 2026-11-20
 
 ### Fixed

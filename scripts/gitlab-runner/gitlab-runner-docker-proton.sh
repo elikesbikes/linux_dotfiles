@@ -5,6 +5,8 @@
 # run by the systemd user service gitlab-runner-docker-proton.service, reads the token from Proton Pass
 # (HOMELAB item "gitlab-runner token - <short hostname>-docker") with the host's TPM-sealed PAT, fills
 # it into docker-<short hostname>.toml (next to this file, placeholder @TOKEN@) and pipes the result
+# (a template may hold more runners: @TOKEN_<NAME>@ is filled from "gitlab-runner token - <host>-docker-<name>",
+# name lower-cased, e.g. @TOKEN_BRANCHES@ -> rocky-docker-branches)
 # into the container through `docker exec` stdin. It does that once at start and again every time the
 # container starts (docker events), because a restarted container comes back with an empty tmpfs.
 # The token is fetched fresh each time and is never kept in this process between injections.
@@ -46,13 +48,22 @@ inject() {
     pat="$(tpm2_unseal -c "$TPM_HANDLE" 2>/dev/null)" || { log "TPM unseal failed"; return 1; }
     PROTON_PASS_PERSONAL_ACCESS_TOKEN="$pat" "$PASS_CLI" login >/dev/null
     pat=""
-    token="$("$PASS_CLI" item view --vault-name "$VAULT" --item-title "$ITEM" --field note)"
+    config="$(cat "$TEMPLATE")"
+    local ph item
+    for ph in $(grep -oE '@TOKEN(_[A-Z0-9]+)?@' "$TEMPLATE" | sort -u); do
+        item="$ITEM"
+        if [ "$ph" != "@TOKEN@" ]; then item="${ph#@TOKEN_}"; item="${item%@}"; item="$ITEM-${item,,}"; fi
+        token="$("$PASS_CLI" item view --vault-name "$VAULT" --item-title "$item" --field note)" || token=""
+        token="${token%$'\n'}"
+        if [[ ${#token} -lt 20 || "$token" == *[[:space:]]* ]]; then
+            "$PASS_CLI" logout >/dev/null 2>&1 || true; rm -rf "$PROTON_PASS_SESSION_DIR"; config=""
+            log "Proton item '$item' is missing or not a runner token"; return 1
+        fi
+        config="${config//$ph/$token}"
+        token=""
+    done
     "$PASS_CLI" logout >/dev/null 2>&1 || true
     rm -rf "$PROTON_PASS_SESSION_DIR"
-    [[ ${#token} -ge 20 && "$token" != *[[:space:]]* ]] || { log "Proton item '$ITEM' is missing or not a runner token"; return 1; }
-    config="$(cat "$TEMPLATE")"
-    config="${config//@TOKEN@/$token}"
-    token=""
     printf '%s\n' "$config" | docker exec -i "$CONTAINER" sh -c \
         'umask 077; cat > /etc/gitlab-runner/config.toml.new && mv -f /etc/gitlab-runner/config.toml.new /etc/gitlab-runner/config.toml'
     config=""

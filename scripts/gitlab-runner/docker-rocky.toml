@@ -1,6 +1,7 @@
-# rocky-docker (runner id 6, docker executor, project runner for mcc). Template for
-# gitlab-runner-docker-proton.sh: the token placeholder is replaced in memory with "gitlab-runner token - rocky-docker"
-# from Proton and the result goes into the container's tmpfs. No secret in this file.
+# rocky-docker (runner id 6) and rocky-docker-branches (runner id 13): docker executor, project runners for mcc.
+# Template for gitlab-runner-docker-proton.sh: @TOKEN@ is replaced in memory with "gitlab-runner token - rocky-docker"
+# and @TOKEN_BRANCHES@ with "gitlab-runner token - rocky-docker-branches" from Proton; the result goes into the
+# container's tmpfs. No secret in this file.
 concurrent = 1
 check_interval = 0
 connection_max_age = "15m0s"
@@ -31,6 +32,31 @@ shutdown_timeout = 0
     oom_kill_disable = false
     disable_cache = false
     volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/home/ecloaiza/.ssh:/ssh-keys:ro", "/home/ecloaiza/.ssh/proton-pass-agent.sock:/ssh-agent.sock", "/cache"]
+    volume_keep = false
+    shm_size = 0
+    network_mtu = 0
+
+# rocky-docker-branches (runner id 13, added 2026-11-20 for merge requests). Runs the untagged test jobs of
+# branches (protected-only runners never take them; security audit run 4 made 1, 6, 8, 9, 10 ref_protected).
+# GitLab side: access_level not_protected, run_untagged, locked to mcc, no tags. Deliberately CLEAN: job
+# containers get no docker.sock, no ~/.ssh and no Proton SSH agent, unlike rocky-docker above. Never add those
+# here: any branch could then reach Docker (root) on rocky and SSH as ecloaiza. Jobs that need Docker are tagged
+# [shell, rocky] and never land here.
+[[runners]]
+  name = "rocky-docker-branches"
+  url = "https://gitlab.home.elikesbikes.com"
+  id = 13
+  token = "@TOKEN_BRANCHES@"
+  executor = "docker"
+  request_concurrency = 2
+  [runners.docker]
+    tls_verify = false
+    image = "alpine:latest"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
     volume_keep = false
     shm_size = 0
     network_mtu = 0

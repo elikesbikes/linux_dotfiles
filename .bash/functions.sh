@@ -312,9 +312,16 @@ gacp_mcc() {
 #
 # Usage:
 #   gacp_worktree [name] [claude args...]   create (or resume) and launch Claude in it
-#   gacp_worktree_done [-y] [--keep] ["message"]
-#                                           commit, merge main in, push to main, clean up
-#                                           (run from a plain shell inside the worktree).
+#   gacp_worktree_done [--keep] ["message"]
+#                                           commit, merge main in, push the branch and open a
+#                                           GitLab merge request (scripts/gitlab/mr); nothing reaches
+#                                           main until the owner clicks Merge. Run it again after the
+#                                           merge to update the main checkout and remove the worktree.
+#                                           A Claude session may run this form (it deploys nothing).
+#   gacp_worktree_done --direct [-y] [--keep] ["message"]
+#                                           the old way, hotfixes only: push straight to main
+#                                           (auto-deploys to rocky) after a y/N prompt; owner only,
+#                                           -y is blocked for Claude by block-landing-yes.sh.
 #                                           --keep lands but leaves the worktree, branch and a
 #                                           running Claude session in place, so you can see the
 #                                           change live and iterate: run it from a second terminal,

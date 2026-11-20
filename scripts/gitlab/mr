@@ -106,7 +106,8 @@ def cmd_open(branch, title):
     body = description(branch)
     mr = newest(pid, branch, "opened")
     if mr:
-        mr = call("PUT", f"/projects/{pid}/merge_requests/{mr['iid']}", {"title": title, "description": body})
+        # Keep the title the MR was opened with (or edited to in GitLab); only the commit list grows.
+        mr = call("PUT", f"/projects/{pid}/merge_requests/{mr['iid']}", {"description": body})
         verb = "updated"
     else:
         mr = call("POST", f"/projects/{pid}/merge_requests", {

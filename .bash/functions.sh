@@ -471,7 +471,7 @@ gacp_worktree_done() {
         echo ""
         echo "--> Running: git push -u origin $branch"
         git push -q -u origin "HEAD:refs/heads/$branch" || { _gacp_report "push of $branch failed; no MR opened"; return 1; }
-        title="${msg:-$(git log -1 --no-merges --format=%s)}"
+        title="$(printf '%s\n' "${msg:-$(git log -1 --no-merges --format=%s)}" | head -n 1)"  # first line only
         mrout="$("$HOME/scripts/gitlab/mr" open "$branch" "$title")" || { _gacp_report "branch $branch pushed but the MR could not be opened"; return 1; }
         echo "$mrout"
         _gwt_log WORKTREE_MR "$main_repo" "branch=$branch commits=$ahead"

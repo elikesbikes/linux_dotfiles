@@ -100,6 +100,7 @@ def description(branch):
 
 
 def cmd_open(branch, title):
+    title = (title.strip().splitlines() or [branch])[0][:255]
     path = project()
     pid = urllib.parse.quote(path, safe="")
     body = description(branch)

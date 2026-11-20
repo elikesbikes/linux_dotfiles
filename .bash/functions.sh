@@ -454,6 +454,31 @@ gacp_worktree_done() {
     fi
 
     ahead="$(git rev-list --count origin/main..HEAD)"
+    if [ "$ahead" -gt 0 ] && [ "$direct" != 1 ]; then
+        # Merge request mode (default since v1.19.0): push the branch, open or refresh its MR, stop.
+        # Nothing reaches main until the owner clicks Merge in GitLab; run this again afterwards
+        # and the ahead=0 path below cleans up.
+        echo ""
+        git log --oneline origin/main..HEAD
+        git diff --stat origin/main HEAD
+        echo ""
+        echo "--> Running: git push -u origin $branch"
+        git push -q -u origin "HEAD:refs/heads/$branch" || { _gacp_report "push of $branch failed; no MR opened"; return 1; }
+        title="${msg:-$(git log -1 --no-merges --format=%s)}"
+        mrout="$("$HOME/scripts/gitlab/mr" open "$branch" "$title")" || { _gacp_report "branch $branch pushed but the MR could not be opened"; return 1; }
+        echo "$mrout"
+        _gwt_log WORKTREE_MR "$main_repo" "branch=$branch commits=$ahead"
+        echo ""
+        echo "SUCCESS: merge request ready (tests run on the branch). Open the link, wait for the pipeline, click Merge."
+        echo "         Merging deploys the way a push to main does. Then run gacp_worktree_done again here to clean up."
+        return 0
+    fi
+    if [ "$ahead" -eq 0 ] && [ "$direct" != 1 ]; then
+        mrout="$("$HOME/scripts/gitlab/mr" status "$branch" 2>/dev/null)"
+        case "$mrout" in
+            merged\ *) echo "--> Merge request merged: ${mrout#merged }" ;;
+        esac
+    fi
     if [ "$ahead" -gt 0 ]; then
         echo ""
         git log --oneline origin/main..HEAD

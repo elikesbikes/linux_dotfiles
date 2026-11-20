@@ -17,6 +17,10 @@ This project follows a pragmatic versioning model inspired by
 - `scripts/gitlab-runner/gitlab-runner-docker-proton.sh`: a template may hold several runners; `@TOKEN_<NAME>@` is
   filled from "gitlab-runner token - <host>-docker-<name>". hailmary's one-runner template works as before.
 
+### Fixed
+- `scripts/gitlab/mr open` on an MR that is already open keeps its title and only rewrites the description (a
+  second `gacp_worktree_done "message"` renamed pilot MR !1 after its newest commit).
+
 ---
 
 ## [v1.19.1] - 2026-11-20

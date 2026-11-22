@@ -7,6 +7,23 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.20.0] - 2026-11-21
+
+### Added
+- `scripts/gitlab/mr merge <branch>`: the owner merges an MR from the terminal. Refuses unless GitLab
+  calls it mergeable (tests green, no conflicts), shows title/link/pipeline/commits, asks y/N on a
+  terminal (no skip flag), pins the merge to the shown commit, deletes the source branch, logs
+  `MR_MERGED`.
+- `gacp_worktree_merge` (`.bash/functions.sh`): run in a worktree; refuses on uncommitted or unpushed
+  work, runs `mr merge` for its branch, then `gacp_worktree_done` cleans up. Three commands now:
+  `gacp_worktree` (create), `gacp_worktree_done` (open the MR; a session may run it),
+  `gacp_worktree_merge` (merge + close; owner only).
+- `.claude/hooks/block-owner-merge.sh`, registered for every Claude session: refuses Bash commands that
+  name `gacp_worktree_merge`, `mr merge`, `glab mr merge` or an API merge call. Tests in
+  `.claude/hooks/test-block-owner-merge.sh` (21 cases pass).
+
+---
+
 ## [v1.19.2] - 2026-11-20
 
 ### Added

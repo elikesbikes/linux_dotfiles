@@ -118,17 +118,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/ios/sshtars gacp_sshtars --stdin",
-            "timeout": 30,
-            "statusMessage": "Auto-committing sshtars-ios..."
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
             "command": "bash ~/.claude/hooks/auto-commit.sh /home/ecloaiza/devops/projects/ios/gittars gacp_gittars --stdin",
             "timeout": 30,
             "statusMessage": "Auto-committing gittars-ios..."

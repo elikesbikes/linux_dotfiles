@@ -45,9 +45,10 @@ fi
 
 if [ -n "$reason" ]; then
     logger -n 192.168.5.25 -P 514 --udp -t claude-hook -p local0.info "BLOCK_OWNER_MERGE: $reason from claude session" 2>/dev/null
-    echo "BLOCKED ($reason): merging a GitLab merge request deploys, and only the owner merges." >&2
+    echo "BLOCKED ($reason): merging deploys, and in mcc only the owner merges." >&2
     echo "  Open the MR (gacp_worktree_done) and give the owner the link; they click Merge or run" >&2
-    echo "  gacp_worktree_merge in their own shell." >&2
+    echo "  gacp_worktree_merge in their own shell. (In the iOS/reviere/groceries repos a session may" >&2
+    echo "  merge its own br/<name> MR with gacp_branch_merge.)" >&2
     exit 2
 fi
 exit 0

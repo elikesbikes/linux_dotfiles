@@ -318,6 +318,8 @@ gacp_mcc() {
 #                                           main until the owner clicks Merge. Run it again after the
 #                                           merge to update the main checkout and remove the worktree.
 #                                           A Claude session may run this form (it deploys nothing).
+#   gacp_worktree_merge                     OWNER ONLY: merge this worktree's MR (green tests, y/N),
+#                                           which deploys, then clean up as above. Blocked for Claude.
 #   gacp_worktree_done --direct [-y] [--keep] ["message"]
 #                                           the old way, hotfixes only: push straight to main
 #                                           (auto-deploys to rocky) after a y/N prompt; owner only,

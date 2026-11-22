@@ -582,6 +582,157 @@ gacp_worktree_merge() {
 
 
 # ------------------------------------------------------------
+# gacp_branch / gacp_branch_done / gacp_branch_merge   (v1.21.0, linux_dotfiles#29)
+# ------------------------------------------------------------
+# Merge requests for repos with one session at a time (the iOS apps, reviere, groceries):
+# a plain branch br/<name> in the normal checkout, no worktree. Same three steps as mcc:
+#   gacp_branch <name>          switch to br/<name>, made from the latest origin/main (or resume it)
+#   gacp_branch_done ["msg"]    commit, merge origin/main in, push the branch, open/refresh the MR.
+#                               Deploys nothing; a Claude session may run it. Run it again after
+#                               a Merge-button click to go back to main and delete the branch.
+#   gacp_branch_merge           OWNER ONLY: merge the MR (scripts/gitlab/mr merge: green tests, y/N),
+#                               which deploys like a push to main, then clean up as above.
+#                               Blocked for Claude by ~/.claude/hooks/block-owner-merge.sh.
+# ~/.claude/hooks/require-branch.sh refuses Claude edits while such a repo is on main.
+# ------------------------------------------------------------
+
+_gbr_check() {  # sets top, branch; refuses worktrees (mcc has its own commands)
+    top="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not in a git repository" >&2; return 1; }
+    local gd common
+    gd="$(cd "$(git rev-parse --absolute-git-dir)" && pwd -P)"
+    common="$(cd "$(git rev-parse --path-format=absolute --git-common-dir)" && pwd -P)"
+    if [ "$gd" != "$common" ]; then
+        echo "ERROR: this is a worktree; use gacp_worktree_done here" >&2
+        return 1
+    fi
+    branch="$(git symbolic-ref -q --short HEAD)"
+}
+
+gacp_branch() {
+    local top branch name new
+    name="$1"
+    if ! [[ "$name" =~ ^[a-z0-9][a-z0-9._-]*$ ]]; then
+        echo "Usage: gacp_branch <name>   (lowercase letters, digits, '.', '_' or '-')" >&2
+        return 1
+    fi
+    _gbr_check || return 1
+    new="br/$name"
+    if [ "$branch" = "$new" ]; then
+        echo "--> Already on $new"
+        return 0
+    fi
+    if [ "$branch" != "main" ]; then
+        echo "ERROR: on '$branch', not main. Finish it first (gacp_branch_done) or switch back to main." >&2
+        return 1
+    fi
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "ERROR: uncommitted changes on main; commit or stash them before starting a branch" >&2
+        git status --short >&2
+        return 1
+    fi
+    echo "--> Running: git fetch origin main && git merge --ff-only origin/main"
+    git fetch -q origin main || { echo "ERROR: git fetch failed" >&2; return 1; }
+    git merge -q --ff-only origin/main || { echo "ERROR: local main has commits origin/main does not; push or fix main first" >&2; return 1; }
+    if git show-ref --verify --quiet "refs/heads/$new"; then
+        echo "--> Running: git switch $new (existing branch)"
+        git switch -q "$new" || return 1
+    else
+        echo "--> Running: git switch -c $new"
+        git switch -q -c "$new" || return 1
+    fi
+    _gwt_log BRANCH_CREATE "$top" "branch=$new"
+    echo "SUCCESS: on $new in $top. Edit, then gacp_branch_done \"message\" opens the merge request."
+}
+
+gacp_branch_done() {
+    local top branch msg="$1" ahead title mrout
+    _gbr_check || return 1
+    case "$branch" in
+        br/*) ;;
+        *) echo "ERROR: on '${branch:-detached}', expected br/<name>; start with gacp_branch <name>" >&2; return 1 ;;
+    esac
+    if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+        if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "ERROR: merge conflicts still unresolved:" >&2
+            git diff --name-only --diff-filter=U | sed 's/^/    /' >&2
+            return 1
+        fi
+        git add -A && git commit -q --no-edit || return 1
+    fi
+    if [ -n "$(git status --porcelain)" ]; then
+        if [ -z "$msg" ]; then
+            echo "ERROR: uncommitted changes; pass a commit message: gacp_branch_done \"message\"" >&2
+            return 1
+        fi
+        echo "--> Running: git add . && git commit"
+        git add . && git commit -q -m "$msg" || return 1
+    fi
+    echo "--> Running: git fetch origin main && git merge origin/main"
+    git fetch -q origin main || { _gacp_report "git fetch origin main failed; nothing pushed"; return 1; }
+    if ! git merge -q --no-edit origin/main; then
+        echo "CONFLICT: main moved under this branch and the same lines changed. Files:" >&2
+        git diff --name-only --diff-filter=U | sed 's/^/    /' >&2
+        echo "Nothing was pushed. Resolve them on this branch, then rerun gacp_branch_done." >&2
+        return 1
+    fi
+    ahead="$(git rev-list --count origin/main..HEAD)"
+    if [ "$ahead" -gt 0 ]; then
+        echo ""
+        git log --oneline origin/main..HEAD
+        git diff --stat origin/main HEAD
+        echo ""
+        echo "--> Running: git push -u origin $branch"
+        git push -q -u origin "HEAD:refs/heads/$branch" || { _gacp_report "push of $branch failed; no MR opened"; return 1; }
+        title="$(printf '%s\n' "${msg:-$(git log -1 --no-merges --format=%s)}" | head -n 1)"
+        mrout="$("$HOME/scripts/gitlab/mr" open "$branch" "$title")" || { _gacp_report "branch $branch pushed but the MR could not be opened"; return 1; }
+        echo "$mrout"
+        _gwt_log BRANCH_MR "$top" "branch=$branch commits=$ahead"
+        echo ""
+        echo "SUCCESS: merge request ready (the branch pipeline runs the tests). The owner merges it:"
+        echo "         gacp_branch_merge here, or the Merge button (then run gacp_branch_done again to clean up)."
+        return 0
+    fi
+    mrout="$("$HOME/scripts/gitlab/mr" status "$branch" 2>/dev/null)"
+    case "$mrout" in
+        merged\ *) echo "--> Merge request merged: ${mrout#merged }" ;;
+        *) echo "--> Nothing new on $branch and no merged MR (${mrout:-none}); staying on it." ; return 0 ;;
+    esac
+    echo "--> Running: git switch main && git merge --ff-only origin/main"
+    git switch -q main || return 1
+    git merge -q --ff-only origin/main || echo "WARN: could not fast-forward main; do it once it is clean" >&2
+    # GitLab deleted the source branch; prune the stale origin copy so branch -d checks main (linux_dotfiles#28).
+    git fetch -q --prune origin 2>/dev/null
+    git branch -d "$branch" || echo "WARN: branch $branch kept (not fully merged into local main)" >&2
+    _gwt_log BRANCH_DONE "$top" "branch=$branch"
+    echo "SUCCESS: $branch merged; back on main ($(git log -1 --format=%h))."
+}
+
+gacp_branch_merge() {
+    local top branch local_sha remote_sha
+    _gbr_check || return 1
+    case "$branch" in
+        br/*) ;;
+        *) echo "ERROR: on '${branch:-detached}', expected br/<name>" >&2; return 1 ;;
+    esac
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "ERROR: uncommitted changes; run gacp_branch_done \"message\" to add them to the MR first" >&2
+        return 1
+    fi
+    git fetch -q origin "$branch" 2>/dev/null
+    local_sha="$(git rev-parse HEAD)"
+    remote_sha="$(git rev-parse -q --verify "origin/$branch" 2>/dev/null)"
+    if [ "$local_sha" != "$remote_sha" ]; then
+        echo "ERROR: this branch is not what GitLab has for $branch; run gacp_branch_done to update the MR first" >&2
+        return 1
+    fi
+    "$HOME/scripts/gitlab/mr" merge "$branch" || return 1
+    _gwt_log BRANCH_MERGED "$top" "branch=$branch"
+    echo "--> Cleaning up"
+    gacp_branch_done
+}
+
+
+# ------------------------------------------------------------
 # gacp_groceries
 # ------------------------------------------------------------
 # Runs the standard gacp workflow inside the groceries project.

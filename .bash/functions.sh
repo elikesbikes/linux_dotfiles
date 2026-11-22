@@ -535,6 +535,9 @@ gacp_worktree_done() {
         [ -L "$top/$rel" ] && rm -f "$top/$rel"
     done < <(_gwt_links)
     git worktree remove "$top" || { echo "WARN: worktree not removed (untracked files left in $top?); remove it by hand once checked" >&2; return 1; }
+    # GitLab deletes the source branch on merge, but the local origin/<branch> copy stays and is behind
+    # the branch (cleanup merged main into it), so `branch -d` refused. Prune first; it then checks HEAD.
+    git fetch -q --prune origin 2>/dev/null
     git branch -d "$branch" || echo "WARN: branch $branch kept (not fully merged into local main)" >&2
 
     _gwt_log WORKTREE_DONE "$main_repo" "branch=$branch commits=$ahead"

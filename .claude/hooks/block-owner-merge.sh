@@ -26,11 +26,19 @@ TEXT="${TEXT//\\r/ }"
 TEXT="${TEXT//\\t/ }"
 TEXT="${TEXT//\\\"/ }"
 
+# Owner 2026-11-22: a session MAY merge in the branch repos (iOS apps, reviere, groceries), whose
+# branches are br/<name>: `gacp_branch_merge` and `mr merge [--wait] br/<name>` pass. scripts/gitlab/mr
+# is the second layer: without a terminal it merges only its SESSION_MERGE allowlist (never mcc).
+MR_ANY="(^|[^[:alnum:]_.-])mr[\"']?[[:space:]]+merge([^[:alnum:]_-]|$)"
+MR_BR="(^|[^[:alnum:]_.-])mr[\"']?[[:space:]]+merge[[:space:]]+(--wait[[:space:]]+)?br/"
+n_any="$(printf '%s' "$TEXT" | grep -oE "$MR_ANY" | wc -l)"
+n_br="$(printf '%s' "$TEXT" | grep -oE "$MR_BR" | wc -l)"
+
 reason=""
-if printf '%s' "$TEXT" | grep -qE 'gacp_(worktree|branch)_merge'; then
-    reason="gacp_*_merge"
-elif printf '%s' "$TEXT" | grep -qE "(^|[^[:alnum:]_.-])mr[\"']?[[:space:]]+merge([^[:alnum:]_-]|$)"; then
-    reason="mr merge"
+if printf '%s' "$TEXT" | grep -qE 'gacp_worktree_merge'; then
+    reason="gacp_worktree_merge (mcc is owner-only)"
+elif [ "$n_any" -gt "$n_br" ]; then
+    reason="mr merge of a non-br/ branch (mcc worktree branches are owner-only)"
 elif printf '%s' "$TEXT" | grep -qE 'merge_requests/[^/[:space:]]+/merge([^[:alnum:]_]|$)'; then
     reason="merge API call"
 fi

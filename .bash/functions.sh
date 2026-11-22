@@ -539,6 +539,42 @@ gacp_worktree_done() {
     echo "SUCCESS: $branch landed on main; worktree removed. You are now in $main_repo"
 }
 
+# gacp_worktree_merge: OWNER ONLY, run in your own shell inside the worktree.
+# Merges this worktree's open MR (scripts/gitlab/mr merge: tests must be green, y/N on the terminal),
+# which deploys like a push to main, then cleans up via gacp_worktree_done (update main, remove the
+# worktree and branch). Claude sessions are refused by ~/.claude/hooks/block-owner-merge.sh.
+gacp_worktree_merge() {
+    local gd common branch local_sha remote_sha
+    gd="$(git rev-parse --absolute-git-dir 2>/dev/null)" || { echo "ERROR: not in a git repository" >&2; return 1; }
+    gd="$(cd "$gd" && pwd -P)"
+    common="$(cd "$(git rev-parse --path-format=absolute --git-common-dir)" && pwd -P)"
+    if [ "$gd" = "$common" ]; then
+        echo "ERROR: this is the main checkout, not a worktree. cd into the worktree whose MR you want to merge." >&2
+        return 1
+    fi
+    branch="$(git symbolic-ref -q --short HEAD)"
+    case "$branch" in
+        wt/*) ;;
+        *) echo "ERROR: worktree branch is '${branch:-detached}', expected wt/<name>" >&2; return 1 ;;
+    esac
+    # Merge only what the MR shows: no local edits or commits that never reached GitLab.
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "ERROR: uncommitted changes here; run gacp_worktree_done \"message\" to add them to the MR first" >&2
+        return 1
+    fi
+    git fetch -q origin "$branch" 2>/dev/null
+    local_sha="$(git rev-parse HEAD)"
+    remote_sha="$(git rev-parse -q --verify "origin/$branch" 2>/dev/null)"
+    if [ "$local_sha" != "$remote_sha" ]; then
+        echo "ERROR: this worktree is not what GitLab has for $branch; run gacp_worktree_done to update the MR first" >&2
+        return 1
+    fi
+    "$HOME/scripts/gitlab/mr" merge "$branch" || return 1
+    _gwt_log WORKTREE_MERGED "$(dirname "$common")" "branch=$branch"
+    echo "--> Cleaning up"
+    gacp_worktree_done
+}
+
 
 # ------------------------------------------------------------
 # gacp_groceries

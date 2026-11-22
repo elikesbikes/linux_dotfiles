@@ -179,10 +179,13 @@ def cmd_merge(branch, wait=False):
     print(f"    {branch} -> {TARGET}, pipeline {pipe.get('id')} {pipe.get('status')}")
     for c in commits:
         print(f"    {c['short_id']} {c['title']}")
-    ans = input(f"Merge !{mr['iid']} into {TARGET}? This deploys (rocky for mcc). [y/N] ").strip()
-    if ans not in ("y", "Y"):
-        print("Not merged.")
-        return 1
+    if interactive:
+        ans = input(f"Merge !{mr['iid']} into {TARGET}? This deploys (rocky for mcc). [y/N] ").strip()
+        if ans not in ("y", "Y"):
+            print("Not merged.")
+            return 1
+    else:
+        print(f"    merging without a prompt: {path} is in SESSION_MERGE (owner 2026-11-22)")
     # sha pins the merge to what was shown: a push in between makes GitLab refuse instead of merging unseen work.
     done = call("PUT", f"/projects/{pid}/merge_requests/{mr['iid']}/merge",
                 {"sha": mr["sha"], "should_remove_source_branch": True})

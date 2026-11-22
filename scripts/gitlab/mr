@@ -189,7 +189,7 @@ def cmd_merge(branch, wait=False):
     # sha pins the merge to what was shown: a push in between makes GitLab refuse instead of merging unseen work.
     done = call("PUT", f"/projects/{pid}/merge_requests/{mr['iid']}/merge",
                 {"sha": mr["sha"], "should_remove_source_branch": True})
-    log(f"MR_MERGED: project={path} mr=!{mr['iid']} branch={branch} sha={mr['sha'][:12]}")
+    log(f"MR_MERGED: project={path} mr=!{mr['iid']} branch={branch} sha={mr['sha'][:12]} by={'owner-terminal' if interactive else 'session'}")
     print(f"merged !{mr['iid']}  {done.get('web_url', mr['web_url'])}")
     return 0 if done.get("state") == "merged" else 1
 

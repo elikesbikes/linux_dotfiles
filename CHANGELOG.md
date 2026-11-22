@@ -7,6 +7,25 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.21.0] - 2026-11-22
+
+### Added
+- `gacp_branch` / `gacp_branch_done` / `gacp_branch_merge`: merge requests for the one-session repos
+  (iOS apps, reviere, groceries) with a plain `br/<name>` branch, no worktree (#29).
+- `scripts/gitlab/mr merge --wait`; without a terminal `mr merge` now merges the `SESSION_MERGE`
+  allowlist (owner 2026-11-22: a session may merge in those repos). mcc and anything unlisted stay
+  owner-only. Merge log line says `by=session|owner-terminal`.
+- `.claude/hooks/require-branch.sh` (+ tests): no Claude edits while a listed repo is on `main`.
+  Pilot list: sshtars-ios, reviere.
+
+### Changed
+- `block-owner-merge.sh` allows `gacp_branch_merge` and `mr merge [--wait] br/<name>`; still blocks
+  mcc's `gacp_worktree_merge`, any other `mr merge`, `glab mr merge` and API merges (30 cases).
+- `.claude/settings.json`: the sshtars-ios auto-commit hook is removed (it pushed `main`, so TestFlight,
+  on every edit); `require-branch.sh` registered.
+
+---
+
 ## [v1.20.0] - 2026-11-21
 
 ### Added

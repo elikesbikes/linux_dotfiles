@@ -12,11 +12,13 @@ Every write is logged to syslog (tag `gitlab-mr`), which each host ships to Gray
                                so the issues close when the MR is merged.
   mr status <branch>           newest MR from <branch>: prints "<state> <url>"
                                (opened / merged / closed / none); exit 0 for merged, 1 otherwise.
-  mr merge  <branch>           OWNER ONLY. Merge the open MR from <branch> into main, which deploys the
-                               way a push to main does. Refuses unless GitLab calls it mergeable (tests
-                               green, no conflicts, not a draft), shows what will land and asks y/N on a
-                               terminal. There is no flag to skip the question, and Claude sessions are
-                               refused by the block-owner-merge.sh hook. Exit 0 once merged.
+  mr merge  [--wait] <branch>  Merge the open MR from <branch> into main, which deploys the way a push
+                               to main does. Refuses unless GitLab calls it mergeable (tests green, no
+                               conflicts, not a draft). On a terminal it shows what will land and asks
+                               y/N. Without a terminal (a Claude session) it merges only projects in
+                               SESSION_MERGE below (owner 2026-11-22: the iOS apps, reviere, groceries);
+                               mcc and every other project stay owner-only. --wait polls (30 s, up to
+                               40 min) while the pipeline is still running. Exit 0 once merged.
 
 Never put a secret in a title or commit message.
 """

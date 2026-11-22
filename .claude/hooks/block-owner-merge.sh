@@ -4,7 +4,7 @@
 # Owner rule 2026-11-20: a session may open an MR (gacp_worktree_done, `mr open`), which deploys
 # nothing; only the owner merges, because a merge into main deploys (mcc: straight to rocky).
 # The owner merges by clicking Merge in GitLab or, in their own shell, with gacp_worktree_merge /
-# `mr merge` (scripts/gitlab/mr, which also needs a terminal and a y/N). This hook refuses those
+# gacp_branch_merge (v1.21.0) / `mr merge` (scripts/gitlab/mr, which also needs a terminal and a y/N). This hook refuses those
 # commands, glab's merge and a direct API merge call when Claude sends them.
 #
 # Matches the raw hook JSON, not a parsed command: no jq dependency to fail open on, and

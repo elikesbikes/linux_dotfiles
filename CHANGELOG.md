@@ -22,6 +22,11 @@ This project follows a pragmatic versioning model inspired by
   name `gacp_worktree_merge`, `mr merge`, `glab mr merge` or an API merge call. Tests in
   `.claude/hooks/test-block-owner-merge.sh` (21 cases pass).
 
+### Fixed
+- `gacp_worktree_done` cleanup after a merged MR left the local `wt/<name>` branch behind ("not fully merged
+  to origin/wt/<name>"): GitLab deletes the source branch, the stale local origin copy stayed. It now prunes
+  first. Reproduced and verified in a scratch repo; first seen cleaning up pilot MR !1.
+
 ---
 
 ## [v1.19.2] - 2026-11-20

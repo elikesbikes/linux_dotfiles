@@ -590,9 +590,10 @@ gacp_worktree_merge() {
 #   gacp_branch_done ["msg"]    commit, merge origin/main in, push the branch, open/refresh the MR.
 #                               Deploys nothing; a Claude session may run it. Run it again after
 #                               a Merge-button click to go back to main and delete the branch.
-#   gacp_branch_merge           OWNER ONLY: merge the MR (scripts/gitlab/mr merge: green tests, y/N),
-#                               which deploys like a push to main, then clean up as above.
-#                               Blocked for Claude by ~/.claude/hooks/block-owner-merge.sh.
+#   gacp_branch_merge           merge the MR once its tests are green (mr merge --wait), which deploys
+#                               like a push to main (iOS: TestFlight), then clean up as above. The owner
+#                               gets a y/N on a terminal; a Claude session MAY run it (owner 2026-11-22,
+#                               these repos only: mr's SESSION_MERGE allowlist; mcc stays owner-only).
 # ~/.claude/hooks/require-branch.sh refuses Claude edits while such a repo is on main.
 # ------------------------------------------------------------
 

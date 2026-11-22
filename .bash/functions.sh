@@ -689,8 +689,8 @@ gacp_branch_done() {
         echo "$mrout"
         _gwt_log BRANCH_MR "$top" "branch=$branch commits=$ahead"
         echo ""
-        echo "SUCCESS: merge request ready (the branch pipeline runs the tests). The owner merges it:"
-        echo "         gacp_branch_merge here, or the Merge button (then run gacp_branch_done again to clean up)."
+        echo "SUCCESS: merge request ready (the branch pipeline runs the tests). Merge it with"
+        echo "         gacp_branch_merge here (waits for green), or the Merge button (then gacp_branch_done again cleans up)."
         return 0
     fi
     mrout="$("$HOME/scripts/gitlab/mr" status "$branch" 2>/dev/null)"

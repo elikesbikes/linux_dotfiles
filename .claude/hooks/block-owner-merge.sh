@@ -27,8 +27,8 @@ TEXT="${TEXT//\\t/ }"
 TEXT="${TEXT//\\\"/ }"
 
 reason=""
-if printf '%s' "$TEXT" | grep -qE 'gacp_worktree_merge'; then
-    reason="gacp_worktree_merge"
+if printf '%s' "$TEXT" | grep -qE 'gacp_(worktree|branch)_merge'; then
+    reason="gacp_*_merge"
 elif printf '%s' "$TEXT" | grep -qE "(^|[^[:alnum:]_.-])mr[\"']?[[:space:]]+merge([^[:alnum:]_-]|$)"; then
     reason="mr merge"
 elif printf '%s' "$TEXT" | grep -qE 'merge_requests/[^/[:space:]]+/merge([^[:alnum:]_]|$)'; then

@@ -16,6 +16,11 @@
             "command": "bash /home/ecloaiza/devops/projects/mcc/.claude/hooks/require-worktree.sh",
             "timeout": 10,
             "statusMessage": "Checking MCC worktree guard..."
+          },
+          {
+            "type": "command",
+            "command": "bash /home/ecloaiza/.claude/hooks/require-branch.sh",
+            "timeout": 10
           }
         ]
       },

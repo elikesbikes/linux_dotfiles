@@ -3,7 +3,7 @@
 | Script | What it does |
 |---|---|
 | `issue` | Open, close, note and list GitLab issues the same way from every session and host |
-| `mr` | Open or check the merge request for a branch (used by `gacp_worktree_done`) |
+| `mr` | Open, check or (owner only) merge the merge request for a branch (used by `gacp_worktree_done` / `gacp_worktree_merge`) |
 | `refresh-gitlab-rocky.sh` | Refresh the GitLab dev replica on rocky from prod on hailmary (see the script header) |
 
 ## issue

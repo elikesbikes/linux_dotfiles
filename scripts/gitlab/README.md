@@ -75,7 +75,32 @@ Claude sessions cannot run either: `~/.claude/hooks/block-owner-merge.sh` (regis
 `glab mr merge` or an API `merge_requests/<n>/merge` call. Tests:
 `bash ~/.claude/hooks/test-block-owner-merge.sh`.
 
+### Branch repos: iOS apps, reviere, groceries (v1.21.0, linux_dotfiles#29)
+
+One session at a time, so a plain branch `br/<name>` in the normal checkout instead of a worktree:
+
+```bash
+gacp_branch fix-login            # switch to br/fix-login, made from the latest origin/main
+gacp_branch_done "1.9.2: msg"    # commit, merge main in, push, open/refresh the MR (deploys nothing)
+gacp_branch_merge                # mr merge --wait: waits for a green pipeline, merges, back to main, branch deleted
+```
+
+**Who merges.** Owner, 2026-11-22: in these repos a Claude session may merge its own MR. `mr merge`
+without a terminal merges only the projects in its `SESSION_MERGE` allowlist (the 11 iOS repos,
+`reviere`, `groceries`); everything else, mcc above all, still needs the owner on a terminal or the
+Merge button. `block-owner-merge.sh` lets `gacp_branch_merge` and `mr merge [--wait] br/<name>` through
+and still blocks `gacp_worktree_merge`, `mr merge` of any other branch, `glab mr merge` and API merges.
+Each merge logs `MR_MERGED ... by=session|owner-terminal`.
+
+**Guard.** `~/.claude/hooks/require-branch.sh` (Edit/Write/NotebookEdit) refuses a Claude edit while a
+listed repo is on `main`; repos are added to its `REPOS` list as they move over, and their auto-commit
+hook (which pushed `main`, i.e. TestFlight, on every edit) is removed from `.claude/settings.json` at
+the same time. Owner override: launch Claude with `GACP_ALLOW_MAIN=1`. Tests:
+`bash ~/.claude/hooks/test-require-branch.sh`.
+
 **Tested 2026-11-20:** `open` and `status` on mcc (pilot MR !1); a GitHub origin is refused with a
-clear message. **Tested 2026-11-21:** the hook (21 cases: 11 blocked, 10 allowed); `mr merge`
+clear message. **Tested 2026-11-22:** hooks (30 + 5 cases); `mr merge` with no terminal refuses mcc
+("owner-only") and reaches the MR lookup for sshtars-ios; `gacp_branch` and `gacp_branch_done` opened
+reviere !1 and sshtars-ios !1. **Tested 2026-11-21:** the hook (21 cases: 11 blocked, 10 allowed); `mr merge`
 refuses with no terminal. **Not tested yet:** a real merge with `gacp_worktree_merge` (the owner runs
 the first one).

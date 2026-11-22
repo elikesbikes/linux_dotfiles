@@ -48,11 +48,34 @@ inside the checkout; the project comes from `origin`, which must be on this GitL
 ```bash
 mr open wt/my-task "Short title"   # opens the MR into main, or refreshes the open one; prints the URL
 mr status wt/my-task               # "merged <url>" (exit 0), or opened / closed / none (exit 1)
+mr merge wt/my-task                # OWNER ONLY: merge the open MR (deploys); y/N on your terminal
 ```
 
 The description lists the branch's commits and repeats every `Closes #N` / `Fixes #N` from their
 messages, so the issues close when the MR is merged. Same token and audit as `issue` (syslog tag
 `gitlab-mr`). The title is cut to its first line and 255 characters.
 
+### Merging from the terminal (v1.20.0)
+
+Only the owner merges, because a merge into main deploys (mcc: straight to rocky). Two ways, same
+result: click **Merge** in GitLab, or, inside the worktree in your own shell:
+
+```bash
+gacp_worktree_merge     # mr merge for this worktree's branch, then gacp_worktree_done cleans up
+```
+
+`mr merge` refuses unless GitLab calls the MR mergeable (tests green, no conflicts, not a draft),
+prints the title, link, pipeline and commits, and asks y/N. It needs a terminal, has no flag to skip
+the question, and pins the merge to the commit it showed (a push in between makes GitLab refuse).
+`gacp_worktree_merge` also refuses when the worktree has uncommitted edits or commits GitLab does not
+have yet. Each merge is logged (`MR_MERGED`, tag `gitlab-mr`; `WORKTREE_MERGED`, tag `gacp`).
+
+Claude sessions cannot run either: `~/.claude/hooks/block-owner-merge.sh` (registered in
+`.claude/settings.json`) refuses any Bash command naming `gacp_worktree_merge`, `mr merge`,
+`glab mr merge` or an API `merge_requests/<n>/merge` call. Tests:
+`bash ~/.claude/hooks/test-block-owner-merge.sh`.
+
 **Tested 2026-11-20:** `open` and `status` on mcc (pilot MR !1); a GitHub origin is refused with a
-clear message.
+clear message. **Tested 2026-11-21:** the hook (21 cases: 11 blocked, 10 allowed); `mr merge`
+refuses with no terminal. **Not tested yet:** a real merge with `gacp_worktree_merge` (the owner runs
+the first one).

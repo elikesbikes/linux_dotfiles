@@ -26,6 +26,9 @@ check 2 "echo y | mr $M wt/x"
 check 2 "curl -X PUT -H 'PRIVATE-TOKEN: t' https://gitlab.home.elikesbikes.com/api/v4/projects/4/merge_requests/1/$M"
 check 2 "python3 -c \"call('PUT', '/projects/4/merge_requests/12/$M')\""
 check 2 "ls; mr $M wt/x"
+check 2 "gacp_branch_$M"
+check 2 "cd ~/devops/projects/ios/sshtars && gacp_branch_$M"
+check 2 "mr $M br/x"
 
 # allowed
 check 0 "mr open wt/x 'title'"

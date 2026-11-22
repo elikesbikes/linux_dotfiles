@@ -34,6 +34,16 @@ import urllib.request
 HOST = "gitlab.home.elikesbikes.com"
 API = f"https://{HOST}/api/v4"
 TARGET = "main"
+# Projects a Claude session may merge without the owner (owner, 2026-11-22: "for the other repos, it is
+# OK for you to merge"). An allowlist on purpose: a project not named here (mcc above all) needs the
+# owner on a terminal. Deliberately not overridable by an environment variable or flag.
+SESSION_MERGE = {
+    "ecloaiza/chattars-ios", "ecloaiza/checkmktars-ios", "ecloaiza/cooper-ios", "ecloaiza/gittars-ios",
+    "ecloaiza/groceries-ios", "ecloaiza/ntfytars-ios", "ecloaiza/openldap-ios", "ecloaiza/proxmoxtars-ios",
+    "ecloaiza/reviere-ios", "ecloaiza/rsstars-ios", "ecloaiza/sshtars-ios",
+    "ecloaiza/reviere", "ecloaiza/groceries",
+}
+WAITING = {"ci_still_running", "checking", "ci_must_pass", "preparing"}
 CLOSES = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+((?:[\w.-]+/)*[\w.-]*#\d+)", re.I)
 
 

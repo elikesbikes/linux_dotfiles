@@ -146,18 +146,27 @@ def cmd_status(branch):
     return 0 if mr["state"] == "merged" else 1
 
 
-def cmd_merge(branch):
-    # The owner's own decision, made on a terminal: no -y, no environment override. A merge deploys.
-    if not (sys.stdin.isatty() and sys.stdout.isatty()):
-        sys.exit("mr merge: needs a terminal to confirm on; run it yourself in your own shell (never from a script or a Claude session)")
+def cmd_merge(branch, wait=False):
+    # A merge deploys. On a terminal the owner confirms y/N. Without one (a Claude session) only the
+    # SESSION_MERGE projects merge; there is no flag or environment override for the rest.
+    interactive = sys.stdin.isatty() and sys.stdout.isatty()
     path = project()
+    if not interactive and path not in SESSION_MERGE:
+        sys.exit(f"mr merge: {path} is owner-only; the owner merges it on a terminal or with the Merge button")
     pid = urllib.parse.quote(path, safe="")
     mr = newest(pid, branch, "opened")
     if not mr:
-        sys.exit(f"mr merge: no open merge request from {branch}; run gacp_worktree_done first, or it is already merged ({branch})")
-    mr = call("GET", f"/projects/{pid}/merge_requests/{mr['iid']}")
-    status = mr.get("detailed_merge_status")
-    pipe = mr.get("head_pipeline") or {}
+        sys.exit(f"mr merge: no open merge request from {branch}; open it first (gacp_branch_done / gacp_worktree_done), or it is already merged")
+    deadline = time.time() + 40 * 60
+    while True:
+        mr = call("GET", f"/projects/{pid}/merge_requests/{mr['iid']}")
+        status = mr.get("detailed_merge_status")
+        pipe = mr.get("head_pipeline") or {}
+        if not (wait and status in WAITING and pipe.get("status") not in ("failed", "canceled", "skipped")
+                and time.time() < deadline):
+            break
+        print(f"    waiting: !{mr['iid']} {status}, pipeline {pipe.get('id')} {pipe.get('status')}", flush=True)
+        time.sleep(30)
     if status != "mergeable":
         hint = {"ci_must_pass": "the tests have not passed yet", "ci_still_running": "the tests are still running",
                 "checking": "GitLab is still checking it, try again in a moment", "conflict": "it has merge conflicts",

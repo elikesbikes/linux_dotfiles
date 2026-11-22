@@ -26,6 +26,11 @@
             "type": "command",
             "command": "bash /home/ecloaiza/devops/projects/mcc/.claude/hooks/block-landing-yes.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash /home/ecloaiza/.claude/hooks/block-owner-merge.sh",
+            "timeout": 10
           }
         ]
       },

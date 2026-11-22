@@ -725,7 +725,7 @@ gacp_branch_merge() {
         echo "ERROR: this branch is not what GitLab has for $branch; run gacp_branch_done to update the MR first" >&2
         return 1
     fi
-    "$HOME/scripts/gitlab/mr" merge "$branch" || return 1
+    "$HOME/scripts/gitlab/mr" merge --wait "$branch" || return 1
     _gwt_log BRANCH_MERGED "$top" "branch=$branch"
     echo "--> Cleaning up"
     gacp_branch_done

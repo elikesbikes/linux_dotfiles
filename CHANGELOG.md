@@ -16,7 +16,10 @@ This project follows a pragmatic versioning model inspired by
   allowlist (owner 2026-11-22: a session may merge in those repos). mcc and anything unlisted stay
   owner-only. Merge log line says `by=session|owner-terminal`.
 - `.claude/hooks/require-branch.sh` (+ tests): no Claude edits while a listed repo is on `main`.
-  Pilot list: sshtars-ios, reviere.
+  Pilots sshtars-ios and reviere (2026-11-22), then all 13 (2026-11-23: the other 10 iOS apps and groceries).
+- `gacp_branch_done` bumps a committed-build iOS app's `CURRENT_PROJECT_VERSION` +1 once per MR (a `build N`
+  commit) when the branch still has main's version and build. The old `gacp_<app>` push did this; without it the
+  merge would have reached TestFlight as a duplicate build and been skipped. build-base apps are left to CI.
 
 ### Changed
 - `block-owner-merge.sh` allows `gacp_branch_merge` and `mr merge [--wait] br/<name>`; still blocks

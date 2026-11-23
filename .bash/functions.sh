@@ -699,13 +699,14 @@ gacp_branch_done() {
     fi
     ahead="$(git rev-list --count origin/main..HEAD)"
     if [ "$ahead" -gt 0 ]; then
+        title="$(printf '%s\n' "${msg:-$(git log -1 --no-merges --format=%s)}" | head -n 1)"
+        _gbr_ios_build || { _gacp_report "build-number bump failed; nothing pushed"; return 1; }
         echo ""
         git log --oneline origin/main..HEAD
         git diff --stat origin/main HEAD
         echo ""
         echo "--> Running: git push -u origin $branch"
         git push -q -u origin "HEAD:refs/heads/$branch" || { _gacp_report "push of $branch failed; no MR opened"; return 1; }
-        title="$(printf '%s\n' "${msg:-$(git log -1 --no-merges --format=%s)}" | head -n 1)"
         mrout="$("$HOME/scripts/gitlab/mr" open "$branch" "$title")" || { _gacp_report "branch $branch pushed but the MR could not be opened"; return 1; }
         echo "$mrout"
         _gwt_log BRANCH_MR "$top" "branch=$branch commits=$ahead"

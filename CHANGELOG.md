@@ -24,8 +24,9 @@ This project follows a pragmatic versioning model inspired by
 ### Changed
 - `block-owner-merge.sh` allows `gacp_branch_merge` and `mr merge [--wait] br/<name>`; still blocks
   mcc's `gacp_worktree_merge`, any other `mr merge`, `glab mr merge` and API merges (30 cases).
-- `.claude/settings.json`: the sshtars-ios auto-commit hook is removed (it pushed `main`, so TestFlight,
-  on every edit); `require-branch.sh` registered.
+- `.claude/settings.json`: the iOS auto-commit hooks are removed (sshtars 2026-11-22; cooper, gittars,
+  proxmoxtars, checkmktars, rsstars, openldap, ntfytars 2026-11-23): they pushed `main`, so TestFlight, on every
+  edit. `require-branch.sh` registered.
 
 ---
 

@@ -14,6 +14,17 @@ set -uo pipefail
 REPOS=(
     "$HOME/devops/projects/ios/sshtars"
     "$HOME/devops/projects/reviere"
+    "$HOME/devops/projects/ios/chattars"
+    "$HOME/devops/projects/ios/checkmktars"
+    "$HOME/devops/projects/ios/cooper"
+    "$HOME/devops/projects/ios/gittars"
+    "$HOME/devops/projects/ios/groceries"
+    "$HOME/devops/projects/ios/ntfytars"
+    "$HOME/devops/projects/ios/openldap"
+    "$HOME/devops/projects/ios/proxmoxtars"
+    "$HOME/devops/projects/ios/reviere"
+    "$HOME/devops/projects/ios/rsstars"
+    "$HOME/devops/projects/groceries"
 )
 
 [ "${GACP_ALLOW_MAIN:-}" = "1" ] && exit 0

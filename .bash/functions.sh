@@ -645,6 +645,27 @@ gacp_branch() {
     echo "SUCCESS: on $new in $top. Edit, then gacp_branch_done \"message\" opens the merge request."
 }
 
+# iOS apps whose build number is committed (no `build-base` file; the old gacp_<app> or the session bumped it on
+# every push): if this branch still has main's exact MARKETING_VERSION and CURRENT_PROJECT_VERSION lines, add one
+# commit with CURRENT_PROJECT_VERSION + 1. Otherwise TestFlight skips the merge as a duplicate build. Idempotent:
+# a rerun or a branch that set its own version/build is left alone. build-base apps (sshtars, ntfytars) are skipped:
+# CI computes theirs.
+_gbr_ios_build() {
+    local pbx cur next
+    pbx="$(ls -1 ./*.xcodeproj/project.pbxproj 2>/dev/null)"
+    [ -n "$pbx" ] && [ "$(printf '%s\n' "$pbx" | wc -l)" -eq 1 ] || return 0
+    [ -f build-base ] && return 0
+    pbx="${pbx#./}"
+    _gbr_vlines() { grep -oE '(MARKETING_VERSION|CURRENT_PROJECT_VERSION) = [^;]*' | sort; }
+    [ "$(git show "origin/main:$pbx" 2>/dev/null | _gbr_vlines)" = "$(_gbr_vlines < "$pbx")" ] || return 0
+    cur="$(grep -m1 -oE 'CURRENT_PROJECT_VERSION = [0-9]+' "$pbx" | grep -oE '[0-9]+$')"
+    [ -n "$cur" ] || return 0
+    next=$(( cur + 1 ))
+    sed -i -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = $next;/g" "$pbx"
+    echo "--> Build number: $cur -> $next (committed-build app; main had the same version and build)"
+    git add "$pbx" && git commit -q -m "build $next" || return 1
+}
+
 gacp_branch_done() {
     local top branch msg="$1" ahead title mrout
     _gbr_check || return 1

@@ -95,7 +95,12 @@ Each merge logs `MR_MERGED ... by=session|owner-terminal`.
 **Guard.** `~/.claude/hooks/require-branch.sh` (Edit/Write/NotebookEdit) refuses a Claude edit while a
 listed repo is on `main`; repos are added to its `REPOS` list as they move over, and their auto-commit
 hook (which pushed `main`, i.e. TestFlight, on every edit) is removed from `.claude/settings.json` at
-the same time. Owner override: launch Claude with `GACP_ALLOW_MAIN=1`. Tests:
+the same time (all 13 since 2026-11-23). Owner override: launch Claude with `GACP_ALLOW_MAIN=1`.
+
+**iOS build numbers.** Apps with a committed build number (no `build-base` file) get `CURRENT_PROJECT_VERSION`
++1 from `gacp_branch_done`, once per MR, as a `build N` commit, when the branch still has main's exact version and
+build lines. A branch that sets its own version or build is left alone; build-base apps (sshtars, ntfytars) are
+CI's. Tested in a scratch repo: bump, no second bump on a rerun, hand-set version untouched, build-base untouched. Tests:
 `bash ~/.claude/hooks/test-require-branch.sh`.
 
 **Tested 2026-11-20:** `open` and `status` on mcc (pilot MR !1); a GitHub origin is refused with a

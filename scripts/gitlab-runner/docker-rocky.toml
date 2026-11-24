@@ -41,7 +41,7 @@ shutdown_timeout = 0
 # rocky-docker-branches (runner id 13, added 2026-11-20 for merge requests). Runs the untagged test jobs of
 # branches (protected-only runners never take them; security audit run 4 made 1, 6, 8, 9, 10 ref_protected).
 # GitLab side: access_level not_protected, run_untagged, locked to mcc, no tags. Deliberately CLEAN: job
-# containers get no docker.sock, no ~/.ssh and no Proton SSH agent, unlike rocky-docker above. Never add those
+# containers get no docker.sock, no ~/.ssh and no Proton SSH agent (rocky-docker above still has docker.sock). Never add those
 # here: any branch could then reach Docker (root) on rocky and SSH as ecloaiza. Jobs that need Docker are tagged
 # [shell, rocky] and never land here.
 [[runners]]

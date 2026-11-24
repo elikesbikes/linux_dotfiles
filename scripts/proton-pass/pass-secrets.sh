@@ -179,3 +179,38 @@ _pp_load_body() {
   for i in "${!_PP_VARS[@]}"; do export "${_PP_VARS[$i]}=${_PP_VALUES[$i]}"; done
   _PP_VALUES=()
 }
+
+# pp_registry_pull <registry> <user> <token> <command...>     (v1.21.1, reviere#8 / groceries#3)
+#   pp_registry_pull registry.home.elikesbikes.com "reviere-pull-$HOST" "$REGISTRY_PULL_TOKEN" docker compose pull reverie
+# Runs <command> able to pull from <registry> as <user>, with the token written NOWHERE: a RAM-only DOCKER_CONFIG
+# (/dev/shm, mode 700) holds only a config.json naming a credential helper (credHelpers) and the helper itself,
+# which prints the token from the environment of this one command. It replaces `docker login --password-stdin`
+# into a /dev/shm DOCKER_CONFIG, which stored the token in config.json and printed Docker's "Your credentials are
+# stored unencrypted" warning in every deploy log. The directory is removed however the command ends.
+pp_registry_pull() {
+  local registry="$1" user="$2" token="$3"
+  shift 3 || { echo "pp_registry_pull: usage: pp_registry_pull <registry> <user> <token> <command...>" >&2; return 1; }
+  [[ "$registry" =~ ^[A-Za-z0-9.:-]+$ && "$user" =~ ^[A-Za-z0-9._-]+$ ]] \
+    || { echo "pp_registry_pull: bad registry or user name" >&2; return 1; }
+  # Deploy tokens are [A-Za-z0-9_-]; anything else could break the helper's JSON, so refuse it.
+  [[ -n "$token" && "$token" =~ ^[A-Za-z0-9._:-]+$ ]] \
+    || { echo "pp_registry_pull: registry token is empty or has unexpected characters" >&2; return 1; }
+  [ $# -gt 0 ] || { echo "pp_registry_pull: no command given" >&2; return 1; }
+  (
+    umask 077
+    d="$(mktemp -d /dev/shm/pp-registry.XXXXXX)" || exit 1
+    trap 'rm -rf "$d"' EXIT
+    printf '{"credHelpers":{"%s":"ppenv"}}\n' "$registry" > "$d/config.json"
+    cat > "$d/docker-credential-ppenv" <<'HELPER'
+#!/bin/sh
+# get only: answer from this process's environment. store/erase/list are refused, so nothing is ever saved.
+[ "$1" = get ] || exit 1
+read -r server || true
+printf '{"ServerURL":"%s","Username":"%s","Secret":"%s"}\n' "$server" "$_PP_REG_USER" "$_PP_REG_SECRET"
+HELPER
+    chmod 700 "$d/docker-credential-ppenv"
+    rc=0
+    DOCKER_CONFIG="$d" PATH="$d:$PATH" _PP_REG_USER="$user" _PP_REG_SECRET="$token" "$@" || rc=$?
+    exit "$rc"
+  )
+}

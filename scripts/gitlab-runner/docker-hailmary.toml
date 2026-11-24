@@ -30,7 +30,9 @@ shutdown_timeout = 0
     disable_entrypoint_overwrite = false
     oom_kill_disable = false
     disable_cache = false
-    volumes = ["/home/ecloaiza/.ssh/proton-pass-agent.sock:/ssh-agent.sock", "/cache"]
+    # No Proton SSH agent socket (removed 2026-11-24, mcc#62 / adastra#120): it handed every job of every project
+    # all of hailmary's agent keys, and no job used it. A job that needs SSH or Docker runs on a host shell runner.
+    volumes = ["/cache"]
     volume_keep = false
     shm_size = 0
     network_mtu = 0

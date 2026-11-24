@@ -32,7 +32,7 @@ shutdown_timeout = 0
     oom_kill_disable = false
     disable_cache = false
     # No ~/.ssh and no Proton SSH agent socket (removed 2026-11-24, mcc#62): no job used them, and they gave every
-    # mcc main job rocky's private keys and agent. docker.sock is still here (open issue, see the CHANGELOG v1.21.1).
+    # mcc main job rocky's private keys and agent. docker.sock is still here (adastra#123).
     volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
     volume_keep = false
     shm_size = 0

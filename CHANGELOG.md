@@ -7,6 +7,25 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.21.1] - 2026-11-24
+
+### Added
+- `pass-secrets.sh`: `pp_registry_pull <registry> <user> <token> <command...>`. The registry token reaches the pull through a
+  credential helper in a RAM-only `DOCKER_CONFIG` (`credHelpers`, answers `get` only, refuses `store`), so it is never
+  written to a `config.json` and Docker's "Your credentials are stored unencrypted" warning is gone from deploy logs.
+  The folder is removed however the command ends; tokens outside `[A-Za-z0-9._:-]` are refused. Tested on tars (fake
+  token: get, store refused, exit code passed through, folder removed) and rocky (registry refuses an anonymous pull,
+  `pp_registry_pull` pulls `reviere:node24`, nothing left in `/dev/shm`). First users: reviere#8, groceries#3.
+
+### Security
+- GitLab runner templates: runner 1 (`docker-hailmary.toml`, instance runner) no longer mounts the Proton SSH agent
+  socket into job containers; runner 6 (`docker-rocky.toml`) no longer mounts the agent socket or `~/.ssh`. No job used
+  them (last 1000 runner-1 / 647 runner-6 jobs: tests and validations only; no CI file references them). Live after
+  `systemctl --user restart gitlab-runner-docker-proton` on hailmary and rocky (config read back from the container).
+  mcc#62, adastra#120. Runner 6 still mounts `docker.sock`: adastra#123.
+
+---
+
 ## [v1.21.0] - 2026-11-22
 
 ### Added

@@ -9,7 +9,7 @@ Personal Access Token (PAT), sealed to its TPM (handle `0x81010001`) or, where t
 | `ssh-agent-watchdog.sh` + `install-ssh-agent-watchdog.sh` | Restarts the agent when it has lost its Proton session (user timer, every 5 min, at most once per 30 min) |
 | `systemd/` | User units for the agent and the watchdog (Linux). kipp (macOS) runs the same script from the LaunchAgent `com.protonpass.ssh-agent` |
 | `git-credential-protonpass` | Git credential helper for github.com and gitlab.home.elikesbikes.com |
-| `pass-secrets.sh`, `pass_cache.py`, `pass_trace.py` | Secret lookup helpers used by service `start.sh` scripts |
+| `pass-secrets.sh`, `pass_cache.py`, `pass_trace.py` | Secret lookup helpers used by service `start.sh` scripts: `pp_load` exports secrets; `pp_registry_pull <registry> <user> <token> <command>` (v1.21.1) runs a `docker compose pull` with the registry token served by a RAM-only credential helper, so it is never written to a `config.json` and Docker prints no "stored unencrypted" warning (replaces `docker login --password-stdin`) |
 
 ## SSH identity: each host signs only as itself (since v1.14.0; keys in HOMELAB since v1.17.0)
 

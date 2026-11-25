@@ -7,6 +7,16 @@ This project follows a pragmatic versioning model inspired by
 
 ---
 
+## [v1.21.2] - 2026-11-25
+
+### Security
+- `docker-rocky.toml`: runner 6 (`rocky-docker`, mcc) no longer mounts `/var/run/docker.sock` into job containers, which
+  was root on rocky for any mcc `main` job. Its jobs are only mcc pytest, standards and registry-validation in
+  `python:3.12-slim` (no docker CLI; no test skips itself without Docker); jobs that need Docker are tagged
+  `[shell, rocky]`. Live after `systemctl --user restart gitlab-runner-docker-proton` on rocky. adastra#123.
+
+---
+
 ## [v1.21.1] - 2026-11-24
 
 ### Added

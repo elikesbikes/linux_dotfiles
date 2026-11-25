@@ -31,9 +31,11 @@ shutdown_timeout = 0
     disable_entrypoint_overwrite = false
     oom_kill_disable = false
     disable_cache = false
-    # No ~/.ssh and no Proton SSH agent socket (removed 2026-11-24, mcc#62): no job used them, and they gave every
-    # mcc main job rocky's private keys and agent. docker.sock is still here (adastra#123).
-    volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+    # No ~/.ssh, no Proton SSH agent socket (removed 2026-11-24, mcc#62) and no docker.sock (removed 2026-11-25,
+    # adastra#123): no job used them (only mcc pytest, standards, registry-validation in python:3.12-slim, which has
+    # no docker CLI), and they gave every mcc main job rocky's keys, agent and root via Docker. Jobs that need Docker
+    # are tagged [shell, rocky]. Never add them back.
+    volumes = ["/cache"]
     volume_keep = false
     shm_size = 0
     network_mtu = 0
@@ -41,7 +43,7 @@ shutdown_timeout = 0
 # rocky-docker-branches (runner id 13, added 2026-11-20 for merge requests). Runs the untagged test jobs of
 # branches (protected-only runners never take them; security audit run 4 made 1, 6, 8, 9, 10 ref_protected).
 # GitLab side: access_level not_protected, run_untagged, locked to mcc, no tags. Deliberately CLEAN: job
-# containers get no docker.sock, no ~/.ssh and no Proton SSH agent (rocky-docker above still has docker.sock). Never add those
+# containers get no docker.sock, no ~/.ssh and no Proton SSH agent (like rocky-docker above). Never add those
 # here: any branch could then reach Docker (root) on rocky and SSH as ecloaiza. Jobs that need Docker are tagged
 # [shell, rocky] and never land here.
 [[runners]]

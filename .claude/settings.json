@@ -315,10 +315,8 @@
     },
     "uptime-kuma": {
       "type": "stdio",
-      "command": "node",
-      "args": [
-        "/home/ecloaiza/devops/mcp/uptime-kuma/server.js"
-      ]
+      "command": "/home/ecloaiza/scripts/uptime-kuma/mcp-start.sh",
+      "args": []
     },
     "n8n-mcp": {
       "type": "stdio",
